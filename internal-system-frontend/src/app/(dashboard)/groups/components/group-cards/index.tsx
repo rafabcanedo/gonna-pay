@@ -2,6 +2,7 @@
 
 import { FC } from "react";
 import Link from "next/link";
+import { Pencil } from "lucide-react";
 import { GroupDetail } from "@/types";
 import { BadgeType } from "@/utils/badge-types";
 
@@ -23,7 +24,19 @@ export const GroupCards: FC<IPropsGroupCards> = ({ group }) => {
           <span className="font-poppins font-semibold text-lg text-zinc-700">
             {group.name}
           </span>
-          <BadgeType type={group.category} />
+          <div className="flex items-center gap-4">
+            <BadgeType type={group.category} />
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+              }}
+              className="p-1 rounded-sm hover:bg-zinc-100 text-zinc-400 hover:text-zinc-600 transition-colors"
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
+          </div>
         </div>
         <div className="flex flex-row flex-wrap items-center gap-2">
           {(group.members ?? []).map((member) => (

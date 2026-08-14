@@ -1,12 +1,13 @@
 'use client'
 
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useGroupQuery } from '@/hooks/queries/use-group-query'
-import { useDeleteGroup } from '@/hooks/mutations/use-group-mutations'
+import { useDeleteGroup, useRemoveMember } from '@/hooks/mutations/use-group-mutations'
 import { BadgeType } from '@/utils/badge-types'
 import { AddMember } from '../add-member'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Loader2, X } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +34,9 @@ export const GroupDetails = ({ groupId }: IGroupDetailProps) => {
   const router = useRouter()
   const { data: group } = useGroupQuery(groupId)
   const { mutateAsync: deleteGroup, isPending } = useDeleteGroup()
+  const { mutateAsync: removeMember } = useRemoveMember()
+  const [hoveredMemberId, setHoveredMemberId] = useState<string | null>(null)
+  const [removingMemberId, setRemovingMemberId] = useState<string | null>(null)
 
   if (!group) return null
 
@@ -41,6 +45,12 @@ export const GroupDetails = ({ groupId }: IGroupDetailProps) => {
   const handleDelete = async () => {
     await deleteGroup(groupId)
     handleBack()
+  }
+
+  const handleRemoveMember = async (contactId: string) => {
+    setRemovingMemberId(contactId)
+    await removeMember({ groupId, contactId })
+    setRemovingMemberId(null)
   }
 
   return (
@@ -55,15 +65,34 @@ export const GroupDetails = ({ groupId }: IGroupDetailProps) => {
 
       <div className="flex flex-row items-center gap-4">
         <div className="flex flex-row flex-wrap items-center gap-2 border border-zinc-200 rounded-lg px-3 py-2 min-h-[52px]">
-          {(group.members ?? []).map((member) => (
-            <div
-              key={member.id}
-              title={member.name}
-              className="flex items-center justify-center w-9 h-9 rounded-full bg-zinc-100 border border-zinc-300 text-zinc-600 font-poppins text-sm font-medium cursor-default select-none"
-            >
-              {getInitials(member.name)}
-            </div>
-          ))}
+          {(group.members ?? []).map((member) => {
+            const isHovered = hoveredMemberId === member.id
+            const isRemoving = removingMemberId === member.id
+
+            return (
+              <button
+                key={member.id}
+                type="button"
+                title={member.name}
+                onClick={() => handleRemoveMember(member.id)}
+                onMouseEnter={() => setHoveredMemberId(member.id)}
+                onMouseLeave={() => setHoveredMemberId(null)}
+                disabled={!!removingMemberId}
+                className={`flex items-center justify-center w-9 h-9 rounded-full border font-poppins text-sm font-medium select-none transition-colors cursor-pointer
+                  ${isHovered || isRemoving
+                    ? 'bg-red-100 border-red-300 text-red-500'
+                    : 'bg-zinc-100 border-zinc-300 text-zinc-600'
+                  }`}
+              >
+                {isRemoving
+                  ? <Loader2 className="w-4 h-4 animate-spin" />
+                  : isHovered
+                    ? <X className="w-4 h-4" />
+                    : getInitials(member.name)
+                }
+              </button>
+            )
+          })}
         </div>
         <AddMember groupId={groupId} currentMembers={group.members} />
       </div>
