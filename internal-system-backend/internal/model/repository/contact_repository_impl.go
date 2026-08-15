@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 
 	"github.com/google/uuid"
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/model/converter"
@@ -72,6 +73,9 @@ func (r *contactRepository) FindByID(id string) (domains.ContactDomainInterface,
 
 	err := row.Scan(&e.ID, &e.OwnerID, &e.Name, &e.Email, &e.Phone, &e.Category)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domains.NewNotFoundError("contact not found")
+		}
 		return nil, err
 	}
 

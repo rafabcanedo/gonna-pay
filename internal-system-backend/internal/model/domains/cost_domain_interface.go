@@ -38,4 +38,6 @@ type CostDomainInterface interface {
 
 	GetSplits() []SplitDomain
 	SetSplits(splits []SplitDomain)
+
+	OwnerValue() float64
 }

@@ -6,7 +6,6 @@ package mocks
 import (
 	reflect "reflect"
 
-	rest_errors "github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/configuration/rest_errors"
 	domains "github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/model/domains"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -35,11 +34,11 @@ func (m *MockContactService) EXPECT() *MockContactServiceMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockContactService) Create(domain domains.ContactDomainInterface) (domains.ContactDomainInterface, *rest_errors.RestErrors) {
+func (m *MockContactService) Create(domain domains.ContactDomainInterface) (domains.ContactDomainInterface, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", domain)
 	ret0, _ := ret[0].(domains.ContactDomainInterface)
-	ret1, _ := ret[1].(*rest_errors.RestErrors)
+	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
@@ -50,11 +49,11 @@ func (mr *MockContactServiceMockRecorder) Create(domain any) *gomock.Call {
 }
 
 // FindAll mocks base method.
-func (m *MockContactService) FindAll(ownerID string) ([]domains.ContactDomainInterface, *rest_errors.RestErrors) {
+func (m *MockContactService) FindAll(ownerID string) ([]domains.ContactDomainInterface, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindAll", ownerID)
 	ret0, _ := ret[0].([]domains.ContactDomainInterface)
-	ret1, _ := ret[1].(*rest_errors.RestErrors)
+	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
@@ -65,11 +64,11 @@ func (mr *MockContactServiceMockRecorder) FindAll(ownerID any) *gomock.Call {
 }
 
 // FindByID mocks base method.
-func (m *MockContactService) FindByID(id, ownerID string) (domains.ContactDomainInterface, *rest_errors.RestErrors) {
+func (m *MockContactService) FindByID(id, ownerID string) (domains.ContactDomainInterface, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindByID", id, ownerID)
 	ret0, _ := ret[0].(domains.ContactDomainInterface)
-	ret1, _ := ret[1].(*rest_errors.RestErrors)
+	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
@@ -80,11 +79,11 @@ func (mr *MockContactServiceMockRecorder) FindByID(id, ownerID any) *gomock.Call
 }
 
 // Update mocks base method.
-func (m *MockContactService) Update(domain domains.ContactDomainInterface) (domains.ContactDomainInterface, *rest_errors.RestErrors) {
+func (m *MockContactService) Update(domain domains.ContactDomainInterface) (domains.ContactDomainInterface, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", domain)
 	ret0, _ := ret[0].(domains.ContactDomainInterface)
-	ret1, _ := ret[1].(*rest_errors.RestErrors)
+	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
@@ -95,10 +94,10 @@ func (mr *MockContactServiceMockRecorder) Update(domain any) *gomock.Call {
 }
 
 // Delete mocks base method.
-func (m *MockContactService) Delete(id, ownerID string) *rest_errors.RestErrors {
+func (m *MockContactService) Delete(id, ownerID string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", id, ownerID)
-	ret0, _ := ret[0].(*rest_errors.RestErrors)
+	ret0, _ := ret[0].(error)
 	return ret0
 }
 

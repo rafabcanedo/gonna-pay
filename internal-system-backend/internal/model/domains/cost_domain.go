@@ -146,3 +146,7 @@ func (c *costDomain) GetSplits() []SplitDomain {
 func (c *costDomain) SetSplits(splits []SplitDomain) {
 	c.splits = splits
 }
+
+func (c *costDomain) OwnerValue() float64 {
+	return c.totalValue * c.ownerPercentage / 100
+}

@@ -6,7 +6,6 @@ package mocks
 import (
 	reflect "reflect"
 
-	rest_errors "github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/configuration/rest_errors"
 	domains "github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/model/domains"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -35,11 +34,11 @@ func (m *MockCostService) EXPECT() *MockCostServiceMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockCostService) Create(domain domains.CostDomainInterface, ownerPercentage *float64) (domains.CostDomainInterface, *rest_errors.RestErrors) {
+func (m *MockCostService) Create(domain domains.CostDomainInterface, ownerPercentage *float64) (domains.CostDomainInterface, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", domain, ownerPercentage)
 	ret0, _ := ret[0].(domains.CostDomainInterface)
-	ret1, _ := ret[1].(*rest_errors.RestErrors)
+	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
@@ -50,11 +49,11 @@ func (mr *MockCostServiceMockRecorder) Create(domain, ownerPercentage any) *gomo
 }
 
 // Update mocks base method.
-func (m *MockCostService) Update(id, userID string, domain domains.CostDomainInterface) (domains.CostDomainInterface, *rest_errors.RestErrors) {
+func (m *MockCostService) Update(id, userID string, domain domains.CostDomainInterface) (domains.CostDomainInterface, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", id, userID, domain)
 	ret0, _ := ret[0].(domains.CostDomainInterface)
-	ret1, _ := ret[1].(*rest_errors.RestErrors)
+	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
@@ -65,11 +64,11 @@ func (mr *MockCostServiceMockRecorder) Update(id, userID, domain any) *gomock.Ca
 }
 
 // FindAll mocks base method.
-func (m *MockCostService) FindAll(userID string) ([]domains.CostDomainInterface, *rest_errors.RestErrors) {
+func (m *MockCostService) FindAll(userID string) ([]domains.CostDomainInterface, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindAll", userID)
 	ret0, _ := ret[0].([]domains.CostDomainInterface)
-	ret1, _ := ret[1].(*rest_errors.RestErrors)
+	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
@@ -80,11 +79,11 @@ func (mr *MockCostServiceMockRecorder) FindAll(userID any) *gomock.Call {
 }
 
 // FindByID mocks base method.
-func (m *MockCostService) FindByID(id, userID string) (domains.CostDomainInterface, *rest_errors.RestErrors) {
+func (m *MockCostService) FindByID(id, userID string) (domains.CostDomainInterface, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindByID", id, userID)
 	ret0, _ := ret[0].(domains.CostDomainInterface)
-	ret1, _ := ret[1].(*rest_errors.RestErrors)
+	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
@@ -95,10 +94,10 @@ func (mr *MockCostServiceMockRecorder) FindByID(id, userID any) *gomock.Call {
 }
 
 // Delete mocks base method.
-func (m *MockCostService) Delete(id, userID string) *rest_errors.RestErrors {
+func (m *MockCostService) Delete(id, userID string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", id, userID)
-	ret0, _ := ret[0].(*rest_errors.RestErrors)
+	ret0, _ := ret[0].(error)
 	return ret0
 }
 

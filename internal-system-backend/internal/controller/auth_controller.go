@@ -28,13 +28,13 @@ func (ac *AuthController) Login(c *gin.Context) {
 	var req request.LoginRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		restErr := validation.ValidateUserError(err)
+		restErr := validation.ValidateError(err)
 		c.JSON(restErr.Code, restErr)
 		return
 	}
 
-	user, restErr := ac.userService.FindByEmail(req.Email)
-	if restErr != nil {
+	user, err := ac.userService.FindByEmail(req.Email)
+	if err != nil {
 		c.JSON(http.StatusUnauthorized, rest_errors.NewUnauthorizedRequestError("invalid credentials"))
 		return
 	}
@@ -47,16 +47,14 @@ func (ac *AuthController) Login(c *gin.Context) {
 	accessToken, err := auth.GenerateAccessToken(user.GetID(), user.GetName())
 	if err != nil {
 		logger.Error("error generating access token", err)
-		restErr := rest_errors.NewInternalServerError("error generating token")
-		c.JSON(restErr.Code, restErr)
+		c.JSON(http.StatusInternalServerError, rest_errors.NewInternalServerError("error generating token"))
 		return
 	}
 
 	refreshToken, err := auth.GenerateRefreshToken()
 	if err != nil {
 		logger.Error("error generating refresh token", err)
-		restErr := rest_errors.NewInternalServerError("error generating token")
-		c.JSON(restErr.Code, restErr)
+		c.JSON(http.StatusInternalServerError, rest_errors.NewInternalServerError("error generating token"))
 		return
 	}
 
@@ -65,8 +63,7 @@ func (ac *AuthController) Login(c *gin.Context) {
 
 	if err := ac.authRepo.Save(user.GetID(), tokenHash, expiresAt); err != nil {
 		logger.Error("error saving refresh token", err)
-		restErr := rest_errors.NewInternalServerError("error processing login")
-		c.JSON(restErr.Code, restErr)
+		c.JSON(http.StatusInternalServerError, rest_errors.NewInternalServerError("error processing login"))
 		return
 	}
 
@@ -75,20 +72,14 @@ func (ac *AuthController) Login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
-		"user": response.UserResponse{
-			ID:    user.GetID(),
-			Name:  user.GetName(),
-			Email: user.GetEmail(),
-			Phone: user.GetPhone(),
-		},
+		"user":    response.NewUserResponse(user),
 	})
 }
 
 func (ac *AuthController) Refresh(c *gin.Context) {
 	refreshToken, err := c.Cookie("refresh_token")
 	if err != nil {
-		restErr := rest_errors.NewUnauthorizedRequestError("missing refresh token")
-		c.JSON(restErr.Code, restErr)
+		c.JSON(http.StatusUnauthorized, rest_errors.NewUnauthorizedRequestError("missing refresh token"))
 		return
 	}
 
@@ -96,39 +87,35 @@ func (ac *AuthController) Refresh(c *gin.Context) {
 
 	stored, err := ac.authRepo.FindByHash(tokenHash)
 	if err != nil {
-		restErr := rest_errors.NewUnauthorizedRequestError("invalid refresh token")
-		c.JSON(restErr.Code, restErr)
+		c.JSON(http.StatusUnauthorized, rest_errors.NewUnauthorizedRequestError("invalid refresh token"))
 		return
 	}
 
 	if time.Now().After(stored.ExpiresAt) {
 		ac.authRepo.DeleteByHash(tokenHash)
-		restErr := rest_errors.NewUnauthorizedRequestError("refresh token expired")
-		c.JSON(restErr.Code, restErr)
+		c.JSON(http.StatusUnauthorized, rest_errors.NewUnauthorizedRequestError("refresh token expired"))
 		return
 	}
 
 	ac.authRepo.DeleteByHash(tokenHash)
 
-	user, restErr := ac.userService.FindByID(stored.UserID.String())
-	if restErr != nil {
-		c.JSON(restErr.Code, restErr)
+	user, err := ac.userService.FindByID(stored.UserID.String())
+	if err != nil {
+		response.RespondError(c, err)
 		return
 	}
 
 	newAccessToken, err := auth.GenerateAccessToken(user.GetID(), user.GetName())
 	if err != nil {
 		logger.Error("error generating access token on refresh", err)
-		restErr := rest_errors.NewInternalServerError("error generating token")
-		c.JSON(restErr.Code, restErr)
+		c.JSON(http.StatusInternalServerError, rest_errors.NewInternalServerError("error generating token"))
 		return
 	}
 
 	newRefreshToken, err := auth.GenerateRefreshToken()
 	if err != nil {
 		logger.Error("error generating refresh token on refresh", err)
-		restErr := rest_errors.NewInternalServerError("error generating token")
-		c.JSON(restErr.Code, restErr)
+		c.JSON(http.StatusInternalServerError, rest_errors.NewInternalServerError("error generating token"))
 		return
 	}
 
@@ -137,8 +124,7 @@ func (ac *AuthController) Refresh(c *gin.Context) {
 
 	if err := ac.authRepo.Save(user.GetID(), newTokenHash, newExpiresAt); err != nil {
 		logger.Error("error saving new refresh token", err)
-		restErr := rest_errors.NewInternalServerError("error processing refresh")
-		c.JSON(restErr.Code, restErr)
+		c.JSON(http.StatusInternalServerError, rest_errors.NewInternalServerError("error processing refresh"))
 		return
 	}
 
@@ -164,21 +150,20 @@ func (ac *AuthController) Logout(c *gin.Context) {
 func (ac *AuthController) UpdateProfile(c *gin.Context) {
 	userID := c.GetString("userID")
 	if userID == "" {
-		restErr := rest_errors.NewUnauthorizedRequestError("user identification missing")
-		c.JSON(restErr.Code, restErr)
+		c.JSON(http.StatusUnauthorized, rest_errors.NewUnauthorizedRequestError("user identification missing"))
 		return
 	}
 
 	var req request.UpdateProfileRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		restErr := validation.ValidateUserError(err)
+		restErr := validation.ValidateError(err)
 		c.JSON(restErr.Code, restErr)
 		return
 	}
 
-	current, restErr := ac.userService.FindByID(userID)
-	if restErr != nil {
-		c.JSON(restErr.Code, restErr)
+	current, err := ac.userService.FindByID(userID)
+	if err != nil {
+		response.RespondError(c, err)
 		return
 	}
 
@@ -192,41 +177,30 @@ func (ac *AuthController) UpdateProfile(c *gin.Context) {
 		current.SetPhone(req.Phone)
 	}
 
-	updated, restErr := ac.userService.Update(current)
-	if restErr != nil {
-		c.JSON(restErr.Code, restErr)
+	updated, err := ac.userService.Update(current)
+	if err != nil {
+		response.RespondError(c, err)
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Profile updated successfully",
-		"user": response.UserResponse{
-			ID:    updated.GetID(),
-			Name:  updated.GetName(),
-			Email: updated.GetEmail(),
-			Phone: updated.GetPhone(),
-		},
+		"user":    response.NewUserResponse(updated),
 	})
 }
 
 func (ac *AuthController) GetProfile(c *gin.Context) {
 	userID := c.GetString("userID")
 	if userID == "" {
-		restErr := rest_errors.NewUnauthorizedRequestError("user identification missing")
-		c.JSON(restErr.Code, restErr)
+		c.JSON(http.StatusUnauthorized, rest_errors.NewUnauthorizedRequestError("user identification missing"))
 		return
 	}
 
-	user, restErr := ac.userService.FindByID(userID)
-	if restErr != nil {
-		c.JSON(restErr.Code, restErr)
+	user, err := ac.userService.FindByID(userID)
+	if err != nil {
+		response.RespondError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, response.UserResponse{
-		ID:    user.GetID(),
-		Name:  user.GetName(),
-		Email: user.GetEmail(),
-		Phone: user.GetPhone(),
-	})
+	c.JSON(http.StatusOK, response.NewUserResponse(user))
 }

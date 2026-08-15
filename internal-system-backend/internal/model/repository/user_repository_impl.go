@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 
 	"github.com/google/uuid"
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/model/converter"
@@ -70,6 +71,9 @@ func (r *userRepository) FindByID(id string) (domains.UserDomainInterface, error
 
 	err := row.Scan(&e.ID, &e.Name, &e.Email, &e.Password, &e.Phone)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domains.NewNotFoundError("user not found")
+		}
 		return nil, err
 	}
 
@@ -86,6 +90,9 @@ func (r *userRepository) FindByEmail(email string) (domains.UserDomainInterface,
 
 	err := row.Scan(&e.ID, &e.Name, &e.Email, &e.Password, &e.Phone)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domains.NewNotFoundError("user not found")
+		}
 		return nil, err
 	}
 

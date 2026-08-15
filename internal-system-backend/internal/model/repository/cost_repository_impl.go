@@ -258,7 +258,7 @@ func (r *costRepository) FindByID(id string) (domains.CostDomainInterface, error
 	}
 
 	if !found {
-		return nil, sql.ErrNoRows
+		return nil, domains.NewNotFoundError("cost not found")
 	}
 
 	groupID := ""

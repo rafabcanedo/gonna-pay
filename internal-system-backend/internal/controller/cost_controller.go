@@ -7,8 +7,8 @@ import (
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/configuration/validation"
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/model/domains"
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/model/service"
-	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/view"
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/view/request"
+	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/view/response"
 )
 
 type CostController struct {
@@ -24,45 +24,45 @@ func (cc *CostController) CreateCost(c *gin.Context) {
 
 	var req request.CreateCostRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		restErr := validation.ValidateCostError(err)
+		restErr := validation.ValidateError(err)
 		c.JSON(restErr.Code, restErr)
 		return
 	}
 
 	domain := domains.NewCostDomain(userID, req.GroupID, req.CostName, req.Category, req.TotalValue, 0)
 
-	created, restErr := cc.service.Create(domain, req.OwnerPercentage)
-	if restErr != nil {
-		c.JSON(restErr.Code, restErr)
+	created, err := cc.service.Create(domain, req.OwnerPercentage)
+	if err != nil {
+		response.RespondError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusCreated, view.ConvertCostDomainToResponse(created))
+	c.JSON(http.StatusCreated, response.NewCostResponse(created))
 }
 
 func (cc *CostController) FindAllCosts(c *gin.Context) {
 	userID := c.GetString("userID")
 
-	costs, restErr := cc.service.FindAll(userID)
-	if restErr != nil {
-		c.JSON(restErr.Code, restErr)
+	costs, err := cc.service.FindAll(userID)
+	if err != nil {
+		response.RespondError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, view.ConvertCostDomainListToResponse(costs))
+	c.JSON(http.StatusOK, response.NewCostResponseList(costs))
 }
 
 func (cc *CostController) FindCostByID(c *gin.Context) {
 	id := c.Param("id")
 	userID := c.GetString("userID")
 
-	cost, restErr := cc.service.FindByID(id, userID)
-	if restErr != nil {
-		c.JSON(restErr.Code, restErr)
+	cost, err := cc.service.FindByID(id, userID)
+	if err != nil {
+		response.RespondError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, view.ConvertCostDomainToDetailResponse(cost))
+	c.JSON(http.StatusOK, response.NewCostDetailResponse(cost))
 }
 
 func (cc *CostController) UpdateCost(c *gin.Context) {
@@ -71,7 +71,7 @@ func (cc *CostController) UpdateCost(c *gin.Context) {
 
 	var req request.UpdateCostRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		restErr := validation.ValidateCostError(err)
+		restErr := validation.ValidateError(err)
 		c.JSON(restErr.Code, restErr)
 		return
 	}
@@ -83,22 +83,21 @@ func (cc *CostController) UpdateCost(c *gin.Context) {
 
 	domain := domains.NewCostDomain(userID, "", req.CostName, req.Category, req.TotalValue, ownerPercentage)
 
-	updated, restErr := cc.service.Update(id, userID, domain)
-	if restErr != nil {
-		c.JSON(restErr.Code, restErr)
+	updated, err := cc.service.Update(id, userID, domain)
+	if err != nil {
+		response.RespondError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, view.ConvertCostDomainToDetailResponse(updated))
+	c.JSON(http.StatusOK, response.NewCostDetailResponse(updated))
 }
 
 func (cc *CostController) DeleteCost(c *gin.Context) {
 	id := c.Param("id")
 	userID := c.GetString("userID")
 
-	restErr := cc.service.Delete(id, userID)
-	if restErr != nil {
-		c.JSON(restErr.Code, restErr)
+	if err := cc.service.Delete(id, userID); err != nil {
+		response.RespondError(c, err)
 		return
 	}
 

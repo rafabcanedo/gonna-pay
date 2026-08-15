@@ -1,21 +1,20 @@
 package service
 
 import (
-	"database/sql"
+	"errors"
 
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/configuration/logger"
-	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/configuration/rest_errors"
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/model/domains"
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/model/repository"
 )
 
 type UserService interface {
-	Create(domain domains.UserDomainInterface) (domains.UserDomainInterface, *rest_errors.RestErrors)
-	FindAll() ([]domains.UserDomainInterface, *rest_errors.RestErrors)
-	FindByID(id string) (domains.UserDomainInterface, *rest_errors.RestErrors)
-	FindByEmail(email string) (domains.UserDomainInterface, *rest_errors.RestErrors)
-	Update(domain domains.UserDomainInterface) (domains.UserDomainInterface, *rest_errors.RestErrors)
-	Delete(id string) *rest_errors.RestErrors
+	Create(domain domains.UserDomainInterface) (domains.UserDomainInterface, error)
+	FindAll() ([]domains.UserDomainInterface, error)
+	FindByID(id string) (domains.UserDomainInterface, error)
+	FindByEmail(email string) (domains.UserDomainInterface, error)
+	Update(domain domains.UserDomainInterface) (domains.UserDomainInterface, error)
+	Delete(id string) error
 }
 
 type userService struct {
@@ -26,83 +25,85 @@ func NewUserService(repo repository.UserRepository) UserService {
 	return &userService{repo: repo}
 }
 
-func (s *userService) Create(domain domains.UserDomainInterface) (domains.UserDomainInterface, *rest_errors.RestErrors) {
-	existing, _ := s.repo.FindByEmail(domain.GetEmail())
+func (s *userService) Create(domain domains.UserDomainInterface) (domains.UserDomainInterface, error) {
+	existing, err := s.repo.FindByEmail(domain.GetEmail())
+	if err != nil && !errors.Is(err, domains.ErrNotFound) {
+		logger.Error("error checking email uniqueness", err)
+		return nil, err
+	}
 	if existing != nil {
-		return nil, rest_errors.NewBadRequestError("email already in use")
+		return nil, domains.NewConflictError("email already in use")
 	}
 
 	if err := domain.EncryptPassword(); err != nil {
 		logger.Error("error encrypting password", err)
-		return nil, rest_errors.NewInternalServerError("error processing user data")
+		return nil, err
 	}
 
 	created, err := s.repo.Create(domain)
 	if err != nil {
 		logger.Error("error creating user", err)
-		return nil, rest_errors.NewInternalServerError("error creating user")
+		return nil, err
 	}
 
 	return created, nil
 }
 
-func (s *userService) FindAll() ([]domains.UserDomainInterface, *rest_errors.RestErrors) {
+func (s *userService) FindAll() ([]domains.UserDomainInterface, error) {
 	users, err := s.repo.FindAll()
 	if err != nil {
 		logger.Error("error finding all users", err)
-		return nil, rest_errors.NewInternalServerError("error finding users")
+		return nil, err
 	}
 
 	return users, nil
 }
 
-func (s *userService) FindByID(id string) (domains.UserDomainInterface, *rest_errors.RestErrors) {
+func (s *userService) FindByID(id string) (domains.UserDomainInterface, error) {
 	user, err := s.repo.FindByID(id)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, rest_errors.NewNotFoundError("user not found")
+		if !errors.Is(err, domains.ErrNotFound) {
+			logger.Error("error finding user by id", err)
 		}
-		logger.Error("error finding user by id", err)
-		return nil, rest_errors.NewInternalServerError("error finding user")
+		return nil, err
 	}
 
 	return user, nil
 }
 
-func (s *userService) FindByEmail(email string) (domains.UserDomainInterface, *rest_errors.RestErrors) {
+func (s *userService) FindByEmail(email string) (domains.UserDomainInterface, error) {
 	user, err := s.repo.FindByEmail(email)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, rest_errors.NewNotFoundError("user not found")
+		if !errors.Is(err, domains.ErrNotFound) {
+			logger.Error("error finding user by email", err)
 		}
-		logger.Error("error finding user by email", err)
-		return nil, rest_errors.NewInternalServerError("error finding user")
+		return nil, err
 	}
 
 	return user, nil
 }
 
-func (s *userService) Update(domain domains.UserDomainInterface) (domains.UserDomainInterface, *rest_errors.RestErrors) {
+func (s *userService) Update(domain domains.UserDomainInterface) (domains.UserDomainInterface, error) {
 	if domain.GetPassword() != "" {
 		if err := domain.EncryptPassword(); err != nil {
 			logger.Error("error encrypting password on update", err)
-			return nil, rest_errors.NewInternalServerError("error processing user data")
+			return nil, err
 		}
 	}
 
 	updated, err := s.repo.Update(domain)
 	if err != nil {
 		logger.Error("error updating user", err)
-		return nil, rest_errors.NewInternalServerError("error updating user")
+		return nil, err
 	}
 
 	return updated, nil
 }
 
-func (s *userService) Delete(id string) *rest_errors.RestErrors {
+func (s *userService) Delete(id string) error {
 	if err := s.repo.Delete(id); err != nil {
 		logger.Error("error deleting user", err)
-		return rest_errors.NewInternalServerError("error deleting user")
+		return err
 	}
 
 	return nil

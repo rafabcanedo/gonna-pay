@@ -7,8 +7,8 @@ import (
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/configuration/validation"
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/model/domains"
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/model/service"
-	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/view"
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/view/request"
+	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/view/response"
 )
 
 type ContactController struct {
@@ -24,45 +24,45 @@ func (cc *ContactController) CreateContact(c *gin.Context) {
 
 	var req request.CreateContactRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		restErr := validation.ValidateContactError(err)
+		restErr := validation.ValidateError(err)
 		c.JSON(restErr.Code, restErr)
 		return
 	}
 
 	domain := domains.NewContactDomain(ownerID, req.Name, req.Email, req.Phone, req.Category)
 
-	created, restErr := cc.service.Create(domain)
-	if restErr != nil {
-		c.JSON(restErr.Code, restErr)
+	created, err := cc.service.Create(domain)
+	if err != nil {
+		response.RespondError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusCreated, view.ConvertContactDomainToResponse(created))
+	c.JSON(http.StatusCreated, response.NewContactResponse(created))
 }
 
 func (cc *ContactController) FindAllContacts(c *gin.Context) {
 	ownerID := c.GetString("userID")
 
-	contacts, restErr := cc.service.FindAll(ownerID)
-	if restErr != nil {
-		c.JSON(restErr.Code, restErr)
+	contacts, err := cc.service.FindAll(ownerID)
+	if err != nil {
+		response.RespondError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, view.ConvertContactDomainListToResponse(contacts))
+	c.JSON(http.StatusOK, response.NewContactResponseList(contacts))
 }
 
 func (cc *ContactController) FindContactByID(c *gin.Context) {
 	id := c.Param("id")
 	ownerID := c.GetString("userID")
 
-	contact, restErr := cc.service.FindByID(id, ownerID)
-	if restErr != nil {
-		c.JSON(restErr.Code, restErr)
+	contact, err := cc.service.FindByID(id, ownerID)
+	if err != nil {
+		response.RespondError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, view.ConvertContactDomainToResponse(contact))
+	c.JSON(http.StatusOK, response.NewContactResponse(contact))
 }
 
 func (cc *ContactController) UpdateContact(c *gin.Context) {
@@ -71,29 +71,28 @@ func (cc *ContactController) UpdateContact(c *gin.Context) {
 
 	var req request.UpdateContactRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		restErr := validation.ValidateContactError(err)
+		restErr := validation.ValidateError(err)
 		c.JSON(restErr.Code, restErr)
 		return
 	}
 
 	domain := domains.NewContactDomainWithID(id, ownerID, req.Name, req.Email, req.Phone, req.Category)
 
-	updated, restErr := cc.service.Update(domain)
-	if restErr != nil {
-		c.JSON(restErr.Code, restErr)
+	updated, err := cc.service.Update(domain)
+	if err != nil {
+		response.RespondError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, view.ConvertContactDomainToResponse(updated))
+	c.JSON(http.StatusOK, response.NewContactResponse(updated))
 }
 
 func (cc *ContactController) DeleteContact(c *gin.Context) {
 	id := c.Param("id")
 	ownerID := c.GetString("userID")
 
-	restErr := cc.service.Delete(id, ownerID)
-	if restErr != nil {
-		c.JSON(restErr.Code, restErr)
+	if err := cc.service.Delete(id, ownerID); err != nil {
+		response.RespondError(c, err)
 		return
 	}
 

@@ -6,7 +6,6 @@ package mocks
 import (
 	reflect "reflect"
 
-	rest_errors "github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/configuration/rest_errors"
 	domains "github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/model/domains"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -35,11 +34,11 @@ func (m *MockGroupService) EXPECT() *MockGroupServiceMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockGroupService) Create(domain domains.GroupDomainInterface, memberIDs []string) (domains.GroupDomainInterface, *rest_errors.RestErrors) {
+func (m *MockGroupService) Create(domain domains.GroupDomainInterface, memberIDs []string) (domains.GroupDomainInterface, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", domain, memberIDs)
 	ret0, _ := ret[0].(domains.GroupDomainInterface)
-	ret1, _ := ret[1].(*rest_errors.RestErrors)
+	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
@@ -50,11 +49,11 @@ func (mr *MockGroupServiceMockRecorder) Create(domain, memberIDs any) *gomock.Ca
 }
 
 // FindAll mocks base method.
-func (m *MockGroupService) FindAll(ownerID string) ([]domains.GroupDomainInterface, *rest_errors.RestErrors) {
+func (m *MockGroupService) FindAll(ownerID string) ([]domains.GroupDomainInterface, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindAll", ownerID)
 	ret0, _ := ret[0].([]domains.GroupDomainInterface)
-	ret1, _ := ret[1].(*rest_errors.RestErrors)
+	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
@@ -65,11 +64,11 @@ func (mr *MockGroupServiceMockRecorder) FindAll(ownerID any) *gomock.Call {
 }
 
 // FindByID mocks base method.
-func (m *MockGroupService) FindByID(id, ownerID string) (domains.GroupDomainInterface, *rest_errors.RestErrors) {
+func (m *MockGroupService) FindByID(id, ownerID string) (domains.GroupDomainInterface, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindByID", id, ownerID)
 	ret0, _ := ret[0].(domains.GroupDomainInterface)
-	ret1, _ := ret[1].(*rest_errors.RestErrors)
+	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
@@ -80,10 +79,10 @@ func (mr *MockGroupServiceMockRecorder) FindByID(id, ownerID any) *gomock.Call {
 }
 
 // Delete mocks base method.
-func (m *MockGroupService) Delete(id, ownerID string) *rest_errors.RestErrors {
+func (m *MockGroupService) Delete(id, ownerID string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", id, ownerID)
-	ret0, _ := ret[0].(*rest_errors.RestErrors)
+	ret0, _ := ret[0].(error)
 	return ret0
 }
 
@@ -94,10 +93,10 @@ func (mr *MockGroupServiceMockRecorder) Delete(id, ownerID any) *gomock.Call {
 }
 
 // AddMember mocks base method.
-func (m *MockGroupService) AddMember(groupID, contactID, ownerID string) *rest_errors.RestErrors {
+func (m *MockGroupService) AddMember(groupID, contactID, ownerID string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddMember", groupID, contactID, ownerID)
-	ret0, _ := ret[0].(*rest_errors.RestErrors)
+	ret0, _ := ret[0].(error)
 	return ret0
 }
 
@@ -108,10 +107,10 @@ func (mr *MockGroupServiceMockRecorder) AddMember(groupID, contactID, ownerID an
 }
 
 // RemoveMember mocks base method.
-func (m *MockGroupService) RemoveMember(groupID, contactID, ownerID string) *rest_errors.RestErrors {
+func (m *MockGroupService) RemoveMember(groupID, contactID, ownerID string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RemoveMember", groupID, contactID, ownerID)
-	ret0, _ := ret[0].(*rest_errors.RestErrors)
+	ret0, _ := ret[0].(error)
 	return ret0
 }
 

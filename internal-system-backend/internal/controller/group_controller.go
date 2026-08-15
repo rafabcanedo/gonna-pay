@@ -7,8 +7,8 @@ import (
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/configuration/validation"
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/model/domains"
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/model/service"
-	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/view"
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/view/request"
+	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/view/response"
 )
 
 type GroupController struct {
@@ -24,32 +24,32 @@ func (gc *GroupController) CreateGroup(c *gin.Context) {
 
 	var req request.CreateGroupRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		restErr := validation.ValidateGroupError(err)
+		restErr := validation.ValidateError(err)
 		c.JSON(restErr.Code, restErr)
 		return
 	}
 
 	domain := domains.NewGroupDomain(ownerID, req.Name, req.Category)
 
-	created, restErr := gc.service.Create(domain, req.MemberIDs)
-	if restErr != nil {
-		c.JSON(restErr.Code, restErr)
+	created, err := gc.service.Create(domain, req.MemberIDs)
+	if err != nil {
+		response.RespondError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusCreated, view.ConvertGroupDomainToResponse(created))
+	c.JSON(http.StatusCreated, response.NewGroupResponse(created))
 }
 
 func (gc *GroupController) FindAllGroups(c *gin.Context) {
 	ownerID := c.GetString("userID")
 
-	groups, restErr := gc.service.FindAll(ownerID)
-	if restErr != nil {
-		c.JSON(restErr.Code, restErr)
+	groups, err := gc.service.FindAll(ownerID)
+	if err != nil {
+		response.RespondError(c, err)
 		return
 	}
 
-	groupsResponse := view.ConvertGroupDomainListToResponse(groups)
+	groupsResponse := response.NewGroupResponseList(groups)
 	c.JSON(http.StatusOK, gin.H{
 		"groups": groupsResponse,
 		"total":  len(groupsResponse),
@@ -60,22 +60,21 @@ func (gc *GroupController) FindGroupByID(c *gin.Context) {
 	id := c.Param("id")
 	ownerID := c.GetString("userID")
 
-	group, restErr := gc.service.FindByID(id, ownerID)
-	if restErr != nil {
-		c.JSON(restErr.Code, restErr)
+	group, err := gc.service.FindByID(id, ownerID)
+	if err != nil {
+		response.RespondError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, view.ConvertGroupDomainToDetailResponse(group))
+	c.JSON(http.StatusOK, response.NewGroupDetailResponse(group))
 }
 
 func (gc *GroupController) DeleteGroup(c *gin.Context) {
 	id := c.Param("id")
 	ownerID := c.GetString("userID")
 
-	restErr := gc.service.Delete(id, ownerID)
-	if restErr != nil {
-		c.JSON(restErr.Code, restErr)
+	if err := gc.service.Delete(id, ownerID); err != nil {
+		response.RespondError(c, err)
 		return
 	}
 
@@ -88,14 +87,13 @@ func (gc *GroupController) AddMember(c *gin.Context) {
 
 	var req request.AddMemberRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		restErr := validation.ValidateGroupError(err)
+		restErr := validation.ValidateError(err)
 		c.JSON(restErr.Code, restErr)
 		return
 	}
 
-	restErr := gc.service.AddMember(groupID, req.ContactID, ownerID)
-	if restErr != nil {
-		c.JSON(restErr.Code, restErr)
+	if err := gc.service.AddMember(groupID, req.ContactID, ownerID); err != nil {
+		response.RespondError(c, err)
 		return
 	}
 
@@ -107,9 +105,8 @@ func (gc *GroupController) RemoveMember(c *gin.Context) {
 	contactID := c.Param("contactId")
 	ownerID := c.GetString("userID")
 
-	restErr := gc.service.RemoveMember(groupID, contactID, ownerID)
-	if restErr != nil {
-		c.JSON(restErr.Code, restErr)
+	if err := gc.service.RemoveMember(groupID, contactID, ownerID); err != nil {
+		response.RespondError(c, err)
 		return
 	}
 

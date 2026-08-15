@@ -147,7 +147,7 @@ func (r *groupRepository) FindByID(id string) (domains.GroupDomainInterface, err
 	}
 
 	if !found {
-		return nil, sql.ErrNoRows
+		return nil, domains.NewNotFoundError("group not found")
 	}
 
 	return domains.NewGroupDomainWithID(groupID.String(), ownerID.String(), name, category, createdAt, updatedAt, members), nil

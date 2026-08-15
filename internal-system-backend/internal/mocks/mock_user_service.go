@@ -6,7 +6,6 @@ package mocks
 import (
 	reflect "reflect"
 
-	rest_errors "github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/configuration/rest_errors"
 	domains "github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/model/domains"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -35,11 +34,11 @@ func (m *MockUserService) EXPECT() *MockUserServiceMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockUserService) Create(domain domains.UserDomainInterface) (domains.UserDomainInterface, *rest_errors.RestErrors) {
+func (m *MockUserService) Create(domain domains.UserDomainInterface) (domains.UserDomainInterface, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", domain)
 	ret0, _ := ret[0].(domains.UserDomainInterface)
-	ret1, _ := ret[1].(*rest_errors.RestErrors)
+	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
@@ -50,11 +49,11 @@ func (mr *MockUserServiceMockRecorder) Create(domain any) *gomock.Call {
 }
 
 // FindAll mocks base method.
-func (m *MockUserService) FindAll() ([]domains.UserDomainInterface, *rest_errors.RestErrors) {
+func (m *MockUserService) FindAll() ([]domains.UserDomainInterface, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindAll")
 	ret0, _ := ret[0].([]domains.UserDomainInterface)
-	ret1, _ := ret[1].(*rest_errors.RestErrors)
+	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
@@ -65,11 +64,11 @@ func (mr *MockUserServiceMockRecorder) FindAll() *gomock.Call {
 }
 
 // FindByID mocks base method.
-func (m *MockUserService) FindByID(id string) (domains.UserDomainInterface, *rest_errors.RestErrors) {
+func (m *MockUserService) FindByID(id string) (domains.UserDomainInterface, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindByID", id)
 	ret0, _ := ret[0].(domains.UserDomainInterface)
-	ret1, _ := ret[1].(*rest_errors.RestErrors)
+	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
@@ -80,11 +79,11 @@ func (mr *MockUserServiceMockRecorder) FindByID(id any) *gomock.Call {
 }
 
 // FindByEmail mocks base method.
-func (m *MockUserService) FindByEmail(email string) (domains.UserDomainInterface, *rest_errors.RestErrors) {
+func (m *MockUserService) FindByEmail(email string) (domains.UserDomainInterface, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindByEmail", email)
 	ret0, _ := ret[0].(domains.UserDomainInterface)
-	ret1, _ := ret[1].(*rest_errors.RestErrors)
+	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
@@ -95,11 +94,11 @@ func (mr *MockUserServiceMockRecorder) FindByEmail(email any) *gomock.Call {
 }
 
 // Update mocks base method.
-func (m *MockUserService) Update(domain domains.UserDomainInterface) (domains.UserDomainInterface, *rest_errors.RestErrors) {
+func (m *MockUserService) Update(domain domains.UserDomainInterface) (domains.UserDomainInterface, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", domain)
 	ret0, _ := ret[0].(domains.UserDomainInterface)
-	ret1, _ := ret[1].(*rest_errors.RestErrors)
+	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
@@ -110,10 +109,10 @@ func (mr *MockUserServiceMockRecorder) Update(domain any) *gomock.Call {
 }
 
 // Delete mocks base method.
-func (m *MockUserService) Delete(id string) *rest_errors.RestErrors {
+func (m *MockUserService) Delete(id string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", id)
-	ret0, _ := ret[0].(*rest_errors.RestErrors)
+	ret0, _ := ret[0].(error)
 	return ret0
 }
 
