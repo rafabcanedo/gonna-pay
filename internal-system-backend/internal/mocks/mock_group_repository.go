@@ -34,25 +34,25 @@ func (m *MockGroupRepository) EXPECT() *MockGroupRepositoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockGroupRepository) Create(domain domains.GroupDomainInterface, memberIDs []string) (domains.GroupDomainInterface, error) {
+func (m *MockGroupRepository) Create(group *domains.Group, memberIDs []string) (*domains.Group, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", domain, memberIDs)
-	ret0, _ := ret[0].(domains.GroupDomainInterface)
+	ret := m.ctrl.Call(m, "Create", group, memberIDs)
+	ret0, _ := ret[0].(*domains.Group)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockGroupRepositoryMockRecorder) Create(domain, memberIDs any) *gomock.Call {
+func (mr *MockGroupRepositoryMockRecorder) Create(group, memberIDs any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockGroupRepository)(nil).Create), domain, memberIDs)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockGroupRepository)(nil).Create), group, memberIDs)
 }
 
 // FindAll mocks base method.
-func (m *MockGroupRepository) FindAll(ownerID string) ([]domains.GroupDomainInterface, error) {
+func (m *MockGroupRepository) FindAll(ownerID string) ([]*domains.Group, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindAll", ownerID)
-	ret0, _ := ret[0].([]domains.GroupDomainInterface)
+	ret0, _ := ret[0].([]*domains.Group)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -64,10 +64,10 @@ func (mr *MockGroupRepositoryMockRecorder) FindAll(ownerID any) *gomock.Call {
 }
 
 // FindByID mocks base method.
-func (m *MockGroupRepository) FindByID(id string) (domains.GroupDomainInterface, error) {
+func (m *MockGroupRepository) FindByID(id string) (*domains.Group, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindByID", id)
-	ret0, _ := ret[0].(domains.GroupDomainInterface)
+	ret0, _ := ret[0].(*domains.Group)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

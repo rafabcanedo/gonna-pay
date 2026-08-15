@@ -1,21 +1,20 @@
 package service
 
 import (
-	"database/sql"
+	"errors"
 	"math"
 
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/configuration/logger"
-	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/configuration/rest_errors"
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/model/domains"
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/model/repository"
 )
 
 type CostService interface {
-	Create(domain domains.CostDomainInterface, ownerPercentage *float64) (domains.CostDomainInterface, *rest_errors.RestErrors)
-	Update(id, userID string, domain domains.CostDomainInterface) (domains.CostDomainInterface, *rest_errors.RestErrors)
-	FindAll(userID string) ([]domains.CostDomainInterface, *rest_errors.RestErrors)
-	FindByID(id, userID string) (domains.CostDomainInterface, *rest_errors.RestErrors)
-	Delete(id, userID string) *rest_errors.RestErrors
+	Create(cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error)
+	Update(id, userID string, cost *domains.Cost) (*domains.Cost, error)
+	FindAll(userID string) ([]*domains.Cost, error)
+	FindByID(id, userID string) (*domains.Cost, error)
+	Delete(id, userID string) error
 }
 
 type costService struct {
@@ -26,106 +25,103 @@ func NewCostService(repo repository.CostRepository) CostService {
 	return &costService{repo: repo}
 }
 
-func (s *costService) Create(domain domains.CostDomainInterface, ownerPercentage *float64) (domains.CostDomainInterface, *rest_errors.RestErrors) {
+func (s *costService) Create(cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error) {
 	var memberIDs []string
 
-	if domain.GetGroupID() != "" {
-		group, err := s.repo.GetGroupMemberIDs(domain.GetGroupID())
+	if cost.GroupID != "" {
+		group, err := s.repo.GetGroupMemberIDs(cost.GroupID)
 		if err != nil {
 			logger.Error("error fetching group members for cost creation", err)
-			return nil, rest_errors.NewInternalServerError("error creating cost")
+			return nil, err
 		}
 		memberIDs = group
 
 		memberCount := len(memberIDs)
 		if ownerPercentage != nil {
 			if *ownerPercentage <= 0 || *ownerPercentage >= 100 {
-				return nil, rest_errors.NewBadRequestError("ownerPercentage must be between 0 and 100 (exclusive)")
+				return nil, domains.NewInvalidInputError("ownerPercentage must be between 0 and 100 (exclusive)")
 			}
-			domain.SetOwnerPercentage(*ownerPercentage)
+			cost.OwnerPercentage = *ownerPercentage
 		} else {
-			domain.SetOwnerPercentage(math.Round((100.0/float64(memberCount+1))*100) / 100)
+			cost.OwnerPercentage = math.Round((100.0/float64(memberCount+1))*100) / 100
 		}
 	} else {
-		domain.SetOwnerPercentage(100)
+		cost.OwnerPercentage = 100
 	}
 
-	created, err := s.repo.Create(domain, memberIDs)
+	created, err := s.repo.Create(cost, memberIDs)
 	if err != nil {
 		logger.Error("error creating cost", err)
-		return nil, rest_errors.NewInternalServerError("error creating cost")
+		return nil, err
 	}
 
 	return created, nil
 }
 
-func (s *costService) Update(id, userID string, domain domains.CostDomainInterface) (domains.CostDomainInterface, *rest_errors.RestErrors) {
+func (s *costService) Update(id, userID string, cost *domains.Cost) (*domains.Cost, error) {
 	existing, err := s.repo.FindByID(id)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, rest_errors.NewNotFoundError("cost not found")
+		if !errors.Is(err, domains.ErrNotFound) {
+			logger.Error("error finding cost for update", err)
 		}
-		logger.Error("error finding cost for update", err)
-		return nil, rest_errors.NewInternalServerError("error updating cost")
+		return nil, err
 	}
 
-	if existing.GetUserID() != userID {
-		return nil, rest_errors.NewForbiddenError("access denied")
+	if existing.UserID != userID {
+		return nil, domains.NewForbiddenError("access denied")
 	}
 
-	updated, err := s.repo.Update(id, domain)
+	updated, err := s.repo.Update(id, cost)
 	if err != nil {
 		logger.Error("error updating cost", err)
-		return nil, rest_errors.NewInternalServerError("error updating cost")
+		return nil, err
 	}
 
 	return updated, nil
 }
 
-func (s *costService) FindAll(userID string) ([]domains.CostDomainInterface, *rest_errors.RestErrors) {
+func (s *costService) FindAll(userID string) ([]*domains.Cost, error) {
 	costs, err := s.repo.FindAll(userID)
 	if err != nil {
 		logger.Error("error finding all costs", err)
-		return nil, rest_errors.NewInternalServerError("error finding costs")
+		return nil, err
 	}
 
 	return costs, nil
 }
 
-func (s *costService) FindByID(id, userID string) (domains.CostDomainInterface, *rest_errors.RestErrors) {
+func (s *costService) FindByID(id, userID string) (*domains.Cost, error) {
 	cost, err := s.repo.FindByID(id)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, rest_errors.NewNotFoundError("cost not found")
+		if !errors.Is(err, domains.ErrNotFound) {
+			logger.Error("error finding cost by id", err)
 		}
-		logger.Error("error finding cost by id", err)
-		return nil, rest_errors.NewInternalServerError("error finding cost")
+		return nil, err
 	}
 
-	if cost.GetUserID() != userID {
-		return nil, rest_errors.NewForbiddenError("access denied")
+	if cost.UserID != userID {
+		return nil, domains.NewForbiddenError("access denied")
 	}
 
 	return cost, nil
 }
 
-func (s *costService) Delete(id, userID string) *rest_errors.RestErrors {
+func (s *costService) Delete(id, userID string) error {
 	cost, err := s.repo.FindByID(id)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return rest_errors.NewNotFoundError("cost not found")
+		if !errors.Is(err, domains.ErrNotFound) {
+			logger.Error("error finding cost for delete", err)
 		}
-		logger.Error("error finding cost for delete", err)
-		return rest_errors.NewInternalServerError("error deleting cost")
+		return err
 	}
 
-	if cost.GetUserID() != userID {
-		return rest_errors.NewForbiddenError("access denied")
+	if cost.UserID != userID {
+		return domains.NewForbiddenError("access denied")
 	}
 
 	if err := s.repo.Delete(id); err != nil {
 		logger.Error("error deleting cost", err)
-		return rest_errors.NewInternalServerError("error deleting cost")
+		return err
 	}
 
 	return nil

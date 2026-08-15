@@ -1,6 +1,10 @@
 package response
 
-import "time"
+import (
+	"time"
+
+	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/model/domains"
+)
 
 type MemberResponse struct {
 	ID    string `json:"id"`
@@ -23,4 +27,37 @@ type GroupDetailResponse struct {
 	CreatedAt time.Time        `json:"createdAt"`
 	UpdatedAt time.Time        `json:"updatedAt"`
 	Members   []MemberResponse `json:"members"`
+}
+
+func NewGroupResponse(g *domains.Group) GroupResponse {
+	return GroupResponse{
+		ID:        g.ID,
+		Name:      g.Name,
+		Category:  g.Category,
+		CreatedAt: g.CreatedAt,
+		UpdatedAt: g.UpdatedAt,
+	}
+}
+
+func NewGroupDetailResponse(g *domains.Group) GroupDetailResponse {
+	members := make([]MemberResponse, len(g.Members))
+	for i, m := range g.Members {
+		members[i] = MemberResponse{ID: m.ID, Name: m.Name, Email: m.Email}
+	}
+	return GroupDetailResponse{
+		ID:        g.ID,
+		Name:      g.Name,
+		Category:  g.Category,
+		CreatedAt: g.CreatedAt,
+		UpdatedAt: g.UpdatedAt,
+		Members:   members,
+	}
+}
+
+func NewGroupResponseList(groups []*domains.Group) []GroupResponse {
+	out := make([]GroupResponse, len(groups))
+	for i, g := range groups {
+		out[i] = NewGroupResponse(g)
+	}
+	return out
 }

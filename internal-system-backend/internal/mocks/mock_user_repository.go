@@ -34,25 +34,25 @@ func (m *MockUserRepository) EXPECT() *MockUserRepositoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockUserRepository) Create(domain domains.UserDomainInterface) (domains.UserDomainInterface, error) {
+func (m *MockUserRepository) Create(user *domains.User) (*domains.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", domain)
-	ret0, _ := ret[0].(domains.UserDomainInterface)
+	ret := m.ctrl.Call(m, "Create", user)
+	ret0, _ := ret[0].(*domains.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockUserRepositoryMockRecorder) Create(domain any) *gomock.Call {
+func (mr *MockUserRepositoryMockRecorder) Create(user any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockUserRepository)(nil).Create), domain)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockUserRepository)(nil).Create), user)
 }
 
 // FindAll mocks base method.
-func (m *MockUserRepository) FindAll() ([]domains.UserDomainInterface, error) {
+func (m *MockUserRepository) FindAll() ([]*domains.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindAll")
-	ret0, _ := ret[0].([]domains.UserDomainInterface)
+	ret0, _ := ret[0].([]*domains.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -64,10 +64,10 @@ func (mr *MockUserRepositoryMockRecorder) FindAll() *gomock.Call {
 }
 
 // FindByID mocks base method.
-func (m *MockUserRepository) FindByID(id string) (domains.UserDomainInterface, error) {
+func (m *MockUserRepository) FindByID(id string) (*domains.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindByID", id)
-	ret0, _ := ret[0].(domains.UserDomainInterface)
+	ret0, _ := ret[0].(*domains.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -79,10 +79,10 @@ func (mr *MockUserRepositoryMockRecorder) FindByID(id any) *gomock.Call {
 }
 
 // FindByEmail mocks base method.
-func (m *MockUserRepository) FindByEmail(email string) (domains.UserDomainInterface, error) {
+func (m *MockUserRepository) FindByEmail(email string) (*domains.User, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindByEmail", email)
-	ret0, _ := ret[0].(domains.UserDomainInterface)
+	ret0, _ := ret[0].(*domains.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -94,18 +94,18 @@ func (mr *MockUserRepositoryMockRecorder) FindByEmail(email any) *gomock.Call {
 }
 
 // Update mocks base method.
-func (m *MockUserRepository) Update(domain domains.UserDomainInterface) (domains.UserDomainInterface, error) {
+func (m *MockUserRepository) Update(user *domains.User) (*domains.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", domain)
-	ret0, _ := ret[0].(domains.UserDomainInterface)
+	ret := m.ctrl.Call(m, "Update", user)
+	ret0, _ := ret[0].(*domains.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Update indicates an expected call of Update.
-func (mr *MockUserRepositoryMockRecorder) Update(domain any) *gomock.Call {
+func (mr *MockUserRepositoryMockRecorder) Update(user any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockUserRepository)(nil).Update), domain)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockUserRepository)(nil).Update), user)
 }
 
 // Delete mocks base method.

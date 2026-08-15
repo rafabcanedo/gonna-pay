@@ -7,8 +7,8 @@ import (
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/configuration/validation"
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/model/domains"
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/model/service"
-	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/view"
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/view/request"
+	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/view/response"
 )
 
 type UserController struct {
@@ -23,42 +23,42 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 	var req request.CreateUserRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		restErr := validation.ValidateUserError(err)
+		restErr := validation.ValidateError(err)
 		c.JSON(restErr.Code, restErr)
 		return
 	}
 
-	domain := domains.NewUserDomain(req.Name, req.Email, req.Password, req.Phone)
+	user := domains.NewUser(req.Name, req.Email, req.Password, req.Phone)
 
-	created, restErr := uc.service.Create(domain)
-	if restErr != nil {
-		c.JSON(restErr.Code, restErr)
+	created, err := uc.service.Create(user)
+	if err != nil {
+		response.RespondError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusCreated, view.ConvertDomainToResponse(created))
+	c.JSON(http.StatusCreated, response.NewUserResponse(created))
 }
 
 func (uc *UserController) FindAllUsers(c *gin.Context) {
-	users, restErr := uc.service.FindAll()
-	if restErr != nil {
-		c.JSON(restErr.Code, restErr)
+	users, err := uc.service.FindAll()
+	if err != nil {
+		response.RespondError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, view.ConvertDomainListToResponse(users))
+	c.JSON(http.StatusOK, response.NewUserResponseList(users))
 }
 
 func (uc *UserController) FindUserByID(c *gin.Context) {
 	id := c.Param("id")
 
-	user, restErr := uc.service.FindByID(id)
-	if restErr != nil {
-		c.JSON(restErr.Code, restErr)
+	user, err := uc.service.FindByID(id)
+	if err != nil {
+		response.RespondError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, view.ConvertDomainToResponse(user))
+	c.JSON(http.StatusOK, response.NewUserResponse(user))
 }
 
 func (uc *UserController) UpdateUser(c *gin.Context) {
@@ -67,28 +67,27 @@ func (uc *UserController) UpdateUser(c *gin.Context) {
 	var req request.UpdateUserRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		restErr := validation.ValidateUserError(err)
+		restErr := validation.ValidateError(err)
 		c.JSON(restErr.Code, restErr)
 		return
 	}
 
-	domain := domains.NewUserDomainWithID(id, req.Name, req.Email, req.Password, req.Phone)
+	user := domains.NewUserWithID(id, req.Name, req.Email, req.Password, req.Phone)
 
-	updated, restErr := uc.service.Update(domain)
-	if restErr != nil {
-		c.JSON(restErr.Code, restErr)
+	updated, err := uc.service.Update(user)
+	if err != nil {
+		response.RespondError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, view.ConvertDomainToResponse(updated))
+	c.JSON(http.StatusOK, response.NewUserResponse(updated))
 }
 
 func (uc *UserController) DeleteUser(c *gin.Context) {
 	id := c.Param("id")
 
-	restErr := uc.service.Delete(id)
-	if restErr != nil {
-		c.JSON(restErr.Code, restErr)
+	if err := uc.service.Delete(id); err != nil {
+		response.RespondError(c, err)
 		return
 	}
 

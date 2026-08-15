@@ -34,40 +34,40 @@ func (m *MockCostRepository) EXPECT() *MockCostRepositoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockCostRepository) Create(domain domains.CostDomainInterface, memberIDs []string) (domains.CostDomainInterface, error) {
+func (m *MockCostRepository) Create(cost *domains.Cost, memberIDs []string) (*domains.Cost, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", domain, memberIDs)
-	ret0, _ := ret[0].(domains.CostDomainInterface)
+	ret := m.ctrl.Call(m, "Create", cost, memberIDs)
+	ret0, _ := ret[0].(*domains.Cost)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockCostRepositoryMockRecorder) Create(domain, memberIDs any) *gomock.Call {
+func (mr *MockCostRepositoryMockRecorder) Create(cost, memberIDs any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockCostRepository)(nil).Create), domain, memberIDs)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockCostRepository)(nil).Create), cost, memberIDs)
 }
 
 // Update mocks base method.
-func (m *MockCostRepository) Update(id string, domain domains.CostDomainInterface) (domains.CostDomainInterface, error) {
+func (m *MockCostRepository) Update(id string, cost *domains.Cost) (*domains.Cost, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", id, domain)
-	ret0, _ := ret[0].(domains.CostDomainInterface)
+	ret := m.ctrl.Call(m, "Update", id, cost)
+	ret0, _ := ret[0].(*domains.Cost)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Update indicates an expected call of Update.
-func (mr *MockCostRepositoryMockRecorder) Update(id, domain any) *gomock.Call {
+func (mr *MockCostRepositoryMockRecorder) Update(id, cost any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockCostRepository)(nil).Update), id, domain)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockCostRepository)(nil).Update), id, cost)
 }
 
 // FindAll mocks base method.
-func (m *MockCostRepository) FindAll(userID string) ([]domains.CostDomainInterface, error) {
+func (m *MockCostRepository) FindAll(userID string) ([]*domains.Cost, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindAll", userID)
-	ret0, _ := ret[0].([]domains.CostDomainInterface)
+	ret0, _ := ret[0].([]*domains.Cost)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -79,10 +79,10 @@ func (mr *MockCostRepositoryMockRecorder) FindAll(userID any) *gomock.Call {
 }
 
 // FindByID mocks base method.
-func (m *MockCostRepository) FindByID(id string) (domains.CostDomainInterface, error) {
+func (m *MockCostRepository) FindByID(id string) (*domains.Cost, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindByID", id)
-	ret0, _ := ret[0].(domains.CostDomainInterface)
+	ret0, _ := ret[0].(*domains.Cost)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

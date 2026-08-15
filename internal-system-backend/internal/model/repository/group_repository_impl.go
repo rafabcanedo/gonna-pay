@@ -11,9 +11,9 @@ import (
 )
 
 type GroupRepository interface {
-	Create(domain domains.GroupDomainInterface, memberIDs []string) (domains.GroupDomainInterface, error)
-	FindAll(ownerID string) ([]domains.GroupDomainInterface, error)
-	FindByID(id string) (domains.GroupDomainInterface, error)
+	Create(group *domains.Group, memberIDs []string) (*domains.Group, error)
+	FindAll(ownerID string) ([]*domains.Group, error)
+	FindByID(id string) (*domains.Group, error)
 	Delete(id string) error
 	AddMember(groupID, contactID string) error
 	RemoveMember(groupID, contactID string) error
@@ -29,8 +29,8 @@ func NewGroupRepository(db *sql.DB) GroupRepository {
 	return &groupRepository{db: db}
 }
 
-func (r *groupRepository) Create(domain domains.GroupDomainInterface, memberIDs []string) (domains.GroupDomainInterface, error) {
-	e := converter.ConvertGroupDomainToEntity(domain)
+func (r *groupRepository) Create(group *domains.Group, memberIDs []string) (*domains.Group, error) {
+	e := converter.ConvertGroupDomainToEntity(group)
 	e.ID = uuid.New()
 	now := time.Now()
 
@@ -62,18 +62,10 @@ func (r *groupRepository) Create(domain domains.GroupDomainInterface, memberIDs 
 		return nil, err
 	}
 
-	return domains.NewGroupDomainWithID(
-		e.ID.String(),
-		domain.GetOwnerID(),
-		domain.GetName(),
-		domain.GetCategory(),
-		now,
-		now,
-		nil,
-	), nil
+	return domains.NewGroupWithID(e.ID.String(), group.OwnerID, group.Name, group.Category, now, now, nil), nil
 }
 
-func (r *groupRepository) FindAll(ownerID string) ([]domains.GroupDomainInterface, error) {
+func (r *groupRepository) FindAll(ownerID string) ([]*domains.Group, error) {
 	rows, err := r.db.Query(
 		`SELECT id, owner_id, name, category, created_at, updated_at FROM group_entities WHERE owner_id = $1`,
 		ownerID,
@@ -83,7 +75,7 @@ func (r *groupRepository) FindAll(ownerID string) ([]domains.GroupDomainInterfac
 	}
 	defer rows.Close()
 
-	var groups []domains.GroupDomainInterface
+	var groups []*domains.Group
 	for rows.Next() {
 		var e entity.GroupEntity
 		if err := rows.Scan(&e.ID, &e.OwnerID, &e.Name, &e.Category, &e.CreatedAt, &e.UpdatedAt); err != nil {
@@ -95,7 +87,7 @@ func (r *groupRepository) FindAll(ownerID string) ([]domains.GroupDomainInterfac
 	return groups, nil
 }
 
-func (r *groupRepository) FindByID(id string) (domains.GroupDomainInterface, error) {
+func (r *groupRepository) FindByID(id string) (*domains.Group, error) {
 	rows, err := r.db.Query(`
 		SELECT
 			g.id, g.owner_id, g.name, g.category, g.created_at, g.updated_at,
@@ -117,7 +109,7 @@ func (r *groupRepository) FindByID(id string) (domains.GroupDomainInterface, err
 		category  string
 		createdAt time.Time
 		updatedAt time.Time
-		members   []domains.MemberDomain
+		members   []domains.Member
 		found     bool
 	)
 
@@ -138,7 +130,7 @@ func (r *groupRepository) FindByID(id string) (domains.GroupDomainInterface, err
 		found = true
 
 		if memberID.Valid {
-			members = append(members, domains.MemberDomain{
+			members = append(members, domains.Member{
 				ID:    memberID.String,
 				Name:  memberName.String,
 				Email: memberEmail.String,
@@ -147,10 +139,10 @@ func (r *groupRepository) FindByID(id string) (domains.GroupDomainInterface, err
 	}
 
 	if !found {
-		return nil, sql.ErrNoRows
+		return nil, domains.NewNotFoundError("group not found")
 	}
 
-	return domains.NewGroupDomainWithID(groupID.String(), ownerID.String(), name, category, createdAt, updatedAt, members), nil
+	return domains.NewGroupWithID(groupID.String(), ownerID.String(), name, category, createdAt, updatedAt, members), nil
 }
 
 func (r *groupRepository) Delete(id string) error {
