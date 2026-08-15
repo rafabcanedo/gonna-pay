@@ -28,9 +28,9 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 		return
 	}
 
-	domain := domains.NewUserDomain(req.Name, req.Email, req.Password, req.Phone)
+	user := domains.NewUser(req.Name, req.Email, req.Password, req.Phone)
 
-	created, err := uc.service.Create(domain)
+	created, err := uc.service.Create(user)
 	if err != nil {
 		response.RespondError(c, err)
 		return
@@ -72,9 +72,9 @@ func (uc *UserController) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	domain := domains.NewUserDomainWithID(id, req.Name, req.Email, req.Password, req.Phone)
+	user := domains.NewUserWithID(id, req.Name, req.Email, req.Password, req.Phone)
 
-	updated, err := uc.service.Update(domain)
+	updated, err := uc.service.Update(user)
 	if err != nil {
 		response.RespondError(c, err)
 		return

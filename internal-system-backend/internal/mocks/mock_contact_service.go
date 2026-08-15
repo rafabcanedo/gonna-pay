@@ -34,25 +34,25 @@ func (m *MockContactService) EXPECT() *MockContactServiceMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockContactService) Create(domain domains.ContactDomainInterface) (domains.ContactDomainInterface, error) {
+func (m *MockContactService) Create(contact *domains.Contact) (*domains.Contact, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", domain)
-	ret0, _ := ret[0].(domains.ContactDomainInterface)
+	ret := m.ctrl.Call(m, "Create", contact)
+	ret0, _ := ret[0].(*domains.Contact)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockContactServiceMockRecorder) Create(domain any) *gomock.Call {
+func (mr *MockContactServiceMockRecorder) Create(contact any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockContactService)(nil).Create), domain)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockContactService)(nil).Create), contact)
 }
 
 // FindAll mocks base method.
-func (m *MockContactService) FindAll(ownerID string) ([]domains.ContactDomainInterface, error) {
+func (m *MockContactService) FindAll(ownerID string) ([]*domains.Contact, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindAll", ownerID)
-	ret0, _ := ret[0].([]domains.ContactDomainInterface)
+	ret0, _ := ret[0].([]*domains.Contact)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -64,10 +64,10 @@ func (mr *MockContactServiceMockRecorder) FindAll(ownerID any) *gomock.Call {
 }
 
 // FindByID mocks base method.
-func (m *MockContactService) FindByID(id, ownerID string) (domains.ContactDomainInterface, error) {
+func (m *MockContactService) FindByID(id, ownerID string) (*domains.Contact, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindByID", id, ownerID)
-	ret0, _ := ret[0].(domains.ContactDomainInterface)
+	ret0, _ := ret[0].(*domains.Contact)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -79,18 +79,18 @@ func (mr *MockContactServiceMockRecorder) FindByID(id, ownerID any) *gomock.Call
 }
 
 // Update mocks base method.
-func (m *MockContactService) Update(domain domains.ContactDomainInterface) (domains.ContactDomainInterface, error) {
+func (m *MockContactService) Update(contact *domains.Contact) (*domains.Contact, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", domain)
-	ret0, _ := ret[0].(domains.ContactDomainInterface)
+	ret := m.ctrl.Call(m, "Update", contact)
+	ret0, _ := ret[0].(*domains.Contact)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Update indicates an expected call of Update.
-func (mr *MockContactServiceMockRecorder) Update(domain any) *gomock.Call {
+func (mr *MockContactServiceMockRecorder) Update(contact any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockContactService)(nil).Update), domain)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockContactService)(nil).Update), contact)
 }
 
 // Delete mocks base method.

@@ -29,9 +29,9 @@ func (cc *CostController) CreateCost(c *gin.Context) {
 		return
 	}
 
-	domain := domains.NewCostDomain(userID, req.GroupID, req.CostName, req.Category, req.TotalValue, 0)
+	cost := domains.NewCost(userID, req.GroupID, req.CostName, req.Category, req.TotalValue, 0)
 
-	created, err := cc.service.Create(domain, req.OwnerPercentage)
+	created, err := cc.service.Create(cost, req.OwnerPercentage)
 	if err != nil {
 		response.RespondError(c, err)
 		return
@@ -81,9 +81,9 @@ func (cc *CostController) UpdateCost(c *gin.Context) {
 		ownerPercentage = *req.OwnerPercentage
 	}
 
-	domain := domains.NewCostDomain(userID, "", req.CostName, req.Category, req.TotalValue, ownerPercentage)
+	cost := domains.NewCost(userID, "", req.CostName, req.Category, req.TotalValue, ownerPercentage)
 
-	updated, err := cc.service.Update(id, userID, domain)
+	updated, err := cc.service.Update(id, userID, cost)
 	if err != nil {
 		response.RespondError(c, err)
 		return

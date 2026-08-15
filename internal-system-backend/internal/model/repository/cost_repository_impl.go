@@ -11,10 +11,10 @@ import (
 )
 
 type CostRepository interface {
-	Create(domain domains.CostDomainInterface, memberIDs []string) (domains.CostDomainInterface, error)
-	Update(id string, domain domains.CostDomainInterface) (domains.CostDomainInterface, error)
-	FindAll(userID string) ([]domains.CostDomainInterface, error)
-	FindByID(id string) (domains.CostDomainInterface, error)
+	Create(cost *domains.Cost, memberIDs []string) (*domains.Cost, error)
+	Update(id string, cost *domains.Cost) (*domains.Cost, error)
+	FindAll(userID string) ([]*domains.Cost, error)
+	FindByID(id string) (*domains.Cost, error)
 	Delete(id string) error
 	GetGroupMemberIDs(groupID string) ([]string, error)
 	GetGroupName(groupID string) (string, error)
@@ -28,13 +28,13 @@ func NewCostRepository(db *sql.DB) CostRepository {
 	return &costRepository{db: db}
 }
 
-func (r *costRepository) Create(domain domains.CostDomainInterface, memberIDs []string) (domains.CostDomainInterface, error) {
+func (r *costRepository) Create(cost *domains.Cost, memberIDs []string) (*domains.Cost, error) {
 	costID := uuid.New()
 	now := time.Now()
 
 	var groupID interface{}
-	if domain.GetGroupID() != "" {
-		groupID = domain.GetGroupID()
+	if cost.GroupID != "" {
+		groupID = cost.GroupID
 	}
 
 	tx, err := r.db.Begin()
@@ -46,8 +46,8 @@ func (r *costRepository) Create(domain domains.CostDomainInterface, memberIDs []
 	_, err = tx.Exec(
 		`INSERT INTO cost_entities (id, user_id, group_id, cost_name, total_value, owner_percentage, category, created_at, updated_at)
 		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-		costID, domain.GetUserID(), groupID, domain.GetCostName(),
-		domain.GetTotalValue(), domain.GetOwnerPercentage(), domain.GetCategory(), now, now,
+		costID, cost.UserID, groupID, cost.CostName,
+		cost.TotalValue, cost.OwnerPercentage, cost.Category, now, now,
 	)
 	if err != nil {
 		return nil, err
@@ -56,8 +56,8 @@ func (r *costRepository) Create(domain domains.CostDomainInterface, memberIDs []
 	memberPercentage := 0.0
 	memberValue := 0.0
 	if len(memberIDs) > 0 {
-		memberPercentage = math.Round(((100-domain.GetOwnerPercentage())/float64(len(memberIDs)))*100) / 100
-		memberValue = math.Round((domain.GetTotalValue()*memberPercentage/100)*100) / 100
+		memberPercentage = math.Round(((100-cost.OwnerPercentage)/float64(len(memberIDs)))*100) / 100
+		memberValue = math.Round((cost.TotalValue*memberPercentage/100)*100) / 100
 	}
 
 	for _, contactID := range memberIDs {
@@ -75,21 +75,22 @@ func (r *costRepository) Create(domain domains.CostDomainInterface, memberIDs []
 		return nil, err
 	}
 
-	return domains.NewCostDomainWithID(
+	return domains.NewCostWithID(
 		costID.String(),
-		domain.GetUserID(),
-		domain.GetGroupID(),
-		domain.GetCostName(),
-		domain.GetCategory(),
-		domain.GetTotalValue(),
-		domain.GetOwnerPercentage(),
+		cost.UserID,
+		cost.GroupID,
+		"",
+		cost.CostName,
+		cost.Category,
+		cost.TotalValue,
+		cost.OwnerPercentage,
 		now,
 		now,
 		nil,
 	), nil
 }
 
-func (r *costRepository) Update(id string, domain domains.CostDomainInterface) (domains.CostDomainInterface, error) {
+func (r *costRepository) Update(id string, cost *domains.Cost) (*domains.Cost, error) {
 	now := time.Now()
 
 	tx, err := r.db.Begin()
@@ -100,7 +101,7 @@ func (r *costRepository) Update(id string, domain domains.CostDomainInterface) (
 
 	_, err = tx.Exec(
 		`UPDATE cost_entities SET cost_name = $1, total_value = $2, owner_percentage = $3, category = $4, updated_at = $5 WHERE id = $6`,
-		domain.GetCostName(), domain.GetTotalValue(), domain.GetOwnerPercentage(), domain.GetCategory(), now, id,
+		cost.CostName, cost.TotalValue, cost.OwnerPercentage, cost.Category, now, id,
 	)
 	if err != nil {
 		return nil, err
@@ -112,8 +113,8 @@ func (r *costRepository) Update(id string, domain domains.CostDomainInterface) (
 	}
 
 	if splitCount > 0 {
-		memberPercentage := math.Round(((100-domain.GetOwnerPercentage())/float64(splitCount))*100) / 100
-		memberValue := math.Round((domain.GetTotalValue()*memberPercentage/100)*100) / 100
+		memberPercentage := math.Round(((100-cost.OwnerPercentage)/float64(splitCount))*100) / 100
+		memberValue := math.Round((cost.TotalValue*memberPercentage/100)*100) / 100
 
 		_, err = tx.Exec(
 			`UPDATE cost_split_entities SET value = $1, percentage = $2, updated_at = $3 WHERE cost_id = $4`,
@@ -131,7 +132,7 @@ func (r *costRepository) Update(id string, domain domains.CostDomainInterface) (
 	return r.FindByID(id)
 }
 
-func (r *costRepository) FindAll(userID string) ([]domains.CostDomainInterface, error) {
+func (r *costRepository) FindAll(userID string) ([]*domains.Cost, error) {
 	rows, err := r.db.Query(`
 		SELECT
 			c.id, c.user_id, c.group_id, c.cost_name, c.total_value, c.owner_percentage, c.category, c.created_at, c.updated_at,
@@ -148,7 +149,7 @@ func (r *costRepository) FindAll(userID string) ([]domains.CostDomainInterface, 
 	}
 	defer rows.Close()
 
-	var costs []domains.CostDomainInterface
+	var costs []*domains.Cost
 	for rows.Next() {
 		var (
 			e          entity.CostEntity
@@ -175,27 +176,25 @@ func (r *costRepository) FindAll(userID string) ([]domains.CostDomainInterface, 
 			groupNameStr = groupName.String
 		}
 
-		domain := domains.NewCostDomainWithID(
-			e.ID.String(),
-			e.UserID.String(),
-			groupID,
-			e.CostName,
-			string(e.Category),
-			e.TotalValue,
-			e.OwnerPercentage,
-			e.CreatedAt,
-			e.UpdatedAt,
-			nil,
-		)
-		domain.SetGroupName(groupNameStr)
-		domain.SetSplitCount(splitCount)
-		costs = append(costs, domain)
+		costs = append(costs, &domains.Cost{
+			ID:              e.ID.String(),
+			UserID:          e.UserID.String(),
+			GroupID:         groupID,
+			GroupName:       groupNameStr,
+			CostName:        e.CostName,
+			TotalValue:      e.TotalValue,
+			OwnerPercentage: e.OwnerPercentage,
+			Category:        string(e.Category),
+			CreatedAt:       e.CreatedAt,
+			UpdatedAt:       e.UpdatedAt,
+			SplitCount:      splitCount,
+		})
 	}
 
 	return costs, nil
 }
 
-func (r *costRepository) FindByID(id string) (domains.CostDomainInterface, error) {
+func (r *costRepository) FindByID(id string) (*domains.Cost, error) {
 	rows, err := r.db.Query(`
 		SELECT
 			c.id, c.user_id, c.group_id, c.cost_name, c.total_value, c.owner_percentage, c.category, c.created_at, c.updated_at,
@@ -223,7 +222,7 @@ func (r *costRepository) FindByID(id string) (domains.CostDomainInterface, error
 		createdAt       time.Time
 		updatedAt       time.Time
 		groupName       sql.NullString
-		splits          []domains.SplitDomain
+		splits          []domains.Split
 		found           bool
 	)
 
@@ -247,7 +246,7 @@ func (r *costRepository) FindByID(id string) (domains.CostDomainInterface, error
 		found = true
 
 		if splitID.Valid {
-			splits = append(splits, domains.SplitDomain{
+			splits = append(splits, domains.Split{
 				ID:          splitID.String,
 				ContactID:   contactID.String,
 				ContactName: contactName.String,
@@ -271,14 +270,20 @@ func (r *costRepository) FindByID(id string) (domains.CostDomainInterface, error
 		groupNameStr = groupName.String
 	}
 
-	domain := domains.NewCostDomainWithID(
-		costID.String(), userID.String(), groupID, costName, category,
-		totalValue, ownerPercentage, createdAt, updatedAt, splits,
-	)
-	domain.SetGroupName(groupNameStr)
-	domain.SetSplitCount(len(splits))
-
-	return domain, nil
+	return &domains.Cost{
+		ID:              costID.String(),
+		UserID:          userID.String(),
+		GroupID:         groupID,
+		GroupName:       groupNameStr,
+		CostName:        costName,
+		TotalValue:      totalValue,
+		OwnerPercentage: ownerPercentage,
+		Category:        category,
+		CreatedAt:       createdAt,
+		UpdatedAt:       updatedAt,
+		SplitCount:      len(splits),
+		Splits:          splits,
+	}, nil
 }
 
 func (r *costRepository) Delete(id string) error {

@@ -11,11 +11,11 @@ import (
 )
 
 type UserRepository interface {
-	Create(domain domains.UserDomainInterface) (domains.UserDomainInterface, error)
-	FindAll() ([]domains.UserDomainInterface, error)
-	FindByID(id string) (domains.UserDomainInterface, error)
-	FindByEmail(email string) (domains.UserDomainInterface, error)
-	Update(domain domains.UserDomainInterface) (domains.UserDomainInterface, error)
+	Create(user *domains.User) (*domains.User, error)
+	FindAll() ([]*domains.User, error)
+	FindByID(id string) (*domains.User, error)
+	FindByEmail(email string) (*domains.User, error)
+	Update(user *domains.User) (*domains.User, error)
 	Delete(id string) error
 }
 
@@ -27,8 +27,8 @@ func NewUserRepository(db *sql.DB) UserRepository {
 	return &userRepository{db: db}
 }
 
-func (r *userRepository) Create(domain domains.UserDomainInterface) (domains.UserDomainInterface, error) {
-	e := converter.ConvertDomainToEntity(domain)
+func (r *userRepository) Create(user *domains.User) (*domains.User, error) {
+	e := converter.ConvertDomainToEntity(user)
 	e.ID = uuid.New()
 
 	_, err := r.db.Exec(
@@ -42,14 +42,14 @@ func (r *userRepository) Create(domain domains.UserDomainInterface) (domains.Use
 	return converter.ConvertEntityToDomain(*e), nil
 }
 
-func (r *userRepository) FindAll() ([]domains.UserDomainInterface, error) {
+func (r *userRepository) FindAll() ([]*domains.User, error) {
 	rows, err := r.db.Query(`SELECT id, name, email, password, phone FROM users_entities`)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var users []domains.UserDomainInterface
+	var users []*domains.User
 	for rows.Next() {
 		var e entity.UsersEntity
 		if err := rows.Scan(&e.ID, &e.Name, &e.Email, &e.Password, &e.Phone); err != nil {
@@ -61,7 +61,7 @@ func (r *userRepository) FindAll() ([]domains.UserDomainInterface, error) {
 	return users, nil
 }
 
-func (r *userRepository) FindByID(id string) (domains.UserDomainInterface, error) {
+func (r *userRepository) FindByID(id string) (*domains.User, error) {
 	var e entity.UsersEntity
 
 	row := r.db.QueryRow(
@@ -80,7 +80,7 @@ func (r *userRepository) FindByID(id string) (domains.UserDomainInterface, error
 	return converter.ConvertEntityToDomain(e), nil
 }
 
-func (r *userRepository) FindByEmail(email string) (domains.UserDomainInterface, error) {
+func (r *userRepository) FindByEmail(email string) (*domains.User, error) {
 	var e entity.UsersEntity
 
 	row := r.db.QueryRow(
@@ -99,8 +99,8 @@ func (r *userRepository) FindByEmail(email string) (domains.UserDomainInterface,
 	return converter.ConvertEntityToDomain(e), nil
 }
 
-func (r *userRepository) Update(domain domains.UserDomainInterface) (domains.UserDomainInterface, error) {
-	e := converter.ConvertDomainToEntity(domain)
+func (r *userRepository) Update(user *domains.User) (*domains.User, error) {
+	e := converter.ConvertDomainToEntity(user)
 
 	_, err := r.db.Exec(
 		`UPDATE users_entities SET name = $1, email = $2, password = $3, phone = $4 WHERE id = $5`,

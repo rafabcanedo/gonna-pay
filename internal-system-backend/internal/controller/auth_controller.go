@@ -44,7 +44,7 @@ func (ac *AuthController) Login(c *gin.Context) {
 		return
 	}
 
-	accessToken, err := auth.GenerateAccessToken(user.GetID(), user.GetName())
+	accessToken, err := auth.GenerateAccessToken(user.ID, user.Name)
 	if err != nil {
 		logger.Error("error generating access token", err)
 		c.JSON(http.StatusInternalServerError, rest_errors.NewInternalServerError("error generating token"))
@@ -61,7 +61,7 @@ func (ac *AuthController) Login(c *gin.Context) {
 	tokenHash := auth.HashToken(refreshToken)
 	expiresAt := time.Now().Add(48 * time.Hour)
 
-	if err := ac.authRepo.Save(user.GetID(), tokenHash, expiresAt); err != nil {
+	if err := ac.authRepo.Save(user.ID, tokenHash, expiresAt); err != nil {
 		logger.Error("error saving refresh token", err)
 		c.JSON(http.StatusInternalServerError, rest_errors.NewInternalServerError("error processing login"))
 		return
@@ -105,7 +105,7 @@ func (ac *AuthController) Refresh(c *gin.Context) {
 		return
 	}
 
-	newAccessToken, err := auth.GenerateAccessToken(user.GetID(), user.GetName())
+	newAccessToken, err := auth.GenerateAccessToken(user.ID, user.Name)
 	if err != nil {
 		logger.Error("error generating access token on refresh", err)
 		c.JSON(http.StatusInternalServerError, rest_errors.NewInternalServerError("error generating token"))
@@ -122,7 +122,7 @@ func (ac *AuthController) Refresh(c *gin.Context) {
 	newTokenHash := auth.HashToken(newRefreshToken)
 	newExpiresAt := time.Now().Add(48 * time.Hour)
 
-	if err := ac.authRepo.Save(user.GetID(), newTokenHash, newExpiresAt); err != nil {
+	if err := ac.authRepo.Save(user.ID, newTokenHash, newExpiresAt); err != nil {
 		logger.Error("error saving new refresh token", err)
 		c.JSON(http.StatusInternalServerError, rest_errors.NewInternalServerError("error processing refresh"))
 		return
@@ -168,13 +168,13 @@ func (ac *AuthController) UpdateProfile(c *gin.Context) {
 	}
 
 	if req.Name != "" {
-		current.SetName(req.Name)
+		current.Name = req.Name
 	}
 	if req.Email != "" {
-		current.SetEmail(req.Email)
+		current.Email = req.Email
 	}
 	if req.Phone != "" {
-		current.SetPhone(req.Phone)
+		current.Phone = req.Phone
 	}
 
 	updated, err := ac.userService.Update(current)

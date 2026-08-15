@@ -11,10 +11,10 @@ import (
 )
 
 type ContactRepository interface {
-	Create(domain domains.ContactDomainInterface) (domains.ContactDomainInterface, error)
-	FindAll(ownerID string) ([]domains.ContactDomainInterface, error)
-	FindByID(id string) (domains.ContactDomainInterface, error)
-	Update(domain domains.ContactDomainInterface) (domains.ContactDomainInterface, error)
+	Create(contact *domains.Contact) (*domains.Contact, error)
+	FindAll(ownerID string) ([]*domains.Contact, error)
+	FindByID(id string) (*domains.Contact, error)
+	Update(contact *domains.Contact) (*domains.Contact, error)
 	Delete(id string) error
 }
 
@@ -26,8 +26,8 @@ func NewContactRepository(db *sql.DB) ContactRepository {
 	return &contactRepository{db: db}
 }
 
-func (r *contactRepository) Create(domain domains.ContactDomainInterface) (domains.ContactDomainInterface, error) {
-	e := converter.ConvertContactDomainToEntity(domain)
+func (r *contactRepository) Create(contact *domains.Contact) (*domains.Contact, error) {
+	e := converter.ConvertContactDomainToEntity(contact)
 	e.ID = uuid.New()
 
 	_, err := r.db.Exec(
@@ -41,7 +41,7 @@ func (r *contactRepository) Create(domain domains.ContactDomainInterface) (domai
 	return converter.ConvertContactEntityToDomain(*e), nil
 }
 
-func (r *contactRepository) FindAll(ownerID string) ([]domains.ContactDomainInterface, error) {
+func (r *contactRepository) FindAll(ownerID string) ([]*domains.Contact, error) {
 	rows, err := r.db.Query(
 		`SELECT id, owner_id, name, email, phone, category FROM contact_entities WHERE owner_id = $1`,
 		ownerID,
@@ -51,7 +51,7 @@ func (r *contactRepository) FindAll(ownerID string) ([]domains.ContactDomainInte
 	}
 	defer rows.Close()
 
-	var contacts []domains.ContactDomainInterface
+	var contacts []*domains.Contact
 	for rows.Next() {
 		var e entity.ContactEntity
 		if err := rows.Scan(&e.ID, &e.OwnerID, &e.Name, &e.Email, &e.Phone, &e.Category); err != nil {
@@ -63,7 +63,7 @@ func (r *contactRepository) FindAll(ownerID string) ([]domains.ContactDomainInte
 	return contacts, nil
 }
 
-func (r *contactRepository) FindByID(id string) (domains.ContactDomainInterface, error) {
+func (r *contactRepository) FindByID(id string) (*domains.Contact, error) {
 	var e entity.ContactEntity
 
 	row := r.db.QueryRow(
@@ -82,8 +82,8 @@ func (r *contactRepository) FindByID(id string) (domains.ContactDomainInterface,
 	return converter.ConvertContactEntityToDomain(e), nil
 }
 
-func (r *contactRepository) Update(domain domains.ContactDomainInterface) (domains.ContactDomainInterface, error) {
-	e := converter.ConvertContactDomainToEntity(domain)
+func (r *contactRepository) Update(contact *domains.Contact) (*domains.Contact, error) {
+	e := converter.ConvertContactDomainToEntity(contact)
 
 	_, err := r.db.Exec(
 		`UPDATE contact_entities SET name = $1, email = $2, phone = $3, category = $4 WHERE id = $5`,

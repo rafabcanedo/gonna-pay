@@ -9,9 +9,9 @@ import (
 )
 
 type GroupService interface {
-	Create(domain domains.GroupDomainInterface, memberIDs []string) (domains.GroupDomainInterface, error)
-	FindAll(ownerID string) ([]domains.GroupDomainInterface, error)
-	FindByID(id, ownerID string) (domains.GroupDomainInterface, error)
+	Create(group *domains.Group, memberIDs []string) (*domains.Group, error)
+	FindAll(ownerID string) ([]*domains.Group, error)
+	FindByID(id, ownerID string) (*domains.Group, error)
 	Delete(id, ownerID string) error
 	AddMember(groupID, contactID, ownerID string) error
 	RemoveMember(groupID, contactID, ownerID string) error
@@ -25,9 +25,9 @@ func NewGroupService(repo repository.GroupRepository) GroupService {
 	return &groupService{repo: repo}
 }
 
-func (s *groupService) Create(domain domains.GroupDomainInterface, memberIDs []string) (domains.GroupDomainInterface, error) {
+func (s *groupService) Create(group *domains.Group, memberIDs []string) (*domains.Group, error) {
 	for _, contactID := range memberIDs {
-		owned, err := s.repo.IsContactOwnedBy(contactID, domain.GetOwnerID())
+		owned, err := s.repo.IsContactOwnedBy(contactID, group.OwnerID)
 		if err != nil {
 			logger.Error("error checking contact ownership on group create", err)
 			return nil, err
@@ -37,7 +37,7 @@ func (s *groupService) Create(domain domains.GroupDomainInterface, memberIDs []s
 		}
 	}
 
-	created, err := s.repo.Create(domain, memberIDs)
+	created, err := s.repo.Create(group, memberIDs)
 	if err != nil {
 		logger.Error("error creating group", err)
 		return nil, err
@@ -46,7 +46,7 @@ func (s *groupService) Create(domain domains.GroupDomainInterface, memberIDs []s
 	return created, nil
 }
 
-func (s *groupService) FindAll(ownerID string) ([]domains.GroupDomainInterface, error) {
+func (s *groupService) FindAll(ownerID string) ([]*domains.Group, error) {
 	groups, err := s.repo.FindAll(ownerID)
 	if err != nil {
 		logger.Error("error finding all groups", err)
@@ -56,7 +56,7 @@ func (s *groupService) FindAll(ownerID string) ([]domains.GroupDomainInterface, 
 	return groups, nil
 }
 
-func (s *groupService) FindByID(id, ownerID string) (domains.GroupDomainInterface, error) {
+func (s *groupService) FindByID(id, ownerID string) (*domains.Group, error) {
 	group, err := s.repo.FindByID(id)
 	if err != nil {
 		if !errors.Is(err, domains.ErrNotFound) {
@@ -65,7 +65,7 @@ func (s *groupService) FindByID(id, ownerID string) (domains.GroupDomainInterfac
 		return nil, err
 	}
 
-	if group.GetOwnerID() != ownerID {
+	if group.OwnerID != ownerID {
 		return nil, domains.NewForbiddenError("access denied")
 	}
 
@@ -81,7 +81,7 @@ func (s *groupService) Delete(id, ownerID string) error {
 		return err
 	}
 
-	if group.GetOwnerID() != ownerID {
+	if group.OwnerID != ownerID {
 		return domains.NewForbiddenError("access denied")
 	}
 
@@ -102,7 +102,7 @@ func (s *groupService) AddMember(groupID, contactID, ownerID string) error {
 		return err
 	}
 
-	if group.GetOwnerID() != ownerID {
+	if group.OwnerID != ownerID {
 		return domains.NewForbiddenError("access denied")
 	}
 
@@ -141,7 +141,7 @@ func (s *groupService) RemoveMember(groupID, contactID, ownerID string) error {
 		return err
 	}
 
-	if group.GetOwnerID() != ownerID {
+	if group.OwnerID != ownerID {
 		return domains.NewForbiddenError("access denied")
 	}
 

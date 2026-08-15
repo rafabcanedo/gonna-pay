@@ -9,10 +9,10 @@ import (
 )
 
 type ContactService interface {
-	Create(domain domains.ContactDomainInterface) (domains.ContactDomainInterface, error)
-	FindAll(ownerID string) ([]domains.ContactDomainInterface, error)
-	FindByID(id, ownerID string) (domains.ContactDomainInterface, error)
-	Update(domain domains.ContactDomainInterface) (domains.ContactDomainInterface, error)
+	Create(contact *domains.Contact) (*domains.Contact, error)
+	FindAll(ownerID string) ([]*domains.Contact, error)
+	FindByID(id, ownerID string) (*domains.Contact, error)
+	Update(contact *domains.Contact) (*domains.Contact, error)
 	Delete(id, ownerID string) error
 }
 
@@ -24,8 +24,8 @@ func NewContactService(repo repository.ContactRepository) ContactService {
 	return &contactService{repo: repo}
 }
 
-func (s *contactService) Create(domain domains.ContactDomainInterface) (domains.ContactDomainInterface, error) {
-	created, err := s.repo.Create(domain)
+func (s *contactService) Create(contact *domains.Contact) (*domains.Contact, error) {
+	created, err := s.repo.Create(contact)
 	if err != nil {
 		logger.Error("error creating contact", err)
 		return nil, err
@@ -34,7 +34,7 @@ func (s *contactService) Create(domain domains.ContactDomainInterface) (domains.
 	return created, nil
 }
 
-func (s *contactService) FindAll(ownerID string) ([]domains.ContactDomainInterface, error) {
+func (s *contactService) FindAll(ownerID string) ([]*domains.Contact, error) {
 	contacts, err := s.repo.FindAll(ownerID)
 	if err != nil {
 		logger.Error("error finding all contacts", err)
@@ -44,7 +44,7 @@ func (s *contactService) FindAll(ownerID string) ([]domains.ContactDomainInterfa
 	return contacts, nil
 }
 
-func (s *contactService) FindByID(id, ownerID string) (domains.ContactDomainInterface, error) {
+func (s *contactService) FindByID(id, ownerID string) (*domains.Contact, error) {
 	contact, err := s.repo.FindByID(id)
 	if err != nil {
 		if !errors.Is(err, domains.ErrNotFound) {
@@ -53,15 +53,15 @@ func (s *contactService) FindByID(id, ownerID string) (domains.ContactDomainInte
 		return nil, err
 	}
 
-	if contact.GetOwnerID() != ownerID {
+	if contact.OwnerID != ownerID {
 		return nil, domains.NewForbiddenError("access denied")
 	}
 
 	return contact, nil
 }
 
-func (s *contactService) Update(domain domains.ContactDomainInterface) (domains.ContactDomainInterface, error) {
-	existing, err := s.repo.FindByID(domain.GetID())
+func (s *contactService) Update(contact *domains.Contact) (*domains.Contact, error) {
+	existing, err := s.repo.FindByID(contact.ID)
 	if err != nil {
 		if !errors.Is(err, domains.ErrNotFound) {
 			logger.Error("error finding contact for update", err)
@@ -69,11 +69,11 @@ func (s *contactService) Update(domain domains.ContactDomainInterface) (domains.
 		return nil, err
 	}
 
-	if existing.GetOwnerID() != domain.GetOwnerID() {
+	if existing.OwnerID != contact.OwnerID {
 		return nil, domains.NewForbiddenError("access denied")
 	}
 
-	updated, err := s.repo.Update(domain)
+	updated, err := s.repo.Update(contact)
 	if err != nil {
 		logger.Error("error updating contact", err)
 		return nil, err
@@ -91,7 +91,7 @@ func (s *contactService) Delete(id, ownerID string) error {
 		return err
 	}
 
-	if existing.GetOwnerID() != ownerID {
+	if existing.OwnerID != ownerID {
 		return domains.NewForbiddenError("access denied")
 	}
 

@@ -29,9 +29,9 @@ func (gc *GroupController) CreateGroup(c *gin.Context) {
 		return
 	}
 
-	domain := domains.NewGroupDomain(ownerID, req.Name, req.Category)
+	group := domains.NewGroup(ownerID, req.Name, req.Category)
 
-	created, err := gc.service.Create(domain, req.MemberIDs)
+	created, err := gc.service.Create(group, req.MemberIDs)
 	if err != nil {
 		response.RespondError(c, err)
 		return

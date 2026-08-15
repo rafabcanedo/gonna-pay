@@ -10,17 +10,17 @@ type ContactResponse struct {
 	Category string `json:"category"`
 }
 
-func NewContactResponse(d domains.ContactDomainInterface) ContactResponse {
+func NewContactResponse(c *domains.Contact) ContactResponse {
 	return ContactResponse{
-		ID:       d.GetID(),
-		Name:     d.GetName(),
-		Email:    d.GetEmail(),
-		Phone:    d.GetPhone(),
-		Category: d.GetCategory(),
+		ID:       c.ID,
+		Name:     c.Name,
+		Email:    c.Email,
+		Phone:    c.Phone,
+		Category: c.Category,
 	}
 }
 
-func NewContactResponseList(contacts []domains.ContactDomainInterface) []ContactResponse {
+func NewContactResponseList(contacts []*domains.Contact) []ContactResponse {
 	out := make([]ContactResponse, len(contacts))
 	for i, c := range contacts {
 		out[i] = NewContactResponse(c)

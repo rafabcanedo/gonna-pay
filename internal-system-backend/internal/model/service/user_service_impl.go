@@ -9,11 +9,11 @@ import (
 )
 
 type UserService interface {
-	Create(domain domains.UserDomainInterface) (domains.UserDomainInterface, error)
-	FindAll() ([]domains.UserDomainInterface, error)
-	FindByID(id string) (domains.UserDomainInterface, error)
-	FindByEmail(email string) (domains.UserDomainInterface, error)
-	Update(domain domains.UserDomainInterface) (domains.UserDomainInterface, error)
+	Create(user *domains.User) (*domains.User, error)
+	FindAll() ([]*domains.User, error)
+	FindByID(id string) (*domains.User, error)
+	FindByEmail(email string) (*domains.User, error)
+	Update(user *domains.User) (*domains.User, error)
 	Delete(id string) error
 }
 
@@ -25,8 +25,8 @@ func NewUserService(repo repository.UserRepository) UserService {
 	return &userService{repo: repo}
 }
 
-func (s *userService) Create(domain domains.UserDomainInterface) (domains.UserDomainInterface, error) {
-	existing, err := s.repo.FindByEmail(domain.GetEmail())
+func (s *userService) Create(user *domains.User) (*domains.User, error) {
+	existing, err := s.repo.FindByEmail(user.Email)
 	if err != nil && !errors.Is(err, domains.ErrNotFound) {
 		logger.Error("error checking email uniqueness", err)
 		return nil, err
@@ -35,12 +35,12 @@ func (s *userService) Create(domain domains.UserDomainInterface) (domains.UserDo
 		return nil, domains.NewConflictError("email already in use")
 	}
 
-	if err := domain.EncryptPassword(); err != nil {
+	if err := user.EncryptPassword(); err != nil {
 		logger.Error("error encrypting password", err)
 		return nil, err
 	}
 
-	created, err := s.repo.Create(domain)
+	created, err := s.repo.Create(user)
 	if err != nil {
 		logger.Error("error creating user", err)
 		return nil, err
@@ -49,7 +49,7 @@ func (s *userService) Create(domain domains.UserDomainInterface) (domains.UserDo
 	return created, nil
 }
 
-func (s *userService) FindAll() ([]domains.UserDomainInterface, error) {
+func (s *userService) FindAll() ([]*domains.User, error) {
 	users, err := s.repo.FindAll()
 	if err != nil {
 		logger.Error("error finding all users", err)
@@ -59,7 +59,7 @@ func (s *userService) FindAll() ([]domains.UserDomainInterface, error) {
 	return users, nil
 }
 
-func (s *userService) FindByID(id string) (domains.UserDomainInterface, error) {
+func (s *userService) FindByID(id string) (*domains.User, error) {
 	user, err := s.repo.FindByID(id)
 	if err != nil {
 		if !errors.Is(err, domains.ErrNotFound) {
@@ -71,7 +71,7 @@ func (s *userService) FindByID(id string) (domains.UserDomainInterface, error) {
 	return user, nil
 }
 
-func (s *userService) FindByEmail(email string) (domains.UserDomainInterface, error) {
+func (s *userService) FindByEmail(email string) (*domains.User, error) {
 	user, err := s.repo.FindByEmail(email)
 	if err != nil {
 		if !errors.Is(err, domains.ErrNotFound) {
@@ -83,15 +83,15 @@ func (s *userService) FindByEmail(email string) (domains.UserDomainInterface, er
 	return user, nil
 }
 
-func (s *userService) Update(domain domains.UserDomainInterface) (domains.UserDomainInterface, error) {
-	if domain.GetPassword() != "" {
-		if err := domain.EncryptPassword(); err != nil {
+func (s *userService) Update(user *domains.User) (*domains.User, error) {
+	if user.Password != "" {
+		if err := user.EncryptPassword(); err != nil {
 			logger.Error("error encrypting password on update", err)
 			return nil, err
 		}
 	}
 
-	updated, err := s.repo.Update(domain)
+	updated, err := s.repo.Update(user)
 	if err != nil {
 		logger.Error("error updating user", err)
 		return nil, err

@@ -29,9 +29,9 @@ func (cc *ContactController) CreateContact(c *gin.Context) {
 		return
 	}
 
-	domain := domains.NewContactDomain(ownerID, req.Name, req.Email, req.Phone, req.Category)
+	contact := domains.NewContact(ownerID, req.Name, req.Email, req.Phone, req.Category)
 
-	created, err := cc.service.Create(domain)
+	created, err := cc.service.Create(contact)
 	if err != nil {
 		response.RespondError(c, err)
 		return
@@ -76,9 +76,9 @@ func (cc *ContactController) UpdateContact(c *gin.Context) {
 		return
 	}
 
-	domain := domains.NewContactDomainWithID(id, ownerID, req.Name, req.Email, req.Phone, req.Category)
+	contact := domains.NewContactWithID(id, ownerID, req.Name, req.Email, req.Phone, req.Category)
 
-	updated, err := cc.service.Update(domain)
+	updated, err := cc.service.Update(contact)
 	if err != nil {
 		response.RespondError(c, err)
 		return

@@ -10,10 +10,10 @@ import (
 )
 
 type CostService interface {
-	Create(domain domains.CostDomainInterface, ownerPercentage *float64) (domains.CostDomainInterface, error)
-	Update(id, userID string, domain domains.CostDomainInterface) (domains.CostDomainInterface, error)
-	FindAll(userID string) ([]domains.CostDomainInterface, error)
-	FindByID(id, userID string) (domains.CostDomainInterface, error)
+	Create(cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error)
+	Update(id, userID string, cost *domains.Cost) (*domains.Cost, error)
+	FindAll(userID string) ([]*domains.Cost, error)
+	FindByID(id, userID string) (*domains.Cost, error)
 	Delete(id, userID string) error
 }
 
@@ -25,11 +25,11 @@ func NewCostService(repo repository.CostRepository) CostService {
 	return &costService{repo: repo}
 }
 
-func (s *costService) Create(domain domains.CostDomainInterface, ownerPercentage *float64) (domains.CostDomainInterface, error) {
+func (s *costService) Create(cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error) {
 	var memberIDs []string
 
-	if domain.GetGroupID() != "" {
-		group, err := s.repo.GetGroupMemberIDs(domain.GetGroupID())
+	if cost.GroupID != "" {
+		group, err := s.repo.GetGroupMemberIDs(cost.GroupID)
 		if err != nil {
 			logger.Error("error fetching group members for cost creation", err)
 			return nil, err
@@ -41,15 +41,15 @@ func (s *costService) Create(domain domains.CostDomainInterface, ownerPercentage
 			if *ownerPercentage <= 0 || *ownerPercentage >= 100 {
 				return nil, domains.NewInvalidInputError("ownerPercentage must be between 0 and 100 (exclusive)")
 			}
-			domain.SetOwnerPercentage(*ownerPercentage)
+			cost.OwnerPercentage = *ownerPercentage
 		} else {
-			domain.SetOwnerPercentage(math.Round((100.0/float64(memberCount+1))*100) / 100)
+			cost.OwnerPercentage = math.Round((100.0/float64(memberCount+1))*100) / 100
 		}
 	} else {
-		domain.SetOwnerPercentage(100)
+		cost.OwnerPercentage = 100
 	}
 
-	created, err := s.repo.Create(domain, memberIDs)
+	created, err := s.repo.Create(cost, memberIDs)
 	if err != nil {
 		logger.Error("error creating cost", err)
 		return nil, err
@@ -58,7 +58,7 @@ func (s *costService) Create(domain domains.CostDomainInterface, ownerPercentage
 	return created, nil
 }
 
-func (s *costService) Update(id, userID string, domain domains.CostDomainInterface) (domains.CostDomainInterface, error) {
+func (s *costService) Update(id, userID string, cost *domains.Cost) (*domains.Cost, error) {
 	existing, err := s.repo.FindByID(id)
 	if err != nil {
 		if !errors.Is(err, domains.ErrNotFound) {
@@ -67,11 +67,11 @@ func (s *costService) Update(id, userID string, domain domains.CostDomainInterfa
 		return nil, err
 	}
 
-	if existing.GetUserID() != userID {
+	if existing.UserID != userID {
 		return nil, domains.NewForbiddenError("access denied")
 	}
 
-	updated, err := s.repo.Update(id, domain)
+	updated, err := s.repo.Update(id, cost)
 	if err != nil {
 		logger.Error("error updating cost", err)
 		return nil, err
@@ -80,7 +80,7 @@ func (s *costService) Update(id, userID string, domain domains.CostDomainInterfa
 	return updated, nil
 }
 
-func (s *costService) FindAll(userID string) ([]domains.CostDomainInterface, error) {
+func (s *costService) FindAll(userID string) ([]*domains.Cost, error) {
 	costs, err := s.repo.FindAll(userID)
 	if err != nil {
 		logger.Error("error finding all costs", err)
@@ -90,7 +90,7 @@ func (s *costService) FindAll(userID string) ([]domains.CostDomainInterface, err
 	return costs, nil
 }
 
-func (s *costService) FindByID(id, userID string) (domains.CostDomainInterface, error) {
+func (s *costService) FindByID(id, userID string) (*domains.Cost, error) {
 	cost, err := s.repo.FindByID(id)
 	if err != nil {
 		if !errors.Is(err, domains.ErrNotFound) {
@@ -99,7 +99,7 @@ func (s *costService) FindByID(id, userID string) (domains.CostDomainInterface, 
 		return nil, err
 	}
 
-	if cost.GetUserID() != userID {
+	if cost.UserID != userID {
 		return nil, domains.NewForbiddenError("access denied")
 	}
 
@@ -115,7 +115,7 @@ func (s *costService) Delete(id, userID string) error {
 		return err
 	}
 
-	if cost.GetUserID() != userID {
+	if cost.UserID != userID {
 		return domains.NewForbiddenError("access denied")
 	}
 

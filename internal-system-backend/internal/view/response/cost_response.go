@@ -42,24 +42,24 @@ type CostDetailResponse struct {
 	Splits          []SplitResponse `json:"splits"`
 }
 
-func NewCostResponse(d domains.CostDomainInterface) CostResponse {
+func NewCostResponse(c *domains.Cost) CostResponse {
 	return CostResponse{
-		ID:              d.GetID(),
-		CostName:        d.GetCostName(),
-		TotalValue:      d.GetTotalValue(),
-		OwnerPercentage: d.GetOwnerPercentage(),
-		OwnerValue:      d.OwnerValue(),
-		Category:        d.GetCategory(),
-		GroupID:         d.GetGroupID(),
-		GroupName:       d.GetGroupName(),
-		SplitCount:      d.GetSplitCount(),
-		CreatedAt:       d.GetCreatedAt(),
+		ID:              c.ID,
+		CostName:        c.CostName,
+		TotalValue:      c.TotalValue,
+		OwnerPercentage: c.OwnerPercentage,
+		OwnerValue:      c.OwnerValue(),
+		Category:        c.Category,
+		GroupID:         c.GroupID,
+		GroupName:       c.GroupName,
+		SplitCount:      c.SplitCount,
+		CreatedAt:       c.CreatedAt,
 	}
 }
 
-func NewCostDetailResponse(d domains.CostDomainInterface) CostDetailResponse {
-	splits := make([]SplitResponse, len(d.GetSplits()))
-	for i, s := range d.GetSplits() {
+func NewCostDetailResponse(c *domains.Cost) CostDetailResponse {
+	splits := make([]SplitResponse, len(c.Splits))
+	for i, s := range c.Splits {
 		splits[i] = SplitResponse{
 			ID:          s.ID,
 			ContactID:   s.ContactID,
@@ -69,22 +69,22 @@ func NewCostDetailResponse(d domains.CostDomainInterface) CostDetailResponse {
 		}
 	}
 	return CostDetailResponse{
-		ID:              d.GetID(),
-		CostName:        d.GetCostName(),
-		TotalValue:      d.GetTotalValue(),
-		OwnerPercentage: d.GetOwnerPercentage(),
-		OwnerValue:      d.OwnerValue(),
-		Category:        d.GetCategory(),
-		GroupID:         d.GetGroupID(),
-		GroupName:       d.GetGroupName(),
-		SplitCount:      d.GetSplitCount(),
-		CreatedAt:       d.GetCreatedAt(),
-		UpdatedAt:       d.GetUpdatedAt(),
+		ID:              c.ID,
+		CostName:        c.CostName,
+		TotalValue:      c.TotalValue,
+		OwnerPercentage: c.OwnerPercentage,
+		OwnerValue:      c.OwnerValue(),
+		Category:        c.Category,
+		GroupID:         c.GroupID,
+		GroupName:       c.GroupName,
+		SplitCount:      c.SplitCount,
+		CreatedAt:       c.CreatedAt,
+		UpdatedAt:       c.UpdatedAt,
 		Splits:          splits,
 	}
 }
 
-func NewCostResponseList(costs []domains.CostDomainInterface) []CostResponse {
+func NewCostResponseList(costs []*domains.Cost) []CostResponse {
 	out := make([]CostResponse, len(costs))
 	for i, c := range costs {
 		out[i] = NewCostResponse(c)

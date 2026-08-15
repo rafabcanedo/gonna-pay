@@ -29,32 +29,32 @@ type GroupDetailResponse struct {
 	Members   []MemberResponse `json:"members"`
 }
 
-func NewGroupResponse(d domains.GroupDomainInterface) GroupResponse {
+func NewGroupResponse(g *domains.Group) GroupResponse {
 	return GroupResponse{
-		ID:        d.GetID(),
-		Name:      d.GetName(),
-		Category:  d.GetCategory(),
-		CreatedAt: d.GetCreatedAt(),
-		UpdatedAt: d.GetUpdatedAt(),
+		ID:        g.ID,
+		Name:      g.Name,
+		Category:  g.Category,
+		CreatedAt: g.CreatedAt,
+		UpdatedAt: g.UpdatedAt,
 	}
 }
 
-func NewGroupDetailResponse(d domains.GroupDomainInterface) GroupDetailResponse {
-	members := make([]MemberResponse, len(d.GetMembers()))
-	for i, m := range d.GetMembers() {
+func NewGroupDetailResponse(g *domains.Group) GroupDetailResponse {
+	members := make([]MemberResponse, len(g.Members))
+	for i, m := range g.Members {
 		members[i] = MemberResponse{ID: m.ID, Name: m.Name, Email: m.Email}
 	}
 	return GroupDetailResponse{
-		ID:        d.GetID(),
-		Name:      d.GetName(),
-		Category:  d.GetCategory(),
-		CreatedAt: d.GetCreatedAt(),
-		UpdatedAt: d.GetUpdatedAt(),
+		ID:        g.ID,
+		Name:      g.Name,
+		Category:  g.Category,
+		CreatedAt: g.CreatedAt,
+		UpdatedAt: g.UpdatedAt,
 		Members:   members,
 	}
 }
 
-func NewGroupResponseList(groups []domains.GroupDomainInterface) []GroupResponse {
+func NewGroupResponseList(groups []*domains.Group) []GroupResponse {
 	out := make([]GroupResponse, len(groups))
 	for i, g := range groups {
 		out[i] = NewGroupResponse(g)

@@ -8,63 +8,52 @@ import (
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/model/repository/entity/enums"
 )
 
-func ConvertDomainToEntity(
-	domain domains.UserDomainInterface,
-) *entity.UsersEntity {
-	id := domain.GetID()
+func ConvertDomainToEntity(user *domains.User) *entity.UsersEntity {
 	var userID uuid.UUID
-
-	if id != "" {
-		userID = uuid.MustParse(id)
+	if user.ID != "" {
+		userID = uuid.MustParse(user.ID)
 	}
 
 	return &entity.UsersEntity{
 		ID:       userID,
-		Name:     domain.GetName(),
-		Email:    domain.GetEmail(),
-		Password: domain.GetPassword(),
-		Phone:    domain.GetPhone(),
+		Name:     user.Name,
+		Email:    user.Email,
+		Password: user.Password,
+		Phone:    user.Phone,
 	}
 }
 
-func ConvertContactDomainToEntity(domain domains.ContactDomainInterface) *entity.ContactEntity {
-	id := domain.GetID()
-	ownerID := domain.GetOwnerID()
-
+func ConvertContactDomainToEntity(contact *domains.Contact) *entity.ContactEntity {
 	var contactID, ownerUUID uuid.UUID
-	if id != "" {
-		contactID = uuid.MustParse(id)
+	if contact.ID != "" {
+		contactID = uuid.MustParse(contact.ID)
 	}
-	if ownerID != "" {
-		ownerUUID = uuid.MustParse(ownerID)
+	if contact.OwnerID != "" {
+		ownerUUID = uuid.MustParse(contact.OwnerID)
 	}
 
 	return &entity.ContactEntity{
 		ID:       contactID,
 		OwnerID:  ownerUUID,
-		Name:     domain.GetName(),
-		Email:    domain.GetEmail(),
-		Phone:    domain.GetPhone(),
-		Category: enums.ContactCategory(domain.GetCategory()),
+		Name:     contact.Name,
+		Email:    contact.Email,
+		Phone:    contact.Phone,
+		Category: enums.ContactCategory(contact.Category),
 	}
 }
 
-func ConvertCostDomainToEntity(domain domains.CostDomainInterface) *entity.CostEntity {
-	id := domain.GetID()
-	userID := domain.GetUserID()
-	groupID := domain.GetGroupID()
-
+func ConvertCostDomainToEntity(cost *domains.Cost) *entity.CostEntity {
 	var costID, userUUID uuid.UUID
-	if id != "" {
-		costID = uuid.MustParse(id)
+	if cost.ID != "" {
+		costID = uuid.MustParse(cost.ID)
 	}
-	if userID != "" {
-		userUUID = uuid.MustParse(userID)
+	if cost.UserID != "" {
+		userUUID = uuid.MustParse(cost.UserID)
 	}
 
 	var groupUUID *uuid.UUID
-	if groupID != "" {
-		parsed := uuid.MustParse(groupID)
+	if cost.GroupID != "" {
+		parsed := uuid.MustParse(cost.GroupID)
 		groupUUID = &parsed
 	}
 
@@ -72,29 +61,26 @@ func ConvertCostDomainToEntity(domain domains.CostDomainInterface) *entity.CostE
 		ID:              costID,
 		UserID:          userUUID,
 		GroupID:         groupUUID,
-		CostName:        domain.GetCostName(),
-		TotalValue:      domain.GetTotalValue(),
-		OwnerPercentage: domain.GetOwnerPercentage(),
-		Category:        enums.CostCategory(domain.GetCategory()),
+		CostName:        cost.CostName,
+		TotalValue:      cost.TotalValue,
+		OwnerPercentage: cost.OwnerPercentage,
+		Category:        enums.CostCategory(cost.Category),
 	}
 }
 
-func ConvertGroupDomainToEntity(domain domains.GroupDomainInterface) *entity.GroupEntity {
-	id := domain.GetID()
-	ownerID := domain.GetOwnerID()
-
+func ConvertGroupDomainToEntity(group *domains.Group) *entity.GroupEntity {
 	var groupID, ownerUUID uuid.UUID
-	if id != "" {
-		groupID = uuid.MustParse(id)
+	if group.ID != "" {
+		groupID = uuid.MustParse(group.ID)
 	}
-	if ownerID != "" {
-		ownerUUID = uuid.MustParse(ownerID)
+	if group.OwnerID != "" {
+		ownerUUID = uuid.MustParse(group.OwnerID)
 	}
 
 	return &entity.GroupEntity{
 		ID:       groupID,
 		OwnerID:  ownerUUID,
-		Name:     domain.GetName(),
-		Category: enums.GroupCategory(domain.GetCategory()),
+		Name:     group.Name,
+		Category: enums.GroupCategory(group.Category),
 	}
 }

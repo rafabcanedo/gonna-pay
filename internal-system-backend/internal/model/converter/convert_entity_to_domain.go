@@ -5,22 +5,18 @@ import (
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/model/repository/entity"
 )
 
-func ConvertEntityToDomain(
-	entity entity.UsersEntity,
-) domains.UserDomainInterface {
-	domain := domains.NewUserDomainWithID(
-		entity.ID.String(),
-		entity.Name,
-		entity.Email,
-		entity.Password,
-		entity.Phone,
+func ConvertEntityToDomain(e entity.UsersEntity) *domains.User {
+	return domains.NewUserWithID(
+		e.ID.String(),
+		e.Name,
+		e.Email,
+		e.Password,
+		e.Phone,
 	)
-
-	return domain
 }
 
-func ConvertContactEntityToDomain(e entity.ContactEntity) domains.ContactDomainInterface {
-	return domains.NewContactDomainWithID(
+func ConvertContactEntityToDomain(e entity.ContactEntity) *domains.Contact {
+	return domains.NewContactWithID(
 		e.ID.String(),
 		e.OwnerID.String(),
 		e.Name,
@@ -30,16 +26,17 @@ func ConvertContactEntityToDomain(e entity.ContactEntity) domains.ContactDomainI
 	)
 }
 
-func ConvertCostEntityToDomain(e entity.CostEntity) domains.CostDomainInterface {
+func ConvertCostEntityToDomain(e entity.CostEntity) *domains.Cost {
 	groupID := ""
 	if e.GroupID != nil {
 		groupID = e.GroupID.String()
 	}
 
-	return domains.NewCostDomainWithID(
+	return domains.NewCostWithID(
 		e.ID.String(),
 		e.UserID.String(),
 		groupID,
+		"",
 		e.CostName,
 		string(e.Category),
 		e.TotalValue,
@@ -50,8 +47,8 @@ func ConvertCostEntityToDomain(e entity.CostEntity) domains.CostDomainInterface 
 	)
 }
 
-func ConvertGroupEntityToDomain(e entity.GroupEntity) domains.GroupDomainInterface {
-	return domains.NewGroupDomainWithID(
+func ConvertGroupEntityToDomain(e entity.GroupEntity) *domains.Group {
+	return domains.NewGroupWithID(
 		e.ID.String(),
 		e.OwnerID.String(),
 		e.Name,

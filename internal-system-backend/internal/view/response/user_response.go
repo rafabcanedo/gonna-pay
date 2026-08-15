@@ -9,16 +9,16 @@ type UserResponse struct {
 	Phone string `json:"phone"`
 }
 
-func NewUserResponse(d domains.UserDomainInterface) UserResponse {
+func NewUserResponse(u *domains.User) UserResponse {
 	return UserResponse{
-		ID:    d.GetID(),
-		Name:  d.GetName(),
-		Email: d.GetEmail(),
-		Phone: d.GetPhone(),
+		ID:    u.ID,
+		Name:  u.Name,
+		Email: u.Email,
+		Phone: u.Phone,
 	}
 }
 
-func NewUserResponseList(users []domains.UserDomainInterface) []UserResponse {
+func NewUserResponseList(users []*domains.User) []UserResponse {
 	out := make([]UserResponse, len(users))
 	for i, u := range users {
 		out[i] = NewUserResponse(u)
