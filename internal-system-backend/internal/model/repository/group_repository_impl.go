@@ -159,7 +159,7 @@ func (r *groupRepository) Update(group *domains.Group) (*domains.Group, error) {
 	now := time.Now()
 
 	_, err := r.db.Exec(
-		`UPDATE group_entities SET name = $1, category = $2, update_at = $3 WHERE id = $4`,
+		`UPDATE group_entities SET name = $1, category = $2, updated_at = $3 WHERE id = $4`,
 		e.Name, e.Category, now, e.ID,
 	)
 	if err != nil {
