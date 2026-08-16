@@ -60,6 +60,10 @@ func (r *contactRepository) FindAll(ownerID string) ([]*domains.Contact, error) 
 		contacts = append(contacts, converter.ConvertContactEntityToDomain(e))
 	}
 
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
 	return contacts, nil
 }
 

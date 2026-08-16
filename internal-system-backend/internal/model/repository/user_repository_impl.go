@@ -58,6 +58,10 @@ func (r *userRepository) FindAll() ([]*domains.User, error) {
 		users = append(users, converter.ConvertEntityToDomain(e))
 	}
 
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
 	return users, nil
 }
 

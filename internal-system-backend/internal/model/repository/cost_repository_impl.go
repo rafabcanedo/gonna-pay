@@ -191,6 +191,10 @@ func (r *costRepository) FindAll(userID string) ([]*domains.Cost, error) {
 		})
 	}
 
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
 	return costs, nil
 }
 
@@ -256,6 +260,10 @@ func (r *costRepository) FindByID(id string) (*domains.Cost, error) {
 		}
 	}
 
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
 	if !found {
 		return nil, domains.NewNotFoundError("cost not found")
 	}
@@ -308,6 +316,10 @@ func (r *costRepository) GetGroupMemberIDs(groupID string) ([]string, error) {
 			return nil, err
 		}
 		memberIDs = append(memberIDs, contactID)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 
 	return memberIDs, nil

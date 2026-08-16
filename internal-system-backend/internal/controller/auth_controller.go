@@ -204,3 +204,21 @@ func (ac *AuthController) GetProfile(c *gin.Context) {
 
 	c.JSON(http.StatusOK, response.NewUserResponse(user))
 }
+
+func (ac *AuthController) DeleteProfile(c *gin.Context) {
+	userID := c.GetString("userID")
+	if userID == "" {
+		c.JSON(http.StatusUnauthorized, rest_errors.NewUnauthorizedRequestError("user identification missing"))
+		return
+	}
+
+	if err := ac.userService.Delete(userID); err != nil {
+		response.RespondError(c, err)
+		return
+	}
+
+	c.SetCookie("access_token", "", -1, "/", "", false, true)
+	c.SetCookie("refresh_token", "", -1, "/auth", "", false, true)
+
+	c.JSON(http.StatusOK, gin.H{"message": "account deleted successfully"})
+}

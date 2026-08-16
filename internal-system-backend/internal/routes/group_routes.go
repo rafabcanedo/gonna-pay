@@ -14,6 +14,7 @@ func GroupRoutes(router *gin.Engine, ctrl *controller.GroupController) {
 		group.GET("/:id", ctrl.FindGroupByID)
 		group.DELETE("/:id", ctrl.DeleteGroup)
 		group.POST("/:id/member", ctrl.AddMember)
+		group.PATCH("/:id", ctrl.UpdateGroup)
 		group.DELETE("/:id/member/:contactId", ctrl.RemoveMember)
 	}
 
