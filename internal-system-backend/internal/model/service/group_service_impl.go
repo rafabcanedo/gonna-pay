@@ -12,6 +12,7 @@ type GroupService interface {
 	Create(group *domains.Group, memberIDs []string) (*domains.Group, error)
 	FindAll(ownerID string) ([]*domains.Group, error)
 	FindByID(id, ownerID string) (*domains.Group, error)
+	Update(group *domains.Group, ownerID string) (*domains.Group, error)
 	Delete(id, ownerID string) error
 	AddMember(groupID, contactID, ownerID string) error
 	RemoveMember(groupID, contactID, ownerID string) error
@@ -70,6 +71,35 @@ func (s *groupService) FindByID(id, ownerID string) (*domains.Group, error) {
 	}
 
 	return group, nil
+}
+
+func (s *groupService) Update(group *domains.Group, ownerID string) (*domains.Group, error) {
+	existing, err := s.repo.FindByID(group.ID)
+	if err != nil {
+		if !errors.Is(err, domains.ErrNotFound) {
+			logger.Error("error finding group for update", err)
+		}
+		return nil, err
+	}
+
+	if existing.OwnerID != ownerID {
+		return nil, domains.NewForbiddenError("access denied")
+	}
+
+	if group.Name != "" {
+		existing.Name = group.Name
+	}
+	if group.Category != "" {
+		existing.Category = group.Category
+	}
+
+	updated, err := s.repo.Update(existing)
+	if err != nil {
+		logger.Error("error updating group", err)
+		return nil, err
+	}
+
+	return updated, nil
 }
 
 func (s *groupService) Delete(id, ownerID string) error {

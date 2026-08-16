@@ -14,6 +14,7 @@ type GroupRepository interface {
 	Create(group *domains.Group, memberIDs []string) (*domains.Group, error)
 	FindAll(ownerID string) ([]*domains.Group, error)
 	FindByID(id string) (*domains.Group, error)
+	Update(group *domains.Group) (*domains.Group, error)
 	Delete(id string) error
 	AddMember(groupID, contactID string) error
 	RemoveMember(groupID, contactID string) error
@@ -84,6 +85,10 @@ func (r *groupRepository) FindAll(ownerID string) ([]*domains.Group, error) {
 		groups = append(groups, converter.ConvertGroupEntityToDomain(e))
 	}
 
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
 	return groups, nil
 }
 
@@ -138,11 +143,30 @@ func (r *groupRepository) FindByID(id string) (*domains.Group, error) {
 		}
 	}
 
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
 	if !found {
 		return nil, domains.NewNotFoundError("group not found")
 	}
 
 	return domains.NewGroupWithID(groupID.String(), ownerID.String(), name, category, createdAt, updatedAt, members), nil
+}
+
+func (r *groupRepository) Update(group *domains.Group) (*domains.Group, error) {
+	e := converter.ConvertGroupDomainToEntity(group)
+	now := time.Now()
+
+	_, err := r.db.Exec(
+		`UPDATE group_entities SET name = $1, category = $2, updated_at = $3 WHERE id = $4`,
+		e.Name, e.Category, now, e.ID,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return domains.NewGroupWithID(group.ID, group.OwnerID, group.Name, group.Category, group.CreatedAt, now, group.Members), nil
 }
 
 func (r *groupRepository) Delete(id string) error {

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/configuration/validation"
@@ -67,6 +68,28 @@ func (gc *GroupController) FindGroupByID(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response.NewGroupDetailResponse(group))
+}
+
+func (gc *GroupController) UpdateGroup(c *gin.Context) {
+	id := c.Param("id")
+	ownerID := c.GetString("userID")
+
+	var req request.UpdateGroupRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		restErr := validation.ValidateError(err)
+		c.JSON(restErr.Code, restErr)
+		return
+	}
+
+	group := domains.NewGroupWithID(id, ownerID, req.Name, req.Category, time.Time{}, time.Time{}, nil)
+
+	updated, err := gc.service.Update(group, ownerID)
+	if err != nil {
+		response.RespondError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.NewGroupResponse(updated))
 }
 
 func (gc *GroupController) DeleteGroup(c *gin.Context) {

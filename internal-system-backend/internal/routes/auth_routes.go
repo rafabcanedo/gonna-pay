@@ -15,5 +15,6 @@ func AuthRoutes(router *gin.Engine, ctrl *controller.AuthController) {
 
 		authGroup.GET("/profile", auth.Middleware(), ctrl.GetProfile)
 		authGroup.PUT("/profile", auth.Middleware(), ctrl.UpdateProfile)
+		authGroup.DELETE("/profile", auth.Middleware(), ctrl.DeleteProfile)
 	}
 }
