@@ -176,7 +176,7 @@ func TestFindCostByID(t *testing.T) {
 }
 
 func TestUpdateCost(t *testing.T) {
-	t.Run("success", func(t *testing.T) {
+	t.Run("success - full update", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		mockService := mocks.NewMockCostService(ctrl)
 		cc := controller.NewCostController(mockService)
@@ -186,7 +186,7 @@ func TestUpdateCost(t *testing.T) {
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakePut(ctx, gin.Params{{Key: "id", Value: "cost-1"}}, map[string]any{
+		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "cost-1"}}, map[string]any{
 			"costName":   "Jantar Atualizado",
 			"totalValue": 150.0,
 			"category":   "Dinner",
@@ -197,14 +197,35 @@ func TestUpdateCost(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 	})
 
-	t.Run("validation error - missing required fields", func(t *testing.T) {
+	t.Run("success - partial update (only category)", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		mockService := mocks.NewMockCostService(ctrl)
+		cc := controller.NewCostController(mockService)
+
+		updated := testutil.NewCostFixture()
+		mockService.EXPECT().Update("cost-1", "user-1", gomock.Any(), gomock.Any()).Return(updated, nil)
+
+		ctx, rec := testutil.NewTestContext()
+		testutil.SetAuthUser(ctx, "user-1")
+		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "cost-1"}}, map[string]any{
+			"category": "Lunch",
+		})
+
+		cc.UpdateCost(ctx)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+	})
+
+	t.Run("validation error - invalid category", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		mockService := mocks.NewMockCostService(ctrl)
 		cc := controller.NewCostController(mockService)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakePut(ctx, gin.Params{{Key: "id", Value: "cost-1"}}, map[string]any{})
+		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "cost-1"}}, map[string]any{
+			"category": "Invalid",
+		})
 
 		cc.UpdateCost(ctx)
 
@@ -220,10 +241,8 @@ func TestUpdateCost(t *testing.T) {
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakePut(ctx, gin.Params{{Key: "id", Value: "cost-1"}}, map[string]any{
-			"costName":   "Jantar",
-			"totalValue": 100.0,
-			"category":   "Dinner",
+		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "cost-1"}}, map[string]any{
+			"category": "Dinner",
 		})
 
 		cc.UpdateCost(ctx)

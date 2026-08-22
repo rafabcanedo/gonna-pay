@@ -106,16 +106,10 @@ func (gc *GroupController) DeleteGroup(c *gin.Context) {
 
 func (gc *GroupController) AddMember(c *gin.Context) {
 	groupID := c.Param("id")
+	contactID := c.Param("contactId")
 	ownerID := c.GetString("userID")
 
-	var req request.AddMemberRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		restErr := validation.ValidateError(err)
-		c.JSON(restErr.Code, restErr)
-		return
-	}
-
-	if err := gc.service.AddMember(groupID, req.ContactID, ownerID); err != nil {
+	if err := gc.service.AddMember(groupID, contactID, ownerID); err != nil {
 		response.RespondError(c, err)
 		return
 	}

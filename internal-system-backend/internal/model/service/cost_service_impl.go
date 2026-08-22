@@ -80,20 +80,28 @@ func (s *costService) Update(id, userID string, cost *domains.Cost, ownerPercent
 		return nil, err
 	}
 
+	if cost.CostName != "" {
+		existing.CostName = cost.CostName
+	}
+	if cost.TotalValue != 0 {
+		existing.TotalValue = cost.TotalValue
+	}
+	if cost.Category != "" {
+		existing.Category = cost.Category
+	}
+
 	if existing.GroupID != "" {
 		if ownerPercentage != nil {
 			if *ownerPercentage <= 0 || *ownerPercentage >= 100 {
 				return nil, domains.NewInvalidInputError("ownerPercentage must be between 0 and 100 (exclusive)")
 			}
-			cost.OwnerPercentage = *ownerPercentage
-		} else {
-			cost.OwnerPercentage = existing.OwnerPercentage
+			existing.OwnerPercentage = *ownerPercentage
 		}
 	} else {
-		cost.OwnerPercentage = 100
+		existing.OwnerPercentage = 100
 	}
 
-	updated, err := s.repo.Update(id, cost)
+	updated, err := s.repo.Update(id, existing)
 	if err != nil {
 		logger.Error("error updating cost", err)
 		return nil, err

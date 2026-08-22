@@ -12,7 +12,7 @@ func CostRoutes(router *gin.Engine, ctrl *controller.CostController) {
 	{
 		cost.POST("", ctrl.CreateCost)
 		cost.GET("/:id", ctrl.FindCostByID)
-		cost.PUT("/:id", ctrl.UpdateCost)
+		cost.PATCH("/:id", ctrl.UpdateCost)
 		cost.DELETE("/:id", ctrl.DeleteCost)
 	}
 

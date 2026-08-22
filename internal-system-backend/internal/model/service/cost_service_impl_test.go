@@ -188,12 +188,14 @@ func TestCostService_Update(t *testing.T) {
 		incoming := domains.NewCost("user-1", "", "Jantar Atualizado", "Dinner", 150.0, 0)
 
 		mockRepo.EXPECT().FindByID("cost-1").Return(existing, nil)
-		mockRepo.EXPECT().Update("cost-1", gomock.Any()).Return(testutil.NewCostFixture(), nil)
+		mockRepo.EXPECT().Update("cost-1", gomock.Any()).DoAndReturn(func(_ string, cost *domains.Cost) (*domains.Cost, error) {
+			assert.Equal(t, existing.OwnerPercentage, cost.OwnerPercentage)
+			return testutil.NewCostFixture(), nil
+		})
 
 		_, err := svc.Update("cost-1", "user-1", incoming, nil)
 
 		assert.NoError(t, err)
-		assert.Equal(t, existing.OwnerPercentage, incoming.OwnerPercentage)
 	})
 
 	t.Run("invalid ownerPercentage - zero", func(t *testing.T) {
