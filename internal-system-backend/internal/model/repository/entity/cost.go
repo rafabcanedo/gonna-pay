@@ -15,6 +15,7 @@ type CostEntity struct {
 	TotalValue      float64            `gorm:"type:numeric(10,2);not null"`
 	OwnerPercentage float64            `gorm:"type:numeric(5,2);not null"`
 	Category        enums.CostCategory `gorm:"type:varchar(20);not null"`
+	Splits          []byte             `gorm:"type:jsonb"`
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 

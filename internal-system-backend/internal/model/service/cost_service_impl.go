@@ -11,7 +11,7 @@ import (
 
 type CostService interface {
 	Create(cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error)
-	Update(id, userID string, cost *domains.Cost) (*domains.Cost, error)
+	Update(id, userID string, cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error)
 	FindAll(userID string) ([]*domains.Cost, error)
 	FindByID(id, userID string) (*domains.Cost, error)
 	Delete(id, userID string) error
@@ -26,17 +26,17 @@ func NewCostService(repo repository.CostRepository) CostService {
 }
 
 func (s *costService) Create(cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error) {
-	var memberIDs []string
+	var members []domains.Member
 
 	if cost.GroupID != "" {
-		group, err := s.repo.GetGroupMemberIDs(cost.GroupID)
+		group, err := s.repo.GetGroupMembers(cost.GroupID)
 		if err != nil {
 			logger.Error("error fetching group members for cost creation", err)
 			return nil, err
 		}
-		memberIDs = group
+		members = group
 
-		memberCount := len(memberIDs)
+		memberCount := len(members)
 		if ownerPercentage != nil {
 			if *ownerPercentage <= 0 || *ownerPercentage >= 100 {
 				return nil, domains.NewInvalidInputError("ownerPercentage must be between 0 and 100 (exclusive)")
@@ -49,7 +49,7 @@ func (s *costService) Create(cost *domains.Cost, ownerPercentage *float64) (*dom
 		cost.OwnerPercentage = 100
 	}
 
-	created, err := s.repo.Create(cost, memberIDs)
+	created, err := s.repo.Create(cost, members)
 	if err != nil {
 		logger.Error("error creating cost", err)
 		return nil, err
@@ -58,7 +58,7 @@ func (s *costService) Create(cost *domains.Cost, ownerPercentage *float64) (*dom
 	return created, nil
 }
 
-func (s *costService) Update(id, userID string, cost *domains.Cost) (*domains.Cost, error) {
+func (s *costService) Update(id, userID string, cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error) {
 	existing, err := s.repo.FindByID(id)
 	if err != nil {
 		if !errors.Is(err, domains.ErrNotFound) {
@@ -69,6 +69,19 @@ func (s *costService) Update(id, userID string, cost *domains.Cost) (*domains.Co
 
 	if existing.UserID != userID {
 		return nil, domains.NewForbiddenError("access denied")
+	}
+
+	if existing.GroupID != "" {
+		if ownerPercentage != nil {
+			if *ownerPercentage <= 0 || *ownerPercentage >= 100 {
+				return nil, domains.NewInvalidInputError("ownerPercentage must be between 0 and 100 (exclusive)")
+			}
+			cost.OwnerPercentage = *ownerPercentage
+		} else {
+			cost.OwnerPercentage = existing.OwnerPercentage
+		}
+	} else {
+		cost.OwnerPercentage = 100
 	}
 
 	updated, err := s.repo.Update(id, cost)

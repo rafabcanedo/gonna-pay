@@ -53,6 +53,15 @@ func MakePatch(c *gin.Context, params gin.Params, body any) {
 	c.Request.Body = io.NopCloser(bytes.NewBuffer(b))
 }
 
+func MakePut(c *gin.Context, params gin.Params, body any) {
+	b, _ := json.Marshal(body)
+
+	c.Request.Method = http.MethodPut
+	c.Request.Header.Set("Content-Type", "application/json")
+	c.Params = params
+	c.Request.Body = io.NopCloser(bytes.NewBuffer(b))
+}
+
 func MakeDelete(c *gin.Context, params gin.Params) {
 	c.Request.Method = http.MethodDelete
 	c.Request.Header.Set("Content-Type", "application/json")

@@ -99,7 +99,7 @@ func (r *groupRepository) FindByID(id string) (*domains.Group, error) {
 			c.id, c.name, c.email
 		FROM group_entities g
 		LEFT JOIN group_member_entities gm ON gm.group_id = g.id
-		LEFT JOIN contact_entities c ON c.id = gm.contact_id
+		LEFT JOIN contact_entities c ON c.id = gm.contact_id AND c.deleted_at IS NULL
 		WHERE g.id = $1
 	`, id)
 	if err != nil {
@@ -193,7 +193,7 @@ func (r *groupRepository) RemoveMember(groupID, contactID string) error {
 func (r *groupRepository) IsContactOwnedBy(contactID, ownerID string) (bool, error) {
 	var count int
 	err := r.db.QueryRow(
-		`SELECT COUNT(*) FROM contact_entities WHERE id = $1 AND owner_id = $2`,
+		`SELECT COUNT(*) FROM contact_entities WHERE id = $1 AND owner_id = $2 AND deleted_at IS NULL`,
 		contactID, ownerID,
 	).Scan(&count)
 	if err != nil {

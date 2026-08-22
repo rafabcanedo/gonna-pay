@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/model/converter"
@@ -43,7 +44,7 @@ func (r *contactRepository) Create(contact *domains.Contact) (*domains.Contact, 
 
 func (r *contactRepository) FindAll(ownerID string) ([]*domains.Contact, error) {
 	rows, err := r.db.Query(
-		`SELECT id, owner_id, name, email, phone, category FROM contact_entities WHERE owner_id = $1`,
+		`SELECT id, owner_id, name, email, phone, category FROM contact_entities WHERE owner_id = $1 AND deleted_at IS NULL`,
 		ownerID,
 	)
 	if err != nil {
@@ -71,7 +72,7 @@ func (r *contactRepository) FindByID(id string) (*domains.Contact, error) {
 	var e entity.ContactEntity
 
 	row := r.db.QueryRow(
-		`SELECT id, owner_id, name, email, phone, category FROM contact_entities WHERE id = $1`,
+		`SELECT id, owner_id, name, email, phone, category FROM contact_entities WHERE id = $1 AND deleted_at IS NULL`,
 		id,
 	)
 
@@ -101,6 +102,9 @@ func (r *contactRepository) Update(contact *domains.Contact) (*domains.Contact, 
 }
 
 func (r *contactRepository) Delete(id string) error {
-	_, err := r.db.Exec(`DELETE FROM contact_entities WHERE id = $1`, id)
+	_, err := r.db.Exec(
+		`UPDATE contact_entities SET deleted_at = $1 WHERE id = $2`,
+		time.Now(), id,
+	)
 	return err
 }

@@ -37,11 +37,12 @@ func RunMigrations() error {
 		&entity.GroupEntity{},
 		&entity.GroupMemberEntity{},
 		&entity.CostEntity{},
-		&entity.CostSplitEntity{},
 	)
 	if err != nil {
 		return fmt.Errorf("error running migrations: %w", err)
 	}
+
+	gormDB.Exec(`CREATE INDEX IF NOT EXISTS idx_cost_splits_gin ON cost_entities USING GIN (splits)`)
 
 	// Recreate all FKs with the correct ON DELETE behavior.
 	// AutoMigrate does not alter existing constraints, so we drop and recreate them.
@@ -55,8 +56,6 @@ func RunMigrations() error {
 	fixes := []fkFix{
 		{"contact_entities", "fk_users_entities_contacts", "owner_id", "users_entities(id)", "CASCADE"},
 		{"cost_entities", "fk_users_entities_costs", "user_id", "users_entities(id)", "CASCADE"},
-		{"cost_split_entities", "fk_cost_entities_cost_splits", "cost_id", "cost_entities(id)", "CASCADE"},
-		{"cost_split_entities", "fk_contact_entities_cost_splits", "contact_id", "contact_entities(id)", "CASCADE"},
 		{"group_member_entities", "fk_group_entities_members", "group_id", "group_entities(id)", "CASCADE"},
 		{"group_member_entities", "fk_contact_entities_group_members", "contact_id", "contact_entities(id)", "CASCADE"},
 	}

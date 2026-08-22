@@ -21,5 +21,8 @@ func NewGroupFixture() *domains.Group {
 
 func NewCostFixture() *domains.Cost {
 	now := time.Now()
-	return domains.NewCostWithID("cost-1", "user-1", "group-1", "Grupo A", "Jantar", "Dinner", 100.0, 50.0, now, now, nil)
+	splits := []domains.Split{
+		{ID: "split-1", ContactID: "contact-1", ContactName: "Ana", Value: 50.0, Percentage: 50.0},
+	}
+	return domains.NewCostWithID("cost-1", "user-1", "group-1", "Grupo A", "Jantar", "Dinner", 100.0, 50.0, now, now, splits)
 }

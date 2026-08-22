@@ -49,18 +49,18 @@ func (mr *MockCostServiceMockRecorder) Create(cost, ownerPercentage any) *gomock
 }
 
 // Update mocks base method.
-func (m *MockCostService) Update(id, userID string, cost *domains.Cost) (*domains.Cost, error) {
+func (m *MockCostService) Update(id, userID string, cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", id, userID, cost)
+	ret := m.ctrl.Call(m, "Update", id, userID, cost, ownerPercentage)
 	ret0, _ := ret[0].(*domains.Cost)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Update indicates an expected call of Update.
-func (mr *MockCostServiceMockRecorder) Update(id, userID, cost any) *gomock.Call {
+func (mr *MockCostServiceMockRecorder) Update(id, userID, cost, ownerPercentage any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockCostService)(nil).Update), id, userID, cost)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockCostService)(nil).Update), id, userID, cost, ownerPercentage)
 }
 
 // FindAll mocks base method.
