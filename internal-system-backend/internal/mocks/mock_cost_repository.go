@@ -34,18 +34,18 @@ func (m *MockCostRepository) EXPECT() *MockCostRepositoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockCostRepository) Create(cost *domains.Cost, memberIDs []string) (*domains.Cost, error) {
+func (m *MockCostRepository) Create(cost *domains.Cost, members []domains.Member) (*domains.Cost, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", cost, memberIDs)
+	ret := m.ctrl.Call(m, "Create", cost, members)
 	ret0, _ := ret[0].(*domains.Cost)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockCostRepositoryMockRecorder) Create(cost, memberIDs any) *gomock.Call {
+func (mr *MockCostRepositoryMockRecorder) Create(cost, members any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockCostRepository)(nil).Create), cost, memberIDs)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockCostRepository)(nil).Create), cost, members)
 }
 
 // Update mocks base method.
@@ -107,32 +107,17 @@ func (mr *MockCostRepositoryMockRecorder) Delete(id any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockCostRepository)(nil).Delete), id)
 }
 
-// GetGroupMemberIDs mocks base method.
-func (m *MockCostRepository) GetGroupMemberIDs(groupID string) ([]string, error) {
+// GetGroupMembers mocks base method.
+func (m *MockCostRepository) GetGroupMembers(groupID string) ([]domains.Member, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetGroupMemberIDs", groupID)
-	ret0, _ := ret[0].([]string)
+	ret := m.ctrl.Call(m, "GetGroupMembers", groupID)
+	ret0, _ := ret[0].([]domains.Member)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetGroupMemberIDs indicates an expected call of GetGroupMemberIDs.
-func (mr *MockCostRepositoryMockRecorder) GetGroupMemberIDs(groupID any) *gomock.Call {
+// GetGroupMembers indicates an expected call of GetGroupMembers.
+func (mr *MockCostRepositoryMockRecorder) GetGroupMembers(groupID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGroupMemberIDs", reflect.TypeOf((*MockCostRepository)(nil).GetGroupMemberIDs), groupID)
-}
-
-// GetGroupName mocks base method.
-func (m *MockCostRepository) GetGroupName(groupID string) (string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetGroupName", groupID)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetGroupName indicates an expected call of GetGroupName.
-func (mr *MockCostRepositoryMockRecorder) GetGroupName(groupID any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGroupName", reflect.TypeOf((*MockCostRepository)(nil).GetGroupName), groupID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGroupMembers", reflect.TypeOf((*MockCostRepository)(nil).GetGroupMembers), groupID)
 }

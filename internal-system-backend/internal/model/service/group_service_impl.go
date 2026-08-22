@@ -57,11 +57,11 @@ func (s *groupService) FindAll(ownerID string) ([]*domains.Group, error) {
 	return groups, nil
 }
 
-func (s *groupService) FindByID(id, ownerID string) (*domains.Group, error) {
+func (s *groupService) findAndAuthorize(id, ownerID string) (*domains.Group, error) {
 	group, err := s.repo.FindByID(id)
 	if err != nil {
 		if !errors.Is(err, domains.ErrNotFound) {
-			logger.Error("error finding group by id", err)
+			logger.Error("error finding group", err)
 		}
 		return nil, err
 	}
@@ -73,17 +73,14 @@ func (s *groupService) FindByID(id, ownerID string) (*domains.Group, error) {
 	return group, nil
 }
 
-func (s *groupService) Update(group *domains.Group, ownerID string) (*domains.Group, error) {
-	existing, err := s.repo.FindByID(group.ID)
-	if err != nil {
-		if !errors.Is(err, domains.ErrNotFound) {
-			logger.Error("error finding group for update", err)
-		}
-		return nil, err
-	}
+func (s *groupService) FindByID(id, ownerID string) (*domains.Group, error) {
+	return s.findAndAuthorize(id, ownerID)
+}
 
-	if existing.OwnerID != ownerID {
-		return nil, domains.NewForbiddenError("access denied")
+func (s *groupService) Update(group *domains.Group, ownerID string) (*domains.Group, error) {
+	existing, err := s.findAndAuthorize(group.ID, ownerID)
+	if err != nil {
+		return nil, err
 	}
 
 	if group.Name != "" {
@@ -103,16 +100,8 @@ func (s *groupService) Update(group *domains.Group, ownerID string) (*domains.Gr
 }
 
 func (s *groupService) Delete(id, ownerID string) error {
-	group, err := s.repo.FindByID(id)
-	if err != nil {
-		if !errors.Is(err, domains.ErrNotFound) {
-			logger.Error("error finding group for delete", err)
-		}
+	if _, err := s.findAndAuthorize(id, ownerID); err != nil {
 		return err
-	}
-
-	if group.OwnerID != ownerID {
-		return domains.NewForbiddenError("access denied")
 	}
 
 	if err := s.repo.Delete(id); err != nil {
@@ -124,16 +113,8 @@ func (s *groupService) Delete(id, ownerID string) error {
 }
 
 func (s *groupService) AddMember(groupID, contactID, ownerID string) error {
-	group, err := s.repo.FindByID(groupID)
-	if err != nil {
-		if !errors.Is(err, domains.ErrNotFound) {
-			logger.Error("error finding group for add member", err)
-		}
+	if _, err := s.findAndAuthorize(groupID, ownerID); err != nil {
 		return err
-	}
-
-	if group.OwnerID != ownerID {
-		return domains.NewForbiddenError("access denied")
 	}
 
 	owned, err := s.repo.IsContactOwnedBy(contactID, ownerID)
@@ -163,16 +144,8 @@ func (s *groupService) AddMember(groupID, contactID, ownerID string) error {
 }
 
 func (s *groupService) RemoveMember(groupID, contactID, ownerID string) error {
-	group, err := s.repo.FindByID(groupID)
-	if err != nil {
-		if !errors.Is(err, domains.ErrNotFound) {
-			logger.Error("error finding group for remove member", err)
-		}
+	if _, err := s.findAndAuthorize(groupID, ownerID); err != nil {
 		return err
-	}
-
-	if group.OwnerID != ownerID {
-		return domains.NewForbiddenError("access denied")
 	}
 
 	exists, err := s.repo.MemberExists(groupID, contactID)

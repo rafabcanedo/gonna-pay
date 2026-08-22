@@ -37,10 +37,11 @@ func TestCreateCost(t *testing.T) {
 		cc.CreateCost(ctx)
 
 		assert.Equal(t, http.StatusCreated, rec.Code)
-		var body response.CostResponse
+		var body response.CostDetailResponse
 		json.Unmarshal(rec.Body.Bytes(), &body)
 		assert.Equal(t, "Jantar", body.CostName)
 		assert.Equal(t, 100.0, body.TotalValue)
+		assert.Len(t, body.Splits, 1)
 	})
 
 	t.Run("validation error - missing required fields", func(t *testing.T) {
@@ -175,13 +176,13 @@ func TestFindCostByID(t *testing.T) {
 }
 
 func TestUpdateCost(t *testing.T) {
-	t.Run("success", func(t *testing.T) {
+	t.Run("success - full update", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		mockService := mocks.NewMockCostService(ctrl)
 		cc := controller.NewCostController(mockService)
 
 		updated := testutil.NewCostFixture()
-		mockService.EXPECT().Update("cost-1", "user-1", gomock.Any()).Return(updated, nil)
+		mockService.EXPECT().Update("cost-1", "user-1", gomock.Any(), gomock.Any()).Return(updated, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, "user-1")
@@ -196,14 +197,35 @@ func TestUpdateCost(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 	})
 
-	t.Run("validation error - missing required fields", func(t *testing.T) {
+	t.Run("success - partial update (only category)", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		mockService := mocks.NewMockCostService(ctrl)
+		cc := controller.NewCostController(mockService)
+
+		updated := testutil.NewCostFixture()
+		mockService.EXPECT().Update("cost-1", "user-1", gomock.Any(), gomock.Any()).Return(updated, nil)
+
+		ctx, rec := testutil.NewTestContext()
+		testutil.SetAuthUser(ctx, "user-1")
+		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "cost-1"}}, map[string]any{
+			"category": "Lunch",
+		})
+
+		cc.UpdateCost(ctx)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+	})
+
+	t.Run("validation error - invalid category", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		mockService := mocks.NewMockCostService(ctrl)
 		cc := controller.NewCostController(mockService)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "cost-1"}}, map[string]any{})
+		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "cost-1"}}, map[string]any{
+			"category": "Invalid",
+		})
 
 		cc.UpdateCost(ctx)
 
@@ -215,14 +237,12 @@ func TestUpdateCost(t *testing.T) {
 		mockService := mocks.NewMockCostService(ctrl)
 		cc := controller.NewCostController(mockService)
 
-		mockService.EXPECT().Update("cost-1", "user-1", gomock.Any()).Return(nil, domains.NewNotFoundError("cost not found"))
+		mockService.EXPECT().Update("cost-1", "user-1", gomock.Any(), gomock.Any()).Return(nil, domains.NewNotFoundError("cost not found"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, "user-1")
 		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "cost-1"}}, map[string]any{
-			"costName":   "Jantar",
-			"totalValue": 100.0,
-			"category":   "Dinner",
+			"category": "Dinner",
 		})
 
 		cc.UpdateCost(ctx)

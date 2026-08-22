@@ -11,7 +11,7 @@ import (
 
 type CostService interface {
 	Create(cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error)
-	Update(id, userID string, cost *domains.Cost) (*domains.Cost, error)
+	Update(id, userID string, cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error)
 	FindAll(userID string) ([]*domains.Cost, error)
 	FindByID(id, userID string) (*domains.Cost, error)
 	Delete(id, userID string) error
@@ -26,17 +26,17 @@ func NewCostService(repo repository.CostRepository) CostService {
 }
 
 func (s *costService) Create(cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error) {
-	var memberIDs []string
+	var members []domains.Member
 
 	if cost.GroupID != "" {
-		group, err := s.repo.GetGroupMemberIDs(cost.GroupID)
+		group, err := s.repo.GetGroupMembers(cost.GroupID)
 		if err != nil {
 			logger.Error("error fetching group members for cost creation", err)
 			return nil, err
 		}
-		memberIDs = group
+		members = group
 
-		memberCount := len(memberIDs)
+		memberCount := len(members)
 		if ownerPercentage != nil {
 			if *ownerPercentage <= 0 || *ownerPercentage >= 100 {
 				return nil, domains.NewInvalidInputError("ownerPercentage must be between 0 and 100 (exclusive)")
@@ -49,7 +49,7 @@ func (s *costService) Create(cost *domains.Cost, ownerPercentage *float64) (*dom
 		cost.OwnerPercentage = 100
 	}
 
-	created, err := s.repo.Create(cost, memberIDs)
+	created, err := s.repo.Create(cost, members)
 	if err != nil {
 		logger.Error("error creating cost", err)
 		return nil, err
@@ -58,20 +58,50 @@ func (s *costService) Create(cost *domains.Cost, ownerPercentage *float64) (*dom
 	return created, nil
 }
 
-func (s *costService) Update(id, userID string, cost *domains.Cost) (*domains.Cost, error) {
-	existing, err := s.repo.FindByID(id)
+func (s *costService) findAndAuthorize(id, userID string) (*domains.Cost, error) {
+	cost, err := s.repo.FindByID(id)
 	if err != nil {
 		if !errors.Is(err, domains.ErrNotFound) {
-			logger.Error("error finding cost for update", err)
+			logger.Error("error finding cost", err)
 		}
 		return nil, err
 	}
 
-	if existing.UserID != userID {
+	if cost.UserID != userID {
 		return nil, domains.NewForbiddenError("access denied")
 	}
 
-	updated, err := s.repo.Update(id, cost)
+	return cost, nil
+}
+
+func (s *costService) Update(id, userID string, cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error) {
+	existing, err := s.findAndAuthorize(id, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	if cost.CostName != "" {
+		existing.CostName = cost.CostName
+	}
+	if cost.TotalValue != 0 {
+		existing.TotalValue = cost.TotalValue
+	}
+	if cost.Category != "" {
+		existing.Category = cost.Category
+	}
+
+	if existing.GroupID != "" {
+		if ownerPercentage != nil {
+			if *ownerPercentage <= 0 || *ownerPercentage >= 100 {
+				return nil, domains.NewInvalidInputError("ownerPercentage must be between 0 and 100 (exclusive)")
+			}
+			existing.OwnerPercentage = *ownerPercentage
+		}
+	} else {
+		existing.OwnerPercentage = 100
+	}
+
+	updated, err := s.repo.Update(id, existing)
 	if err != nil {
 		logger.Error("error updating cost", err)
 		return nil, err
@@ -91,32 +121,12 @@ func (s *costService) FindAll(userID string) ([]*domains.Cost, error) {
 }
 
 func (s *costService) FindByID(id, userID string) (*domains.Cost, error) {
-	cost, err := s.repo.FindByID(id)
-	if err != nil {
-		if !errors.Is(err, domains.ErrNotFound) {
-			logger.Error("error finding cost by id", err)
-		}
-		return nil, err
-	}
-
-	if cost.UserID != userID {
-		return nil, domains.NewForbiddenError("access denied")
-	}
-
-	return cost, nil
+	return s.findAndAuthorize(id, userID)
 }
 
 func (s *costService) Delete(id, userID string) error {
-	cost, err := s.repo.FindByID(id)
-	if err != nil {
-		if !errors.Is(err, domains.ErrNotFound) {
-			logger.Error("error finding cost for delete", err)
-		}
+	if _, err := s.findAndAuthorize(id, userID); err != nil {
 		return err
-	}
-
-	if cost.UserID != userID {
-		return domains.NewForbiddenError("access denied")
 	}
 
 	if err := s.repo.Delete(id); err != nil {

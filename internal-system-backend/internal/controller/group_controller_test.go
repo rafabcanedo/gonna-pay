@@ -306,27 +306,14 @@ func TestAddMember(t *testing.T) {
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakePost(ctx, gin.Params{{Key: "id", Value: "group-1"}}, map[string]any{
-			"contactId": "contact-1",
-		})
+		testutil.MakePost(ctx, gin.Params{
+			{Key: "id", Value: "group-1"},
+			{Key: "contactId", Value: "contact-1"},
+		}, nil)
 
 		gc.AddMember(ctx)
 
 		assert.Equal(t, http.StatusCreated, rec.Code)
-	})
-
-	t.Run("validation error - missing contactId", func(t *testing.T) {
-		ctrl := gomock.NewController(t)
-		mockService := mocks.NewMockGroupService(ctrl)
-		gc := controller.NewGroupController(mockService)
-
-		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakePost(ctx, gin.Params{{Key: "id", Value: "group-1"}}, map[string]any{})
-
-		gc.AddMember(ctx)
-
-		assert.Equal(t, http.StatusBadRequest, rec.Code)
 	})
 
 	t.Run("conflict - already a member", func(t *testing.T) {
@@ -338,9 +325,10 @@ func TestAddMember(t *testing.T) {
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakePost(ctx, gin.Params{{Key: "id", Value: "group-1"}}, map[string]any{
-			"contactId": "contact-1",
-		})
+		testutil.MakePost(ctx, gin.Params{
+			{Key: "id", Value: "group-1"},
+			{Key: "contactId", Value: "contact-1"},
+		}, nil)
 
 		gc.AddMember(ctx)
 

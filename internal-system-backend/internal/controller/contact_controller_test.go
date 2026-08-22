@@ -168,7 +168,7 @@ func TestUpdateContact(t *testing.T) {
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "contact-1"}}, map[string]any{
+		testutil.MakePut(ctx, gin.Params{{Key: "id", Value: "contact-1"}}, map[string]any{
 			"name": "Ana Silva",
 		})
 
@@ -187,7 +187,7 @@ func TestUpdateContact(t *testing.T) {
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "contact-1"}}, map[string]any{
+		testutil.MakePut(ctx, gin.Params{{Key: "id", Value: "contact-1"}}, map[string]any{
 			"category": "Invalid",
 		})
 

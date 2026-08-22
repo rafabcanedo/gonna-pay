@@ -37,7 +37,7 @@ func (cc *CostController) CreateCost(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, response.NewCostResponse(created))
+	c.JSON(http.StatusCreated, response.NewCostDetailResponse(created))
 }
 
 func (cc *CostController) FindAllCosts(c *gin.Context) {
@@ -76,14 +76,9 @@ func (cc *CostController) UpdateCost(c *gin.Context) {
 		return
 	}
 
-	ownerPercentage := 0.0
-	if req.OwnerPercentage != nil {
-		ownerPercentage = *req.OwnerPercentage
-	}
+	cost := domains.NewCost(userID, "", req.CostName, req.Category, req.TotalValue, 0)
 
-	cost := domains.NewCost(userID, "", req.CostName, req.Category, req.TotalValue, ownerPercentage)
-
-	updated, err := cc.service.Update(id, userID, cost)
+	updated, err := cc.service.Update(id, userID, cost, req.OwnerPercentage)
 	if err != nil {
 		response.RespondError(c, err)
 		return
