@@ -44,11 +44,11 @@ func (s *contactService) FindAll(ownerID string) ([]*domains.Contact, error) {
 	return contacts, nil
 }
 
-func (s *contactService) FindByID(id, ownerID string) (*domains.Contact, error) {
+func (s *contactService) findAndAuthorize(id, ownerID string) (*domains.Contact, error) {
 	contact, err := s.repo.FindByID(id)
 	if err != nil {
 		if !errors.Is(err, domains.ErrNotFound) {
-			logger.Error("error finding contact by id", err)
+			logger.Error("error finding contact", err)
 		}
 		return nil, err
 	}
@@ -60,17 +60,13 @@ func (s *contactService) FindByID(id, ownerID string) (*domains.Contact, error) 
 	return contact, nil
 }
 
-func (s *contactService) Update(contact *domains.Contact) (*domains.Contact, error) {
-	existing, err := s.repo.FindByID(contact.ID)
-	if err != nil {
-		if !errors.Is(err, domains.ErrNotFound) {
-			logger.Error("error finding contact for update", err)
-		}
-		return nil, err
-	}
+func (s *contactService) FindByID(id, ownerID string) (*domains.Contact, error) {
+	return s.findAndAuthorize(id, ownerID)
+}
 
-	if existing.OwnerID != contact.OwnerID {
-		return nil, domains.NewForbiddenError("access denied")
+func (s *contactService) Update(contact *domains.Contact) (*domains.Contact, error) {
+	if _, err := s.findAndAuthorize(contact.ID, contact.OwnerID); err != nil {
+		return nil, err
 	}
 
 	updated, err := s.repo.Update(contact)
@@ -83,16 +79,8 @@ func (s *contactService) Update(contact *domains.Contact) (*domains.Contact, err
 }
 
 func (s *contactService) Delete(id, ownerID string) error {
-	existing, err := s.repo.FindByID(id)
-	if err != nil {
-		if !errors.Is(err, domains.ErrNotFound) {
-			logger.Error("error finding contact for delete", err)
-		}
+	if _, err := s.findAndAuthorize(id, ownerID); err != nil {
 		return err
-	}
-
-	if existing.OwnerID != ownerID {
-		return domains.NewForbiddenError("access denied")
 	}
 
 	if err := s.repo.Delete(id); err != nil {

@@ -58,17 +58,26 @@ func (s *costService) Create(cost *domains.Cost, ownerPercentage *float64) (*dom
 	return created, nil
 }
 
-func (s *costService) Update(id, userID string, cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error) {
-	existing, err := s.repo.FindByID(id)
+func (s *costService) findAndAuthorize(id, userID string) (*domains.Cost, error) {
+	cost, err := s.repo.FindByID(id)
 	if err != nil {
 		if !errors.Is(err, domains.ErrNotFound) {
-			logger.Error("error finding cost for update", err)
+			logger.Error("error finding cost", err)
 		}
 		return nil, err
 	}
 
-	if existing.UserID != userID {
+	if cost.UserID != userID {
 		return nil, domains.NewForbiddenError("access denied")
+	}
+
+	return cost, nil
+}
+
+func (s *costService) Update(id, userID string, cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error) {
+	existing, err := s.findAndAuthorize(id, userID)
+	if err != nil {
+		return nil, err
 	}
 
 	if existing.GroupID != "" {
@@ -104,32 +113,12 @@ func (s *costService) FindAll(userID string) ([]*domains.Cost, error) {
 }
 
 func (s *costService) FindByID(id, userID string) (*domains.Cost, error) {
-	cost, err := s.repo.FindByID(id)
-	if err != nil {
-		if !errors.Is(err, domains.ErrNotFound) {
-			logger.Error("error finding cost by id", err)
-		}
-		return nil, err
-	}
-
-	if cost.UserID != userID {
-		return nil, domains.NewForbiddenError("access denied")
-	}
-
-	return cost, nil
+	return s.findAndAuthorize(id, userID)
 }
 
 func (s *costService) Delete(id, userID string) error {
-	cost, err := s.repo.FindByID(id)
-	if err != nil {
-		if !errors.Is(err, domains.ErrNotFound) {
-			logger.Error("error finding cost for delete", err)
-		}
+	if _, err := s.findAndAuthorize(id, userID); err != nil {
 		return err
-	}
-
-	if cost.UserID != userID {
-		return domains.NewForbiddenError("access denied")
 	}
 
 	if err := s.repo.Delete(id); err != nil {
