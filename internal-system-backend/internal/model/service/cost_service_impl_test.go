@@ -20,13 +20,14 @@ func TestCostService_Create(t *testing.T) {
 		mockRepo := mocks.NewMockCostRepository(ctrl)
 		svc := service.NewCostService(mockRepo)
 
-		cost := domains.NewCost("user-1", "", "Jantar", "Dinner", 100.0, 0)
-		mockRepo.EXPECT().Create(gomock.Any(), gomock.Nil()).Return(testutil.NewCostFixture(), nil)
+		m := testutil.NewCostMock()
+		cost := domains.NewCost(testutil.UserID, "", m.Name, m.Category, m.TotalValue, 0)
+		mockRepo.EXPECT().Create(gomock.Any(), gomock.Nil()).Return(m.Cost, nil)
 
 		result, err := svc.Create(cost, nil)
 
 		assert.NoError(t, err)
-		assert.Equal(t, "cost-1", result.ID)
+		assert.Equal(t, m.ID, result.ID)
 		assert.Equal(t, float64(100), cost.OwnerPercentage)
 	})
 
@@ -35,16 +36,17 @@ func TestCostService_Create(t *testing.T) {
 		mockRepo := mocks.NewMockCostRepository(ctrl)
 		svc := service.NewCostService(mockRepo)
 
-		cost := domains.NewCost("user-1", "group-1", "Jantar", "Dinner", 100.0, 0)
-		members := []domains.Member{{ID: "contact-1", Name: "Ana"}, {ID: "contact-2", Name: "Pedro"}}
+		m := testutil.NewCostMock()
+		cost := domains.NewCost(testutil.UserID, testutil.GroupID, m.Name, m.Category, m.TotalValue, 0)
+		members := []domains.Member{{ID: testutil.ContactID, Name: testutil.ContactName}, {ID: "contact-2", Name: "Pedro"}}
 
-		mockRepo.EXPECT().GetGroupMembers("group-1").Return(members, nil)
-		mockRepo.EXPECT().Create(gomock.Any(), members).Return(testutil.NewCostFixture(), nil)
+		mockRepo.EXPECT().GetGroupMembers(testutil.GroupID).Return(members, nil)
+		mockRepo.EXPECT().Create(gomock.Any(), members).Return(m.Cost, nil)
 
 		result, err := svc.Create(cost, float64Ptr(40.0))
 
 		assert.NoError(t, err)
-		assert.Equal(t, "cost-1", result.ID)
+		assert.Equal(t, m.ID, result.ID)
 		assert.Equal(t, 40.0, cost.OwnerPercentage)
 	})
 
@@ -53,11 +55,16 @@ func TestCostService_Create(t *testing.T) {
 		mockRepo := mocks.NewMockCostRepository(ctrl)
 		svc := service.NewCostService(mockRepo)
 
-		cost := domains.NewCost("user-1", "group-1", "Jantar", "Dinner", 100.0, 0)
-		members := []domains.Member{{ID: "contact-1", Name: "Ana"}, {ID: "contact-2", Name: "Pedro"}, {ID: "contact-3", Name: "João"}}
+		m := testutil.NewCostMock()
+		cost := domains.NewCost(testutil.UserID, testutil.GroupID, m.Name, m.Category, m.TotalValue, 0)
+		members := []domains.Member{
+			{ID: testutil.ContactID, Name: testutil.ContactName},
+			{ID: "contact-2", Name: "Pedro"},
+			{ID: "contact-3", Name: "João"},
+		}
 
-		mockRepo.EXPECT().GetGroupMembers("group-1").Return(members, nil)
-		mockRepo.EXPECT().Create(gomock.Any(), members).Return(testutil.NewCostFixture(), nil)
+		mockRepo.EXPECT().GetGroupMembers(testutil.GroupID).Return(members, nil)
+		mockRepo.EXPECT().Create(gomock.Any(), members).Return(m.Cost, nil)
 
 		_, err := svc.Create(cost, nil)
 
@@ -70,8 +77,8 @@ func TestCostService_Create(t *testing.T) {
 		mockRepo := mocks.NewMockCostRepository(ctrl)
 		svc := service.NewCostService(mockRepo)
 
-		cost := domains.NewCost("user-1", "group-1", "Jantar", "Dinner", 100.0, 0)
-		mockRepo.EXPECT().GetGroupMembers("group-1").Return([]domains.Member{{ID: "contact-1", Name: "Ana"}}, nil)
+		cost := domains.NewCost(testutil.UserID, testutil.GroupID, testutil.CostName, testutil.CostCategory, 100.0, 0)
+		mockRepo.EXPECT().GetGroupMembers(testutil.GroupID).Return([]domains.Member{{ID: testutil.ContactID, Name: testutil.ContactName}}, nil)
 
 		_, err := svc.Create(cost, float64Ptr(0))
 
@@ -83,8 +90,8 @@ func TestCostService_Create(t *testing.T) {
 		mockRepo := mocks.NewMockCostRepository(ctrl)
 		svc := service.NewCostService(mockRepo)
 
-		cost := domains.NewCost("user-1", "group-1", "Jantar", "Dinner", 100.0, 0)
-		mockRepo.EXPECT().GetGroupMembers("group-1").Return([]domains.Member{{ID: "contact-1", Name: "Ana"}}, nil)
+		cost := domains.NewCost(testutil.UserID, testutil.GroupID, testutil.CostName, testutil.CostCategory, 100.0, 0)
+		mockRepo.EXPECT().GetGroupMembers(testutil.GroupID).Return([]domains.Member{{ID: testutil.ContactID, Name: testutil.ContactName}}, nil)
 
 		_, err := svc.Create(cost, float64Ptr(100))
 
@@ -96,8 +103,8 @@ func TestCostService_Create(t *testing.T) {
 		mockRepo := mocks.NewMockCostRepository(ctrl)
 		svc := service.NewCostService(mockRepo)
 
-		cost := domains.NewCost("user-1", "group-1", "Jantar", "Dinner", 100.0, 0)
-		mockRepo.EXPECT().GetGroupMembers("group-1").Return(nil, errors.New("db error"))
+		cost := domains.NewCost(testutil.UserID, testutil.GroupID, testutil.CostName, testutil.CostCategory, 100.0, 0)
+		mockRepo.EXPECT().GetGroupMembers(testutil.GroupID).Return(nil, errors.New("db error"))
 
 		_, err := svc.Create(cost, nil)
 		assert.Error(t, err)
@@ -110,12 +117,12 @@ func TestCostService_FindAll(t *testing.T) {
 		mockRepo := mocks.NewMockCostRepository(ctrl)
 		svc := service.NewCostService(mockRepo)
 
-		c1 := testutil.NewCostFixture()
-		c2 := testutil.NewCostFixture()
-		c2.ID = "cost-2"
-		mockRepo.EXPECT().FindAll("user-1").Return([]*domains.Cost{c1, c2}, nil)
+		m1 := testutil.NewCostMock()
+		m2 := testutil.NewCostMock()
+		m2.Cost.ID = "cost-2"
+		mockRepo.EXPECT().FindAll(testutil.UserID).Return([]*domains.Cost{m1.Cost, m2.Cost}, nil)
 
-		result, err := svc.FindAll("user-1")
+		result, err := svc.FindAll(testutil.UserID)
 
 		assert.NoError(t, err)
 		assert.Len(t, result, 2)
@@ -128,12 +135,13 @@ func TestCostService_FindByID(t *testing.T) {
 		mockRepo := mocks.NewMockCostRepository(ctrl)
 		svc := service.NewCostService(mockRepo)
 
-		mockRepo.EXPECT().FindByID("cost-1").Return(testutil.NewCostFixture(), nil)
+		m := testutil.NewCostMock()
+		mockRepo.EXPECT().FindByID(m.ID).Return(m.Cost, nil)
 
-		result, err := svc.FindByID("cost-1", "user-1")
+		result, err := svc.FindByID(m.ID, testutil.UserID)
 
 		assert.NoError(t, err)
-		assert.Equal(t, "cost-1", result.ID)
+		assert.Equal(t, m.ID, result.ID)
 	})
 
 	t.Run("not found", func(t *testing.T) {
@@ -141,9 +149,9 @@ func TestCostService_FindByID(t *testing.T) {
 		mockRepo := mocks.NewMockCostRepository(ctrl)
 		svc := service.NewCostService(mockRepo)
 
-		mockRepo.EXPECT().FindByID("cost-1").Return(nil, domains.NewNotFoundError("cost not found"))
+		mockRepo.EXPECT().FindByID(testutil.CostID).Return(nil, domains.NewNotFoundError("cost not found"))
 
-		_, err := svc.FindByID("cost-1", "user-1")
+		_, err := svc.FindByID(testutil.CostID, testutil.UserID)
 
 		assert.ErrorIs(t, err, domains.ErrNotFound)
 	})
@@ -153,9 +161,10 @@ func TestCostService_FindByID(t *testing.T) {
 		mockRepo := mocks.NewMockCostRepository(ctrl)
 		svc := service.NewCostService(mockRepo)
 
-		mockRepo.EXPECT().FindByID("cost-1").Return(testutil.NewCostFixture(), nil)
+		m := testutil.NewCostMock()
+		mockRepo.EXPECT().FindByID(m.ID).Return(m.Cost, nil)
 
-		_, err := svc.FindByID("cost-1", "user-2")
+		_, err := svc.FindByID(m.ID, testutil.UserID2)
 
 		assert.ErrorIs(t, err, domains.ErrForbidden)
 	})
@@ -167,16 +176,16 @@ func TestCostService_Update(t *testing.T) {
 		mockRepo := mocks.NewMockCostRepository(ctrl)
 		svc := service.NewCostService(mockRepo)
 
-		existing := testutil.NewCostFixture()
-		incoming := domains.NewCost("user-1", "", "Jantar Atualizado", "Dinner", 150.0, 0)
+		m := testutil.NewCostMock()
+		incoming := domains.NewCost(testutil.UserID, "", "Jantar Atualizado", m.Category, 150.0, 0)
 
-		mockRepo.EXPECT().FindByID("cost-1").Return(existing, nil)
-		mockRepo.EXPECT().Update("cost-1", gomock.Any()).Return(testutil.NewCostFixture(), nil)
+		mockRepo.EXPECT().FindByID(m.ID).Return(m.Cost, nil)
+		mockRepo.EXPECT().Update(m.ID, gomock.Any()).Return(m.Cost, nil)
 
-		result, err := svc.Update("cost-1", "user-1", incoming, nil)
+		result, err := svc.Update(m.ID, testutil.UserID, incoming, nil)
 
 		assert.NoError(t, err)
-		assert.Equal(t, "cost-1", result.ID)
+		assert.Equal(t, m.ID, result.ID)
 	})
 
 	t.Run("success - ownerPercentage mantido quando nil", func(t *testing.T) {
@@ -184,16 +193,16 @@ func TestCostService_Update(t *testing.T) {
 		mockRepo := mocks.NewMockCostRepository(ctrl)
 		svc := service.NewCostService(mockRepo)
 
-		existing := testutil.NewCostFixture()
-		incoming := domains.NewCost("user-1", "", "Jantar Atualizado", "Dinner", 150.0, 0)
+		m := testutil.NewCostMock()
+		incoming := domains.NewCost(testutil.UserID, "", "Jantar Atualizado", m.Category, 150.0, 0)
 
-		mockRepo.EXPECT().FindByID("cost-1").Return(existing, nil)
-		mockRepo.EXPECT().Update("cost-1", gomock.Any()).DoAndReturn(func(_ string, cost *domains.Cost) (*domains.Cost, error) {
-			assert.Equal(t, existing.OwnerPercentage, cost.OwnerPercentage)
-			return testutil.NewCostFixture(), nil
+		mockRepo.EXPECT().FindByID(m.ID).Return(m.Cost, nil)
+		mockRepo.EXPECT().Update(m.ID, gomock.Any()).DoAndReturn(func(_ string, cost *domains.Cost) (*domains.Cost, error) {
+			assert.Equal(t, m.OwnerPercentage, cost.OwnerPercentage)
+			return m.Cost, nil
 		})
 
-		_, err := svc.Update("cost-1", "user-1", incoming, nil)
+		_, err := svc.Update(m.ID, testutil.UserID, incoming, nil)
 
 		assert.NoError(t, err)
 	})
@@ -203,9 +212,10 @@ func TestCostService_Update(t *testing.T) {
 		mockRepo := mocks.NewMockCostRepository(ctrl)
 		svc := service.NewCostService(mockRepo)
 
-		mockRepo.EXPECT().FindByID("cost-1").Return(testutil.NewCostFixture(), nil)
+		m := testutil.NewCostMock()
+		mockRepo.EXPECT().FindByID(m.ID).Return(m.Cost, nil)
 
-		_, err := svc.Update("cost-1", "user-1", domains.NewCost("user-1", "", "X", "Dinner", 100, 0), float64Ptr(0))
+		_, err := svc.Update(m.ID, testutil.UserID, domains.NewCost(testutil.UserID, "", "X", testutil.CostCategory, 100, 0), float64Ptr(0))
 
 		assert.ErrorIs(t, err, domains.ErrInvalidInput)
 	})
@@ -215,9 +225,10 @@ func TestCostService_Update(t *testing.T) {
 		mockRepo := mocks.NewMockCostRepository(ctrl)
 		svc := service.NewCostService(mockRepo)
 
-		mockRepo.EXPECT().FindByID("cost-1").Return(testutil.NewCostFixture(), nil)
+		m := testutil.NewCostMock()
+		mockRepo.EXPECT().FindByID(m.ID).Return(m.Cost, nil)
 
-		_, err := svc.Update("cost-1", "user-1", domains.NewCost("user-1", "", "X", "Dinner", 100, 0), float64Ptr(100))
+		_, err := svc.Update(m.ID, testutil.UserID, domains.NewCost(testutil.UserID, "", "X", testutil.CostCategory, 100, 0), float64Ptr(100))
 
 		assert.ErrorIs(t, err, domains.ErrInvalidInput)
 	})
@@ -227,9 +238,9 @@ func TestCostService_Update(t *testing.T) {
 		mockRepo := mocks.NewMockCostRepository(ctrl)
 		svc := service.NewCostService(mockRepo)
 
-		mockRepo.EXPECT().FindByID("cost-1").Return(nil, domains.NewNotFoundError("cost not found"))
+		mockRepo.EXPECT().FindByID(testutil.CostID).Return(nil, domains.NewNotFoundError("cost not found"))
 
-		_, err := svc.Update("cost-1", "user-1", domains.NewCost("user-1", "", "X", "Dinner", 100, 0), nil)
+		_, err := svc.Update(testutil.CostID, testutil.UserID, domains.NewCost(testutil.UserID, "", "X", testutil.CostCategory, 100, 0), nil)
 
 		assert.ErrorIs(t, err, domains.ErrNotFound)
 	})
@@ -239,9 +250,10 @@ func TestCostService_Update(t *testing.T) {
 		mockRepo := mocks.NewMockCostRepository(ctrl)
 		svc := service.NewCostService(mockRepo)
 
-		mockRepo.EXPECT().FindByID("cost-1").Return(testutil.NewCostFixture(), nil)
+		m := testutil.NewCostMock()
+		mockRepo.EXPECT().FindByID(m.ID).Return(m.Cost, nil)
 
-		_, err := svc.Update("cost-1", "user-2", domains.NewCost("user-2", "", "X", "Dinner", 100, 0), nil)
+		_, err := svc.Update(m.ID, testutil.UserID2, domains.NewCost(testutil.UserID2, "", "X", testutil.CostCategory, 100, 0), nil)
 
 		assert.ErrorIs(t, err, domains.ErrForbidden)
 	})
@@ -253,10 +265,11 @@ func TestCostService_Delete(t *testing.T) {
 		mockRepo := mocks.NewMockCostRepository(ctrl)
 		svc := service.NewCostService(mockRepo)
 
-		mockRepo.EXPECT().FindByID("cost-1").Return(testutil.NewCostFixture(), nil)
-		mockRepo.EXPECT().Delete("cost-1").Return(nil)
+		m := testutil.NewCostMock()
+		mockRepo.EXPECT().FindByID(m.ID).Return(m.Cost, nil)
+		mockRepo.EXPECT().Delete(m.ID).Return(nil)
 
-		err := svc.Delete("cost-1", "user-1")
+		err := svc.Delete(m.ID, testutil.UserID)
 		assert.NoError(t, err)
 	})
 
@@ -265,9 +278,9 @@ func TestCostService_Delete(t *testing.T) {
 		mockRepo := mocks.NewMockCostRepository(ctrl)
 		svc := service.NewCostService(mockRepo)
 
-		mockRepo.EXPECT().FindByID("cost-1").Return(nil, domains.NewNotFoundError("cost not found"))
+		mockRepo.EXPECT().FindByID(testutil.CostID).Return(nil, domains.NewNotFoundError("cost not found"))
 
-		err := svc.Delete("cost-1", "user-1")
+		err := svc.Delete(testutil.CostID, testutil.UserID)
 
 		assert.ErrorIs(t, err, domains.ErrNotFound)
 	})
@@ -277,9 +290,10 @@ func TestCostService_Delete(t *testing.T) {
 		mockRepo := mocks.NewMockCostRepository(ctrl)
 		svc := service.NewCostService(mockRepo)
 
-		mockRepo.EXPECT().FindByID("cost-1").Return(testutil.NewCostFixture(), nil)
+		m := testutil.NewCostMock()
+		mockRepo.EXPECT().FindByID(m.ID).Return(m.Cost, nil)
 
-		err := svc.Delete("cost-1", "user-2")
+		err := svc.Delete(m.ID, testutil.UserID2)
 
 		assert.ErrorIs(t, err, domains.ErrForbidden)
 	})

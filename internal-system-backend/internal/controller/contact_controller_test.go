@@ -21,16 +21,16 @@ func TestCreateContact(t *testing.T) {
 		mockService := mocks.NewMockContactService(ctrl)
 		cc := controller.NewContactController(mockService)
 
-		contact := testutil.NewContactFixture()
-		mockService.EXPECT().Create(gomock.Any()).Return(contact, nil)
+		m := testutil.NewContactMock()
+		mockService.EXPECT().Create(gomock.Any()).Return(m.Contact, nil)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
+		testutil.SetAuthUser(ctx, testutil.UserID)
 		testutil.MakePost(ctx, nil, map[string]any{
-			"name":     "Ana",
-			"email":    "ana@email.com",
-			"phone":    "11999999999",
-			"category": "Friend",
+			"name":     m.Name,
+			"email":    m.Email,
+			"phone":    m.Phone,
+			"category": m.Category,
 		})
 
 		cc.CreateContact(ctx)
@@ -38,8 +38,8 @@ func TestCreateContact(t *testing.T) {
 		assert.Equal(t, http.StatusCreated, rec.Code)
 		var body response.ContactResponse
 		json.Unmarshal(rec.Body.Bytes(), &body)
-		assert.Equal(t, "Ana", body.Name)
-		assert.Equal(t, "Friend", body.Category)
+		assert.Equal(t, m.Name, body.Name)
+		assert.Equal(t, m.Category, body.Category)
 	})
 
 	t.Run("validation error - missing required fields", func(t *testing.T) {
@@ -48,7 +48,7 @@ func TestCreateContact(t *testing.T) {
 		cc := controller.NewContactController(mockService)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
+		testutil.SetAuthUser(ctx, testutil.UserID)
 		testutil.MakePost(ctx, nil, map[string]any{
 			"name": "Ana",
 		})
@@ -64,7 +64,7 @@ func TestCreateContact(t *testing.T) {
 		cc := controller.NewContactController(mockService)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
+		testutil.SetAuthUser(ctx, testutil.UserID)
 		testutil.MakePost(ctx, nil, map[string]any{
 			"name":     "Ana",
 			"email":    "ana@email.com",
@@ -84,13 +84,13 @@ func TestFindAllContacts(t *testing.T) {
 		mockService := mocks.NewMockContactService(ctrl)
 		cc := controller.NewContactController(mockService)
 
-		c1 := testutil.NewContactFixture()
-		c2 := testutil.NewContactFixture()
-		c2.ID = "contact-2"
-		mockService.EXPECT().FindAll("user-1").Return([]*domains.Contact{c1, c2}, nil)
+		m1 := testutil.NewContactMock()
+		m2 := testutil.NewContactMock()
+		m2.Contact.ID = "contact-2"
+		mockService.EXPECT().FindAll(testutil.UserID).Return([]*domains.Contact{m1.Contact, m2.Contact}, nil)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
+		testutil.SetAuthUser(ctx, testutil.UserID)
 		testutil.MakeGet(ctx, nil, nil)
 
 		cc.FindAllContacts(ctx)
@@ -108,19 +108,19 @@ func TestFindContactByID(t *testing.T) {
 		mockService := mocks.NewMockContactService(ctrl)
 		cc := controller.NewContactController(mockService)
 
-		contact := testutil.NewContactFixture()
-		mockService.EXPECT().FindByID("contact-1", "user-1").Return(contact, nil)
+		m := testutil.NewContactMock()
+		mockService.EXPECT().FindByID(m.ID, testutil.UserID).Return(m.Contact, nil)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakeGet(ctx, gin.Params{{Key: "id", Value: "contact-1"}}, nil)
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakeGet(ctx, gin.Params{{Key: "id", Value: m.ID}}, nil)
 
 		cc.FindContactByID(ctx)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var body response.ContactResponse
 		json.Unmarshal(rec.Body.Bytes(), &body)
-		assert.Equal(t, "contact-1", body.ID)
+		assert.Equal(t, m.ID, body.ID)
 	})
 
 	t.Run("not found", func(t *testing.T) {
@@ -128,11 +128,11 @@ func TestFindContactByID(t *testing.T) {
 		mockService := mocks.NewMockContactService(ctrl)
 		cc := controller.NewContactController(mockService)
 
-		mockService.EXPECT().FindByID("contact-1", "user-1").Return(nil, domains.NewNotFoundError("contact not found"))
+		mockService.EXPECT().FindByID(testutil.ContactID, testutil.UserID).Return(nil, domains.NewNotFoundError("contact not found"))
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakeGet(ctx, gin.Params{{Key: "id", Value: "contact-1"}}, nil)
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakeGet(ctx, gin.Params{{Key: "id", Value: testutil.ContactID}}, nil)
 
 		cc.FindContactByID(ctx)
 
@@ -144,11 +144,11 @@ func TestFindContactByID(t *testing.T) {
 		mockService := mocks.NewMockContactService(ctrl)
 		cc := controller.NewContactController(mockService)
 
-		mockService.EXPECT().FindByID("contact-1", "user-2").Return(nil, domains.NewForbiddenError("access denied"))
+		mockService.EXPECT().FindByID(testutil.ContactID, testutil.UserID2).Return(nil, domains.NewForbiddenError("access denied"))
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-2")
-		testutil.MakeGet(ctx, gin.Params{{Key: "id", Value: "contact-1"}}, nil)
+		testutil.SetAuthUser(ctx, testutil.UserID2)
+		testutil.MakeGet(ctx, gin.Params{{Key: "id", Value: testutil.ContactID}}, nil)
 
 		cc.FindContactByID(ctx)
 
@@ -162,14 +162,14 @@ func TestUpdateContact(t *testing.T) {
 		mockService := mocks.NewMockContactService(ctrl)
 		cc := controller.NewContactController(mockService)
 
-		updated := testutil.NewContactFixture()
-		updated.Name = "Ana Silva"
-		mockService.EXPECT().Update(gomock.Any()).Return(updated, nil)
+		m := testutil.NewContactMock()
+		m.Contact.Name = testutil.ContactUpdatedName
+		mockService.EXPECT().Update(gomock.Any()).Return(m.Contact, nil)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "contact-1"}}, map[string]any{
-			"name": "Ana Silva",
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: m.ID}}, map[string]any{
+			"name": testutil.ContactUpdatedName,
 		})
 
 		cc.UpdateContact(ctx)
@@ -177,7 +177,7 @@ func TestUpdateContact(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var body response.ContactResponse
 		json.Unmarshal(rec.Body.Bytes(), &body)
-		assert.Equal(t, "Ana Silva", body.Name)
+		assert.Equal(t, testutil.ContactUpdatedName, body.Name)
 	})
 
 	t.Run("validation error - invalid category", func(t *testing.T) {
@@ -186,8 +186,8 @@ func TestUpdateContact(t *testing.T) {
 		cc := controller.NewContactController(mockService)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "contact-1"}}, map[string]any{
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: testutil.ContactID}}, map[string]any{
 			"category": "Invalid",
 		})
 
@@ -204,9 +204,9 @@ func TestUpdateContact(t *testing.T) {
 		mockService.EXPECT().Update(gomock.Any()).Return(nil, domains.NewNotFoundError("contact not found"))
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "contact-1"}}, map[string]any{
-			"name": "Ana Silva",
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: testutil.ContactID}}, map[string]any{
+			"name": testutil.ContactUpdatedName,
 		})
 
 		cc.UpdateContact(ctx)
@@ -222,9 +222,9 @@ func TestUpdateContact(t *testing.T) {
 		mockService.EXPECT().Update(gomock.Any()).Return(nil, domains.NewForbiddenError("access denied"))
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-2")
-		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "contact-1"}}, map[string]any{
-			"name": "Ana Silva",
+		testutil.SetAuthUser(ctx, testutil.UserID2)
+		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: testutil.ContactID}}, map[string]any{
+			"name": testutil.ContactUpdatedName,
 		})
 
 		cc.UpdateContact(ctx)
@@ -239,11 +239,11 @@ func TestDeleteContact(t *testing.T) {
 		mockService := mocks.NewMockContactService(ctrl)
 		cc := controller.NewContactController(mockService)
 
-		mockService.EXPECT().Delete("contact-1", "user-1").Return(nil)
+		mockService.EXPECT().Delete(testutil.ContactID, testutil.UserID).Return(nil)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakeDelete(ctx, gin.Params{{Key: "id", Value: "contact-1"}})
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakeDelete(ctx, gin.Params{{Key: "id", Value: testutil.ContactID}})
 
 		cc.DeleteContact(ctx)
 
@@ -255,11 +255,11 @@ func TestDeleteContact(t *testing.T) {
 		mockService := mocks.NewMockContactService(ctrl)
 		cc := controller.NewContactController(mockService)
 
-		mockService.EXPECT().Delete("contact-1", "user-1").Return(domains.NewNotFoundError("contact not found"))
+		mockService.EXPECT().Delete(testutil.ContactID, testutil.UserID).Return(domains.NewNotFoundError("contact not found"))
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakeDelete(ctx, gin.Params{{Key: "id", Value: "contact-1"}})
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakeDelete(ctx, gin.Params{{Key: "id", Value: testutil.ContactID}})
 
 		cc.DeleteContact(ctx)
 

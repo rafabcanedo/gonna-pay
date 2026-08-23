@@ -42,7 +42,6 @@ func TestNewCostResponse(t *testing.T) {
 
 		r := response.NewCostResponse(cost)
 
-		// CostResponse não tem campo Splits — só CostDetailResponse tem
 		assert.Equal(t, "cost-1", r.ID)
 	})
 }
