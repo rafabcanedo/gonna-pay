@@ -2,7 +2,6 @@ package controller
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/configuration/validation"
@@ -81,7 +80,7 @@ func (gc *GroupController) UpdateGroup(c *gin.Context) {
 		return
 	}
 
-	group := domains.NewGroupWithID(id, ownerID, req.Name, req.Category, time.Time{}, time.Time{}, nil)
+	group := domains.NewGroupForUpdate(id, ownerID, req.Name, req.Category)
 
 	updated, err := gc.service.Update(group, ownerID)
 	if err != nil {

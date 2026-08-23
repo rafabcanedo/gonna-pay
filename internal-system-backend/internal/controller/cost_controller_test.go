@@ -21,17 +21,16 @@ func TestCreateCost(t *testing.T) {
 		mockService := mocks.NewMockCostService(ctrl)
 		cc := controller.NewCostController(mockService)
 
-		cost := testutil.NewCostFixture()
-		mockService.EXPECT().Create(gomock.Any(), gomock.Any()).Return(cost, nil)
+		m := testutil.NewCostMock()
+		mockService.EXPECT().Create(gomock.Any(), gomock.Any()).Return(m.Cost, nil)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
-		ownerPct := 50.0
+		testutil.SetAuthUser(ctx, testutil.UserID)
 		testutil.MakePost(ctx, nil, map[string]any{
-			"costName":        "Jantar",
-			"totalValue":      100.0,
-			"category":        "Dinner",
-			"ownerPercentage": ownerPct,
+			"costName":        m.Name,
+			"totalValue":      m.TotalValue,
+			"category":        m.Category,
+			"ownerPercentage": m.OwnerPercentage,
 		})
 
 		cc.CreateCost(ctx)
@@ -39,8 +38,8 @@ func TestCreateCost(t *testing.T) {
 		assert.Equal(t, http.StatusCreated, rec.Code)
 		var body response.CostDetailResponse
 		json.Unmarshal(rec.Body.Bytes(), &body)
-		assert.Equal(t, "Jantar", body.CostName)
-		assert.Equal(t, 100.0, body.TotalValue)
+		assert.Equal(t, m.Name, body.CostName)
+		assert.Equal(t, m.TotalValue, body.TotalValue)
 		assert.Len(t, body.Splits, 1)
 	})
 
@@ -50,9 +49,9 @@ func TestCreateCost(t *testing.T) {
 		cc := controller.NewCostController(mockService)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
+		testutil.SetAuthUser(ctx, testutil.UserID)
 		testutil.MakePost(ctx, nil, map[string]any{
-			"costName": "Jantar",
+			"costName": testutil.CostName,
 		})
 
 		cc.CreateCost(ctx)
@@ -66,9 +65,9 @@ func TestCreateCost(t *testing.T) {
 		cc := controller.NewCostController(mockService)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
+		testutil.SetAuthUser(ctx, testutil.UserID)
 		testutil.MakePost(ctx, nil, map[string]any{
-			"costName":   "Jantar",
+			"costName":   testutil.CostName,
 			"totalValue": 100.0,
 			"category":   "Invalid",
 		})
@@ -84,11 +83,11 @@ func TestCreateCost(t *testing.T) {
 		cc := controller.NewCostController(mockService)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
+		testutil.SetAuthUser(ctx, testutil.UserID)
 		testutil.MakePost(ctx, nil, map[string]any{
-			"costName":   "Jantar",
+			"costName":   testutil.CostName,
 			"totalValue": 0,
-			"category":   "Dinner",
+			"category":   testutil.CostCategory,
 		})
 
 		cc.CreateCost(ctx)
@@ -103,13 +102,13 @@ func TestFindAllCosts(t *testing.T) {
 		mockService := mocks.NewMockCostService(ctrl)
 		cc := controller.NewCostController(mockService)
 
-		c1 := testutil.NewCostFixture()
-		c2 := testutil.NewCostFixture()
-		c2.ID = "cost-2"
-		mockService.EXPECT().FindAll("user-1").Return([]*domains.Cost{c1, c2}, nil)
+		m1 := testutil.NewCostMock()
+		m2 := testutil.NewCostMock()
+		m2.Cost.ID = "cost-2"
+		mockService.EXPECT().FindAll(testutil.UserID).Return([]*domains.Cost{m1.Cost, m2.Cost}, nil)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
+		testutil.SetAuthUser(ctx, testutil.UserID)
 		testutil.MakeGet(ctx, nil, nil)
 
 		cc.FindAllCosts(ctx)
@@ -127,19 +126,19 @@ func TestFindCostByID(t *testing.T) {
 		mockService := mocks.NewMockCostService(ctrl)
 		cc := controller.NewCostController(mockService)
 
-		cost := testutil.NewCostFixture()
-		mockService.EXPECT().FindByID("cost-1", "user-1").Return(cost, nil)
+		m := testutil.NewCostMock()
+		mockService.EXPECT().FindByID(m.ID, testutil.UserID).Return(m.Cost, nil)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakeGet(ctx, gin.Params{{Key: "id", Value: "cost-1"}}, nil)
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakeGet(ctx, gin.Params{{Key: "id", Value: m.ID}}, nil)
 
 		cc.FindCostByID(ctx)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var body response.CostDetailResponse
 		json.Unmarshal(rec.Body.Bytes(), &body)
-		assert.Equal(t, "cost-1", body.ID)
+		assert.Equal(t, m.ID, body.ID)
 	})
 
 	t.Run("not found", func(t *testing.T) {
@@ -147,11 +146,11 @@ func TestFindCostByID(t *testing.T) {
 		mockService := mocks.NewMockCostService(ctrl)
 		cc := controller.NewCostController(mockService)
 
-		mockService.EXPECT().FindByID("cost-1", "user-1").Return(nil, domains.NewNotFoundError("cost not found"))
+		mockService.EXPECT().FindByID(testutil.CostID, testutil.UserID).Return(nil, domains.NewNotFoundError("cost not found"))
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakeGet(ctx, gin.Params{{Key: "id", Value: "cost-1"}}, nil)
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakeGet(ctx, gin.Params{{Key: "id", Value: testutil.CostID}}, nil)
 
 		cc.FindCostByID(ctx)
 
@@ -163,11 +162,11 @@ func TestFindCostByID(t *testing.T) {
 		mockService := mocks.NewMockCostService(ctrl)
 		cc := controller.NewCostController(mockService)
 
-		mockService.EXPECT().FindByID("cost-1", "user-2").Return(nil, domains.NewForbiddenError("access denied"))
+		mockService.EXPECT().FindByID(testutil.CostID, testutil.UserID2).Return(nil, domains.NewForbiddenError("access denied"))
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-2")
-		testutil.MakeGet(ctx, gin.Params{{Key: "id", Value: "cost-1"}}, nil)
+		testutil.SetAuthUser(ctx, testutil.UserID2)
+		testutil.MakeGet(ctx, gin.Params{{Key: "id", Value: testutil.CostID}}, nil)
 
 		cc.FindCostByID(ctx)
 
@@ -181,15 +180,15 @@ func TestUpdateCost(t *testing.T) {
 		mockService := mocks.NewMockCostService(ctrl)
 		cc := controller.NewCostController(mockService)
 
-		updated := testutil.NewCostFixture()
-		mockService.EXPECT().Update("cost-1", "user-1", gomock.Any(), gomock.Any()).Return(updated, nil)
+		m := testutil.NewCostMock()
+		mockService.EXPECT().Update(m.ID, testutil.UserID, gomock.Any(), gomock.Any()).Return(m.Cost, nil)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "cost-1"}}, map[string]any{
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: m.ID}}, map[string]any{
 			"costName":   "Jantar Atualizado",
 			"totalValue": 150.0,
-			"category":   "Dinner",
+			"category":   m.Category,
 		})
 
 		cc.UpdateCost(ctx)
@@ -202,12 +201,12 @@ func TestUpdateCost(t *testing.T) {
 		mockService := mocks.NewMockCostService(ctrl)
 		cc := controller.NewCostController(mockService)
 
-		updated := testutil.NewCostFixture()
-		mockService.EXPECT().Update("cost-1", "user-1", gomock.Any(), gomock.Any()).Return(updated, nil)
+		m := testutil.NewCostMock()
+		mockService.EXPECT().Update(m.ID, testutil.UserID, gomock.Any(), gomock.Any()).Return(m.Cost, nil)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "cost-1"}}, map[string]any{
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: m.ID}}, map[string]any{
 			"category": "Lunch",
 		})
 
@@ -222,8 +221,8 @@ func TestUpdateCost(t *testing.T) {
 		cc := controller.NewCostController(mockService)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "cost-1"}}, map[string]any{
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: testutil.CostID}}, map[string]any{
 			"category": "Invalid",
 		})
 
@@ -237,12 +236,12 @@ func TestUpdateCost(t *testing.T) {
 		mockService := mocks.NewMockCostService(ctrl)
 		cc := controller.NewCostController(mockService)
 
-		mockService.EXPECT().Update("cost-1", "user-1", gomock.Any(), gomock.Any()).Return(nil, domains.NewNotFoundError("cost not found"))
+		mockService.EXPECT().Update(testutil.CostID, testutil.UserID, gomock.Any(), gomock.Any()).Return(nil, domains.NewNotFoundError("cost not found"))
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "cost-1"}}, map[string]any{
-			"category": "Dinner",
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: testutil.CostID}}, map[string]any{
+			"category": testutil.CostCategory,
 		})
 
 		cc.UpdateCost(ctx)
@@ -257,11 +256,11 @@ func TestDeleteCost(t *testing.T) {
 		mockService := mocks.NewMockCostService(ctrl)
 		cc := controller.NewCostController(mockService)
 
-		mockService.EXPECT().Delete("cost-1", "user-1").Return(nil)
+		mockService.EXPECT().Delete(testutil.CostID, testutil.UserID).Return(nil)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakeDelete(ctx, gin.Params{{Key: "id", Value: "cost-1"}})
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakeDelete(ctx, gin.Params{{Key: "id", Value: testutil.CostID}})
 
 		cc.DeleteCost(ctx)
 
@@ -273,11 +272,11 @@ func TestDeleteCost(t *testing.T) {
 		mockService := mocks.NewMockCostService(ctrl)
 		cc := controller.NewCostController(mockService)
 
-		mockService.EXPECT().Delete("cost-1", "user-1").Return(domains.NewNotFoundError("cost not found"))
+		mockService.EXPECT().Delete(testutil.CostID, testutil.UserID).Return(domains.NewNotFoundError("cost not found"))
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakeDelete(ctx, gin.Params{{Key: "id", Value: "cost-1"}})
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakeDelete(ctx, gin.Params{{Key: "id", Value: testutil.CostID}})
 
 		cc.DeleteCost(ctx)
 

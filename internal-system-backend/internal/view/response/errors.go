@@ -16,7 +16,7 @@ func RespondError(c *gin.Context, err error) {
 	case errors.Is(err, domains.ErrForbidden):
 		c.JSON(http.StatusForbidden, rest_errors.NewForbiddenError(err.Error()))
 	case errors.Is(err, domains.ErrConflict):
-		c.JSON(http.StatusConflict, rest_errors.NewBadRequestError(err.Error()))
+		c.JSON(http.StatusConflict, rest_errors.NewConflictError(err.Error()))
 	case errors.Is(err, domains.ErrUnauthorized):
 		c.JSON(http.StatusUnauthorized, rest_errors.NewUnauthorizedRequestError(err.Error()))
 	case errors.Is(err, domains.ErrInvalidInput):

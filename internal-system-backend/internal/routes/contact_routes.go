@@ -12,7 +12,7 @@ func ContactRoutes(router *gin.Engine, ctrl *controller.ContactController) {
     {
         contact.POST("", ctrl.CreateContact)
         contact.GET("/:id", ctrl.FindContactByID)
-        contact.PUT("/:id", ctrl.UpdateContact)
+        contact.PATCH("/:id", ctrl.UpdateContact)
         contact.DELETE("/:id", ctrl.DeleteContact)
     }
 

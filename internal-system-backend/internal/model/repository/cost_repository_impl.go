@@ -90,28 +90,24 @@ func (r *costRepository) Create(cost *domains.Cost, members []domains.Member) (*
 func (r *costRepository) Update(id string, cost *domains.Cost) (*domains.Cost, error) {
 	now := time.Now()
 
-	existing, err := r.FindByID(id)
-	if err != nil {
-		return nil, err
-	}
-
 	var splitsJSON []byte
-	if len(existing.Splits) > 0 {
-		memberPercentage := math.Round(((100-cost.OwnerPercentage)/float64(len(existing.Splits)))*100) / 100
+	if len(cost.Splits) > 0 {
+		memberPercentage := math.Round(((100-cost.OwnerPercentage)/float64(len(cost.Splits)))*100) / 100
 		memberValue := math.Round((cost.TotalValue*memberPercentage/100)*100) / 100
 
-		for i := range existing.Splits {
-			existing.Splits[i].Percentage = memberPercentage
-			existing.Splits[i].Value = memberValue
+		for i := range cost.Splits {
+			cost.Splits[i].Percentage = memberPercentage
+			cost.Splits[i].Value = memberValue
 		}
 
-		splitsJSON, err = json.Marshal(existing.Splits)
+		var err error
+		splitsJSON, err = json.Marshal(cost.Splits)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	_, err = r.db.Exec(
+	_, err := r.db.Exec(
 		`UPDATE cost_entities SET cost_name=$1, total_value=$2, owner_percentage=$3, category=$4, splits=$5::jsonb, updated_at=$6 WHERE id=$7`,
 		cost.CostName, cost.TotalValue, cost.OwnerPercentage, cost.Category, splitsJSON, now, id,
 	)
@@ -120,18 +116,18 @@ func (r *costRepository) Update(id string, cost *domains.Cost) (*domains.Cost, e
 	}
 
 	return &domains.Cost{
-		ID:              existing.ID,
-		UserID:          existing.UserID,
-		GroupID:         existing.GroupID,
-		GroupName:       existing.GroupName,
+		ID:              cost.ID,
+		UserID:          cost.UserID,
+		GroupID:         cost.GroupID,
+		GroupName:       cost.GroupName,
 		CostName:        cost.CostName,
 		TotalValue:      cost.TotalValue,
 		OwnerPercentage: cost.OwnerPercentage,
 		Category:        cost.Category,
-		CreatedAt:       existing.CreatedAt,
+		CreatedAt:       cost.CreatedAt,
 		UpdatedAt:       now,
-		SplitCount:      len(existing.Splits),
-		Splits:          existing.Splits,
+		SplitCount:      len(cost.Splits),
+		Splits:          cost.Splits,
 	}, nil
 }
 
@@ -192,7 +188,7 @@ func (r *costRepository) FindAll(userID string) ([]*domains.Cost, error) {
 			CostName:        costName,
 			TotalValue:      totalValue,
 			OwnerPercentage: ownerPercentage,
-			Category:        string(category),
+			Category:        category,
 			CreatedAt:       createdAt,
 			UpdatedAt:       updatedAt,
 			SplitCount:      splitCount,

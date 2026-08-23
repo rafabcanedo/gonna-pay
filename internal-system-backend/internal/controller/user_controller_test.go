@@ -21,15 +21,15 @@ func TestCreateUser(t *testing.T) {
 		mockService := mocks.NewMockUserService(ctrl)
 		uc := controller.NewUserController(mockService)
 
-		user := testutil.NewUserFixture()
-		mockService.EXPECT().Create(gomock.Any()).Return(user, nil)
+		m := testutil.NewUserMock()
+		mockService.EXPECT().Create(gomock.Any()).Return(m.User, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.MakePost(ctx, nil, map[string]any{
-			"name":     "Rafael",
-			"email":    "rafael@email.com",
+			"name":     m.Name,
+			"email":    m.Email,
 			"password": "senha123",
-			"phone":    "11999999999",
+			"phone":    m.Phone,
 		})
 
 		uc.CreateUser(ctx)
@@ -37,8 +37,8 @@ func TestCreateUser(t *testing.T) {
 		assert.Equal(t, http.StatusCreated, rec.Code)
 		var body response.UserResponse
 		json.Unmarshal(rec.Body.Bytes(), &body)
-		assert.Equal(t, "Rafael", body.Name)
-		assert.Equal(t, "rafael@email.com", body.Email)
+		assert.Equal(t, m.Name, body.Name)
+		assert.Equal(t, m.Email, body.Email)
 	})
 
 	t.Run("validation error - missing fields", func(t *testing.T) {
@@ -48,7 +48,7 @@ func TestCreateUser(t *testing.T) {
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.MakePost(ctx, nil, map[string]any{
-			"name": "Rafael",
+			"name": testutil.UserName,
 		})
 
 		uc.CreateUser(ctx)
@@ -63,10 +63,10 @@ func TestCreateUser(t *testing.T) {
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.MakePost(ctx, nil, map[string]any{
-			"name":     "Rafael",
+			"name":     testutil.UserName,
 			"email":    "not-an-email",
 			"password": "senha123",
-			"phone":    "11999999999",
+			"phone":    testutil.UserPhone,
 		})
 
 		uc.CreateUser(ctx)
@@ -83,10 +83,10 @@ func TestCreateUser(t *testing.T) {
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.MakePost(ctx, nil, map[string]any{
-			"name":     "Rafael",
-			"email":    "rafael@email.com",
+			"name":     testutil.UserName,
+			"email":    testutil.UserEmail,
 			"password": "senha123",
-			"phone":    "11999999999",
+			"phone":    testutil.UserPhone,
 		})
 
 		uc.CreateUser(ctx)
@@ -101,10 +101,10 @@ func TestFindAllUsers(t *testing.T) {
 		mockService := mocks.NewMockUserService(ctrl)
 		uc := controller.NewUserController(mockService)
 
-		u1 := testutil.NewUserFixture()
-		u2 := testutil.NewUserFixture()
-		u2.ID = "user-2"
-		mockService.EXPECT().FindAll().Return([]*domains.User{u1, u2}, nil)
+		m1 := testutil.NewUserMock()
+		m2 := testutil.NewUserMock()
+		m2.User.ID = testutil.UserID2
+		mockService.EXPECT().FindAll().Return([]*domains.User{m1.User, m2.User}, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.MakeGet(ctx, nil, nil)
@@ -124,18 +124,18 @@ func TestFindUserByID(t *testing.T) {
 		mockService := mocks.NewMockUserService(ctrl)
 		uc := controller.NewUserController(mockService)
 
-		user := testutil.NewUserFixture()
-		mockService.EXPECT().FindByID("user-1").Return(user, nil)
+		m := testutil.NewUserMock()
+		mockService.EXPECT().FindByID(m.ID).Return(m.User, nil)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.MakeGet(ctx, gin.Params{{Key: "id", Value: "user-1"}}, nil)
+		testutil.MakeGet(ctx, gin.Params{{Key: "id", Value: m.ID}}, nil)
 
 		uc.FindUserByID(ctx)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var body response.UserResponse
 		json.Unmarshal(rec.Body.Bytes(), &body)
-		assert.Equal(t, "user-1", body.ID)
+		assert.Equal(t, m.ID, body.ID)
 	})
 
 	t.Run("not found", func(t *testing.T) {
@@ -143,10 +143,10 @@ func TestFindUserByID(t *testing.T) {
 		mockService := mocks.NewMockUserService(ctrl)
 		uc := controller.NewUserController(mockService)
 
-		mockService.EXPECT().FindByID("user-1").Return(nil, domains.NewNotFoundError("user not found"))
+		mockService.EXPECT().FindByID(testutil.UserID).Return(nil, domains.NewNotFoundError("user not found"))
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.MakeGet(ctx, gin.Params{{Key: "id", Value: "user-1"}}, nil)
+		testutil.MakeGet(ctx, gin.Params{{Key: "id", Value: testutil.UserID}}, nil)
 
 		uc.FindUserByID(ctx)
 
@@ -160,13 +160,13 @@ func TestUpdateUser(t *testing.T) {
 		mockService := mocks.NewMockUserService(ctrl)
 		uc := controller.NewUserController(mockService)
 
-		updated := testutil.NewUserFixture()
-		updated.Name = "Rafael Novo"
-		mockService.EXPECT().Update(gomock.Any()).Return(updated, nil)
+		m := testutil.NewUserMock()
+		m.User.Name = testutil.UserUpdatedName
+		mockService.EXPECT().Update(gomock.Any()).Return(m.User, nil)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "user-1"}}, map[string]any{
-			"name": "Rafael Novo",
+		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: m.ID}}, map[string]any{
+			"name": testutil.UserUpdatedName,
 		})
 
 		uc.UpdateUser(ctx)
@@ -174,7 +174,7 @@ func TestUpdateUser(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var body response.UserResponse
 		json.Unmarshal(rec.Body.Bytes(), &body)
-		assert.Equal(t, "Rafael Novo", body.Name)
+		assert.Equal(t, testutil.UserUpdatedName, body.Name)
 	})
 
 	t.Run("validation error - invalid email", func(t *testing.T) {
@@ -183,7 +183,7 @@ func TestUpdateUser(t *testing.T) {
 		uc := controller.NewUserController(mockService)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "user-1"}}, map[string]any{
+		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: testutil.UserID}}, map[string]any{
 			"email": "not-an-email",
 		})
 
@@ -199,10 +199,10 @@ func TestDeleteUser(t *testing.T) {
 		mockService := mocks.NewMockUserService(ctrl)
 		uc := controller.NewUserController(mockService)
 
-		mockService.EXPECT().Delete("user-1").Return(nil)
+		mockService.EXPECT().Delete(testutil.UserID).Return(nil)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.MakeDelete(ctx, gin.Params{{Key: "id", Value: "user-1"}})
+		testutil.MakeDelete(ctx, gin.Params{{Key: "id", Value: testutil.UserID}})
 
 		uc.DeleteUser(ctx)
 
@@ -214,10 +214,10 @@ func TestDeleteUser(t *testing.T) {
 		mockService := mocks.NewMockUserService(ctrl)
 		uc := controller.NewUserController(mockService)
 
-		mockService.EXPECT().Delete("user-1").Return(domains.NewNotFoundError("user not found"))
+		mockService.EXPECT().Delete(testutil.UserID).Return(domains.NewNotFoundError("user not found"))
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.MakeDelete(ctx, gin.Params{{Key: "id", Value: "user-1"}})
+		testutil.MakeDelete(ctx, gin.Params{{Key: "id", Value: testutil.UserID}})
 
 		uc.DeleteUser(ctx)
 

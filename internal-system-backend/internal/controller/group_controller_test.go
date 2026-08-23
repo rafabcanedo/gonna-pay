@@ -21,14 +21,14 @@ func TestCreateGroup(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		group := testutil.NewGroupFixture()
-		mockService.EXPECT().Create(gomock.Any(), gomock.Any()).Return(group, nil)
+		m := testutil.NewGroupMock()
+		mockService.EXPECT().Create(gomock.Any(), gomock.Any()).Return(m.Group, nil)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
+		testutil.SetAuthUser(ctx, testutil.UserID)
 		testutil.MakePost(ctx, nil, map[string]any{
-			"name":     "Viagem",
-			"category": "Travel",
+			"name":     m.Name,
+			"category": m.Category,
 		})
 
 		gc.CreateGroup(ctx)
@@ -36,8 +36,8 @@ func TestCreateGroup(t *testing.T) {
 		assert.Equal(t, http.StatusCreated, rec.Code)
 		var body response.GroupResponse
 		json.Unmarshal(rec.Body.Bytes(), &body)
-		assert.Equal(t, "Viagem", body.Name)
-		assert.Equal(t, "Travel", body.Category)
+		assert.Equal(t, m.Name, body.Name)
+		assert.Equal(t, m.Category, body.Category)
 	})
 
 	t.Run("validation error - missing required fields", func(t *testing.T) {
@@ -46,7 +46,7 @@ func TestCreateGroup(t *testing.T) {
 		gc := controller.NewGroupController(mockService)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
+		testutil.SetAuthUser(ctx, testutil.UserID)
 		testutil.MakePost(ctx, nil, map[string]any{})
 
 		gc.CreateGroup(ctx)
@@ -60,9 +60,9 @@ func TestCreateGroup(t *testing.T) {
 		gc := controller.NewGroupController(mockService)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
+		testutil.SetAuthUser(ctx, testutil.UserID)
 		testutil.MakePost(ctx, nil, map[string]any{
-			"name":     "Viagem",
+			"name":     testutil.GroupName,
 			"category": "Invalid",
 		})
 
@@ -79,10 +79,10 @@ func TestCreateGroup(t *testing.T) {
 		mockService.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil, domains.NewForbiddenError("access denied"))
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
+		testutil.SetAuthUser(ctx, testutil.UserID)
 		testutil.MakePost(ctx, nil, map[string]any{
-			"name":     "Viagem",
-			"category": "Travel",
+			"name":     testutil.GroupName,
+			"category": testutil.GroupCategory,
 		})
 
 		gc.CreateGroup(ctx)
@@ -97,13 +97,13 @@ func TestFindAllGroups(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		g1 := testutil.NewGroupFixture()
-		g2 := testutil.NewGroupFixture()
-		g2.ID = "group-2"
-		mockService.EXPECT().FindAll("user-1").Return([]*domains.Group{g1, g2}, nil)
+		m1 := testutil.NewGroupMock()
+		m2 := testutil.NewGroupMock()
+		m2.Group.ID = "group-2"
+		mockService.EXPECT().FindAll(testutil.UserID).Return([]*domains.Group{m1.Group, m2.Group}, nil)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
+		testutil.SetAuthUser(ctx, testutil.UserID)
 		testutil.MakeGet(ctx, nil, nil)
 
 		gc.FindAllGroups(ctx)
@@ -119,10 +119,10 @@ func TestFindAllGroups(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		mockService.EXPECT().FindAll("user-1").Return(nil, domains.NewNotFoundError("not found"))
+		mockService.EXPECT().FindAll(testutil.UserID).Return(nil, domains.NewNotFoundError("not found"))
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
+		testutil.SetAuthUser(ctx, testutil.UserID)
 		testutil.MakeGet(ctx, nil, nil)
 
 		gc.FindAllGroups(ctx)
@@ -137,19 +137,19 @@ func TestFindGroupByID(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		group := testutil.NewGroupFixture()
-		mockService.EXPECT().FindByID("group-1", "user-1").Return(group, nil)
+		m := testutil.NewGroupMock()
+		mockService.EXPECT().FindByID(m.ID, testutil.UserID).Return(m.Group, nil)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakeGet(ctx, gin.Params{{Key: "id", Value: "group-1"}}, nil)
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakeGet(ctx, gin.Params{{Key: "id", Value: m.ID}}, nil)
 
 		gc.FindGroupByID(ctx)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var body response.GroupDetailResponse
 		json.Unmarshal(rec.Body.Bytes(), &body)
-		assert.Equal(t, "group-1", body.ID)
+		assert.Equal(t, m.ID, body.ID)
 	})
 
 	t.Run("not found", func(t *testing.T) {
@@ -157,11 +157,11 @@ func TestFindGroupByID(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		mockService.EXPECT().FindByID("group-1", "user-1").Return(nil, domains.NewNotFoundError("group not found"))
+		mockService.EXPECT().FindByID(testutil.GroupID, testutil.UserID).Return(nil, domains.NewNotFoundError("group not found"))
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakeGet(ctx, gin.Params{{Key: "id", Value: "group-1"}}, nil)
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakeGet(ctx, gin.Params{{Key: "id", Value: testutil.GroupID}}, nil)
 
 		gc.FindGroupByID(ctx)
 
@@ -173,11 +173,11 @@ func TestFindGroupByID(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		mockService.EXPECT().FindByID("group-1", "user-2").Return(nil, domains.NewForbiddenError("access denied"))
+		mockService.EXPECT().FindByID(testutil.GroupID, testutil.UserID2).Return(nil, domains.NewForbiddenError("access denied"))
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-2")
-		testutil.MakeGet(ctx, gin.Params{{Key: "id", Value: "group-1"}}, nil)
+		testutil.SetAuthUser(ctx, testutil.UserID2)
+		testutil.MakeGet(ctx, gin.Params{{Key: "id", Value: testutil.GroupID}}, nil)
 
 		gc.FindGroupByID(ctx)
 
@@ -191,14 +191,14 @@ func TestUpdateGroup(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		updated := testutil.NewGroupFixture()
-		updated.Name = "Novo Nome"
-		mockService.EXPECT().Update(gomock.Any(), "user-1").Return(updated, nil)
+		m := testutil.NewGroupMock()
+		m.Group.Name = testutil.GroupUpdatedName
+		mockService.EXPECT().Update(gomock.Any(), testutil.UserID).Return(m.Group, nil)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "group-1"}}, map[string]any{
-			"name": "Novo Nome",
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: m.ID}}, map[string]any{
+			"name": testutil.GroupUpdatedName,
 		})
 
 		gc.UpdateGroup(ctx)
@@ -206,7 +206,7 @@ func TestUpdateGroup(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var body response.GroupResponse
 		json.Unmarshal(rec.Body.Bytes(), &body)
-		assert.Equal(t, "Novo Nome", body.Name)
+		assert.Equal(t, testutil.GroupUpdatedName, body.Name)
 	})
 
 	t.Run("validation error - invalid category", func(t *testing.T) {
@@ -215,8 +215,8 @@ func TestUpdateGroup(t *testing.T) {
 		gc := controller.NewGroupController(mockService)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "group-1"}}, map[string]any{
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: testutil.GroupID}}, map[string]any{
 			"category": "Invalid",
 		})
 
@@ -230,12 +230,12 @@ func TestUpdateGroup(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		mockService.EXPECT().Update(gomock.Any(), "user-1").Return(nil, domains.NewNotFoundError("group not found"))
+		mockService.EXPECT().Update(gomock.Any(), testutil.UserID).Return(nil, domains.NewNotFoundError("group not found"))
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "group-1"}}, map[string]any{
-			"name": "Novo Nome",
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: testutil.GroupID}}, map[string]any{
+			"name": testutil.GroupUpdatedName,
 		})
 
 		gc.UpdateGroup(ctx)
@@ -248,12 +248,12 @@ func TestUpdateGroup(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		mockService.EXPECT().Update(gomock.Any(), "user-2").Return(nil, domains.NewForbiddenError("access denied"))
+		mockService.EXPECT().Update(gomock.Any(), testutil.UserID2).Return(nil, domains.NewForbiddenError("access denied"))
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-2")
-		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "group-1"}}, map[string]any{
-			"name": "Novo Nome",
+		testutil.SetAuthUser(ctx, testutil.UserID2)
+		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: testutil.GroupID}}, map[string]any{
+			"name": testutil.GroupUpdatedName,
 		})
 
 		gc.UpdateGroup(ctx)
@@ -268,11 +268,11 @@ func TestDeleteGroup(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		mockService.EXPECT().Delete("group-1", "user-1").Return(nil)
+		mockService.EXPECT().Delete(testutil.GroupID, testutil.UserID).Return(nil)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakeDelete(ctx, gin.Params{{Key: "id", Value: "group-1"}})
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakeDelete(ctx, gin.Params{{Key: "id", Value: testutil.GroupID}})
 
 		gc.DeleteGroup(ctx)
 
@@ -284,11 +284,11 @@ func TestDeleteGroup(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		mockService.EXPECT().Delete("group-1", "user-1").Return(domains.NewNotFoundError("group not found"))
+		mockService.EXPECT().Delete(testutil.GroupID, testutil.UserID).Return(domains.NewNotFoundError("group not found"))
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakeDelete(ctx, gin.Params{{Key: "id", Value: "group-1"}})
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakeDelete(ctx, gin.Params{{Key: "id", Value: testutil.GroupID}})
 
 		gc.DeleteGroup(ctx)
 
@@ -302,13 +302,13 @@ func TestAddMember(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		mockService.EXPECT().AddMember("group-1", "contact-1", "user-1").Return(nil)
+		mockService.EXPECT().AddMember(testutil.GroupID, testutil.ContactID, testutil.UserID).Return(nil)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
+		testutil.SetAuthUser(ctx, testutil.UserID)
 		testutil.MakePost(ctx, gin.Params{
-			{Key: "id", Value: "group-1"},
-			{Key: "contactId", Value: "contact-1"},
+			{Key: "id", Value: testutil.GroupID},
+			{Key: "contactId", Value: testutil.ContactID},
 		}, nil)
 
 		gc.AddMember(ctx)
@@ -321,13 +321,13 @@ func TestAddMember(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		mockService.EXPECT().AddMember("group-1", "contact-1", "user-1").Return(domains.NewConflictError("already a member"))
+		mockService.EXPECT().AddMember(testutil.GroupID, testutil.ContactID, testutil.UserID).Return(domains.NewConflictError("already a member"))
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
+		testutil.SetAuthUser(ctx, testutil.UserID)
 		testutil.MakePost(ctx, gin.Params{
-			{Key: "id", Value: "group-1"},
-			{Key: "contactId", Value: "contact-1"},
+			{Key: "id", Value: testutil.GroupID},
+			{Key: "contactId", Value: testutil.ContactID},
 		}, nil)
 
 		gc.AddMember(ctx)
@@ -342,13 +342,13 @@ func TestRemoveMember(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		mockService.EXPECT().RemoveMember("group-1", "contact-1", "user-1").Return(nil)
+		mockService.EXPECT().RemoveMember(testutil.GroupID, testutil.ContactID, testutil.UserID).Return(nil)
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
+		testutil.SetAuthUser(ctx, testutil.UserID)
 		testutil.MakeDelete(ctx, gin.Params{
-			{Key: "id", Value: "group-1"},
-			{Key: "contactId", Value: "contact-1"},
+			{Key: "id", Value: testutil.GroupID},
+			{Key: "contactId", Value: testutil.ContactID},
 		})
 
 		gc.RemoveMember(ctx)
@@ -361,13 +361,13 @@ func TestRemoveMember(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		mockService.EXPECT().RemoveMember("group-1", "contact-1", "user-1").Return(domains.NewNotFoundError("member not found"))
+		mockService.EXPECT().RemoveMember(testutil.GroupID, testutil.ContactID, testutil.UserID).Return(domains.NewNotFoundError("member not found"))
 
 		ctx, rec := testutil.NewTestContext()
-		testutil.SetAuthUser(ctx, "user-1")
+		testutil.SetAuthUser(ctx, testutil.UserID)
 		testutil.MakeDelete(ctx, gin.Params{
-			{Key: "id", Value: "group-1"},
-			{Key: "contactId", Value: "contact-1"},
+			{Key: "id", Value: testutil.GroupID},
+			{Key: "contactId", Value: testutil.ContactID},
 		})
 
 		gc.RemoveMember(ctx)
