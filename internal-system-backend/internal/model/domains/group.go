@@ -26,6 +26,15 @@ func NewGroup(ownerID, name, category string) *Group {
 	}
 }
 
+func NewGroupForUpdate(id, ownerID, name, category string) *Group {
+	return &Group{
+		ID:       id,
+		OwnerID:  ownerID,
+		Name:     name,
+		Category: category,
+	}
+}
+
 func NewGroupWithID(id, ownerID, name, category string, createdAt, updatedAt time.Time, members []Member) *Group {
 	return &Group{
 		ID:        id,

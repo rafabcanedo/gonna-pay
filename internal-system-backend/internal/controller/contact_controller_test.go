@@ -168,7 +168,7 @@ func TestUpdateContact(t *testing.T) {
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakePut(ctx, gin.Params{{Key: "id", Value: "contact-1"}}, map[string]any{
+		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "contact-1"}}, map[string]any{
 			"name": "Ana Silva",
 		})
 
@@ -187,13 +187,49 @@ func TestUpdateContact(t *testing.T) {
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, "user-1")
-		testutil.MakePut(ctx, gin.Params{{Key: "id", Value: "contact-1"}}, map[string]any{
+		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "contact-1"}}, map[string]any{
 			"category": "Invalid",
 		})
 
 		cc.UpdateContact(ctx)
 
 		assert.Equal(t, http.StatusBadRequest, rec.Code)
+	})
+
+	t.Run("not found", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		mockService := mocks.NewMockContactService(ctrl)
+		cc := controller.NewContactController(mockService)
+
+		mockService.EXPECT().Update(gomock.Any()).Return(nil, domains.NewNotFoundError("contact not found"))
+
+		ctx, rec := testutil.NewTestContext()
+		testutil.SetAuthUser(ctx, "user-1")
+		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "contact-1"}}, map[string]any{
+			"name": "Ana Silva",
+		})
+
+		cc.UpdateContact(ctx)
+
+		assert.Equal(t, http.StatusNotFound, rec.Code)
+	})
+
+	t.Run("forbidden", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		mockService := mocks.NewMockContactService(ctrl)
+		cc := controller.NewContactController(mockService)
+
+		mockService.EXPECT().Update(gomock.Any()).Return(nil, domains.NewForbiddenError("access denied"))
+
+		ctx, rec := testutil.NewTestContext()
+		testutil.SetAuthUser(ctx, "user-2")
+		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: "contact-1"}}, map[string]any{
+			"name": "Ana Silva",
+		})
+
+		cc.UpdateContact(ctx)
+
+		assert.Equal(t, http.StatusForbidden, rec.Code)
 	})
 }
 

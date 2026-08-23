@@ -65,11 +65,25 @@ func (s *contactService) FindByID(id, ownerID string) (*domains.Contact, error) 
 }
 
 func (s *contactService) Update(contact *domains.Contact) (*domains.Contact, error) {
-	if _, err := s.findAndAuthorize(contact.ID, contact.OwnerID); err != nil {
+	existing, err := s.findAndAuthorize(contact.ID, contact.OwnerID)
+	if err != nil {
 		return nil, err
 	}
 
-	updated, err := s.repo.Update(contact)
+	if contact.Name != "" {
+		existing.Name = contact.Name
+	}
+	if contact.Email != "" {
+		existing.Email = contact.Email
+	}
+	if contact.Phone != "" {
+		existing.Phone = contact.Phone
+	}
+	if contact.Category != "" {
+		existing.Category = contact.Category
+	}
+
+	updated, err := s.repo.Update(existing)
 	if err != nil {
 		logger.Error("error updating contact", err)
 		return nil, err

@@ -30,33 +30,41 @@ func NewRestErrors(message, err string, code int, causes []Causes) *RestErrors {
 func NewBadRequestError(message string) *RestErrors {
 	return &RestErrors{
 		Message: message,
-		Err: "bad_request",
-		Code: http.StatusBadRequest,
+		Err:     "bad_request",
+		Code:    http.StatusBadRequest,
 	}
 }
 
 func NewBadRequestValidationError(message string, causes []Causes) *RestErrors {
 	return &RestErrors{
 		Message: message,
-		Err: "bad_request",
-		Code: http.StatusBadRequest,
-		Causes: causes,
+		Err:     "bad_request",
+		Code:    http.StatusBadRequest,
+		Causes:  causes,
 	}
 }
 
 func NewInternalServerError(message string) *RestErrors {
 	return &RestErrors{
 		Message: message,
-		Err: "internal_server_error",
-		Code: http.StatusInternalServerError,
+		Err:     "internal_server_error",
+		Code:    http.StatusInternalServerError,
 	}
 }
 
 func NewNotFoundError(message string) *RestErrors {
 	return &RestErrors{
 		Message: message,
-		Err: "not_found",
-		Code: http.StatusNotFound,
+		Err:     "not_found",
+		Code:    http.StatusNotFound,
+	}
+}
+
+func NewConflictError(message string) *RestErrors {
+	return &RestErrors{
+		Message: message,
+		Err:     "conflict",
+		Code:    http.StatusConflict,
 	}
 }
 

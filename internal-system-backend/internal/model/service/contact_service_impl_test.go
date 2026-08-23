@@ -103,16 +103,57 @@ func TestContactService_Update(t *testing.T) {
 		svc := service.NewContactService(mockRepo)
 
 		existing := testutil.NewContactFixture()
-		incoming := testutil.NewContactFixture()
-		incoming.Name = "Ana Silva"
+		incoming := domains.NewContactWithID("contact-1", "user-1", "Ana Silva", "nova@email.com", "11888888888", "Work")
 
 		mockRepo.EXPECT().FindByID("contact-1").Return(existing, nil)
-		mockRepo.EXPECT().Update(incoming).Return(incoming, nil)
+		mockRepo.EXPECT().Update(gomock.Any()).DoAndReturn(func(c *domains.Contact) (*domains.Contact, error) {
+			assert.Equal(t, "Ana Silva", c.Name)
+			assert.Equal(t, "nova@email.com", c.Email)
+			assert.Equal(t, "11888888888", c.Phone)
+			assert.Equal(t, "Work", c.Category)
+			return c, nil
+		})
 
 		result, err := svc.Update(incoming)
 
 		assert.NoError(t, err)
 		assert.Equal(t, "Ana Silva", result.Name)
+	})
+
+	t.Run("success - partial update preserves existing fields", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		mockRepo := mocks.NewMockContactRepository(ctrl)
+		svc := service.NewContactService(mockRepo)
+
+		existing := testutil.NewContactFixture()
+		incoming := domains.NewContactWithID("contact-1", "user-1", "Ana Silva", "", "", "")
+
+		mockRepo.EXPECT().FindByID("contact-1").Return(existing, nil)
+		mockRepo.EXPECT().Update(gomock.Any()).DoAndReturn(func(c *domains.Contact) (*domains.Contact, error) {
+			assert.Equal(t, "Ana Silva", c.Name)
+			assert.Equal(t, existing.Email, c.Email)
+			assert.Equal(t, existing.Phone, c.Phone)
+			assert.Equal(t, existing.Category, c.Category)
+			return c, nil
+		})
+
+		_, err := svc.Update(incoming)
+		assert.NoError(t, err)
+	})
+
+	t.Run("repo error on Update", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		mockRepo := mocks.NewMockContactRepository(ctrl)
+		svc := service.NewContactService(mockRepo)
+
+		existing := testutil.NewContactFixture()
+		incoming := domains.NewContactWithID("contact-1", "user-1", "Ana Silva", "", "", "")
+
+		mockRepo.EXPECT().FindByID("contact-1").Return(existing, nil)
+		mockRepo.EXPECT().Update(gomock.Any()).Return(nil, errors.New("db error"))
+
+		_, err := svc.Update(incoming)
+		assert.Error(t, err)
 	})
 
 	t.Run("not found", func(t *testing.T) {
