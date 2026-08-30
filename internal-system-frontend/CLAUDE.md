@@ -65,3 +65,45 @@ Configured in [src/lib/react-query/index.tsx](src/lib/react-query/index.tsx):
 - `staleTime: 60000` (1 minute)
 - `refetchOnWindowFocus: false`
 - Devtools included (initially closed)
+
+## Project Standards
+
+### Colocation
+
+Colocation means keeping related files close to where they are used. If a file (types, constants, helpers, subcomponents) only exists because of a specific component or route, it should live next to it — not in a global folder.
+
+Only move to a shared folder (`src/types/`, `src/hooks/`, etc.) when the file is genuinely reused across multiple places.
+
+**How it's applied in this project:**
+
+Components with enough logic to split responsibilities adopt the following structure:
+
+```
+src/components/[component]/
+├── index.tsx          # Component — rendering only
+├── constants/
+│   └── index.ts       # Static data scoped to this component
+└── types/
+    └── index.ts       # Types used by the component and its neighboring files
+```
+
+The same pattern applies to routes inside `src/app/(dashboard)/`:
+
+```
+src/app/(dashboard)/[feature]/
+├── page.tsx
+├── components/
+│   └── [component]/
+│       ├── index.tsx
+│       ├── constants/
+│       │   └── index.ts
+│       └── types/
+│           └── index.ts
+└── [sub-route]/
+    ├── page.tsx
+    └── components/
+        └── [component]/
+            ├── index.tsx
+            └── types/
+                └── index.ts
+```
