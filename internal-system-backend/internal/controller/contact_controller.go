@@ -19,6 +19,19 @@ func NewContactController(service service.ContactService) *ContactController {
 	return &ContactController{service: service}
 }
 
+// @Summary      Criar contato
+// @Description  Cria um novo contato vinculado ao usuário autenticado
+// @Tags         contacts
+// @Accept       json
+// @Produce      json
+// @Param        body  body      request.CreateContactRequest  true  "Dados do contato"
+// @Success      201   {object}  response.ContactResponse
+// @Failure      400   {object}  rest_errors.RestErrors
+// @Failure      401   {object}  rest_errors.RestErrors
+// @Failure      409   {object}  rest_errors.RestErrors
+// @Failure      500   {object}  rest_errors.RestErrors
+// @Security     CookieAuth
+// @Router       /contact [post]
 func (cc *ContactController) CreateContact(c *gin.Context) {
 	ownerID := c.GetString("userID")
 
@@ -40,6 +53,15 @@ func (cc *ContactController) CreateContact(c *gin.Context) {
 	c.JSON(http.StatusCreated, response.NewContactResponse(created))
 }
 
+// @Summary      Listar contatos
+// @Description  Retorna todos os contatos do usuário autenticado
+// @Tags         contacts
+// @Produce      json
+// @Success      200  {array}   response.ContactResponse
+// @Failure      401  {object}  rest_errors.RestErrors
+// @Failure      500  {object}  rest_errors.RestErrors
+// @Security     CookieAuth
+// @Router       /contacts [get]
 func (cc *ContactController) FindAllContacts(c *gin.Context) {
 	ownerID := c.GetString("userID")
 
@@ -52,6 +74,18 @@ func (cc *ContactController) FindAllContacts(c *gin.Context) {
 	c.JSON(http.StatusOK, response.NewContactResponseList(contacts))
 }
 
+// @Summary      Buscar contato por ID
+// @Description  Retorna um contato pelo ID. Apenas o dono pode acessar
+// @Tags         contacts
+// @Produce      json
+// @Param        id   path      string  true  "ID do contato"
+// @Success      200  {object}  response.ContactResponse
+// @Failure      401  {object}  rest_errors.RestErrors
+// @Failure      403  {object}  rest_errors.RestErrors  "Contato não pertence ao usuário"
+// @Failure      404  {object}  rest_errors.RestErrors
+// @Failure      500  {object}  rest_errors.RestErrors
+// @Security     CookieAuth
+// @Router       /contact/{id} [get]
 func (cc *ContactController) FindContactByID(c *gin.Context) {
 	id := c.Param("id")
 	ownerID := c.GetString("userID")
@@ -65,6 +99,22 @@ func (cc *ContactController) FindContactByID(c *gin.Context) {
 	c.JSON(http.StatusOK, response.NewContactResponse(contact))
 }
 
+// @Summary      Atualizar contato
+// @Description  Atualiza os dados de um contato. Apenas o dono pode editar. Campos são opcionais (patch)
+// @Tags         contacts
+// @Accept       json
+// @Produce      json
+// @Param        id    path      string                        true  "ID do contato"
+// @Param        body  body      request.UpdateContactRequest  true  "Dados para atualização"
+// @Success      200   {object}  response.ContactResponse
+// @Failure      400   {object}  rest_errors.RestErrors
+// @Failure      401   {object}  rest_errors.RestErrors
+// @Failure      403   {object}  rest_errors.RestErrors
+// @Failure      404   {object}  rest_errors.RestErrors
+// @Failure      409   {object}  rest_errors.RestErrors
+// @Failure      500   {object}  rest_errors.RestErrors
+// @Security     CookieAuth
+// @Router       /contact/{id} [patch]
 func (cc *ContactController) UpdateContact(c *gin.Context) {
 	id := c.Param("id")
 	ownerID := c.GetString("userID")
@@ -87,6 +137,18 @@ func (cc *ContactController) UpdateContact(c *gin.Context) {
 	c.JSON(http.StatusOK, response.NewContactResponse(updated))
 }
 
+// @Summary      Deletar contato
+// @Description  Remove um contato. Apenas o dono pode deletar
+// @Tags         contacts
+// @Produce      json
+// @Param        id   path      string  true  "ID do contato"
+// @Success      200  {object}  map[string]string  "message"
+// @Failure      401  {object}  rest_errors.RestErrors
+// @Failure      403  {object}  rest_errors.RestErrors
+// @Failure      404  {object}  rest_errors.RestErrors
+// @Failure      500  {object}  rest_errors.RestErrors
+// @Security     CookieAuth
+// @Router       /contact/{id} [delete]
 func (cc *ContactController) DeleteContact(c *gin.Context) {
 	id := c.Param("id")
 	ownerID := c.GetString("userID")

@@ -24,6 +24,17 @@ func NewAuthController(userService service.UserService, authRepo repository.Auth
 	return &AuthController{userService: userService, authRepo: authRepo}
 }
 
+// @Summary      Login
+// @Description  Autentica o usuário e retorna cookies de sessão (access_token e refresh_token)
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body  body      request.LoginRequest  true  "Credenciais do usuário"
+// @Success      200   {object}  map[string]interface{}  "message e user"
+// @Failure      400   {object}  rest_errors.RestErrors
+// @Failure      401   {object}  rest_errors.RestErrors
+// @Failure      500   {object}  rest_errors.RestErrors
+// @Router       /auth/login [post]
 func (ac *AuthController) Login(c *gin.Context) {
 	var req request.LoginRequest
 
@@ -76,6 +87,14 @@ func (ac *AuthController) Login(c *gin.Context) {
 	})
 }
 
+// @Summary      Refresh token
+// @Description  Gera um novo access_token usando o cookie refresh_token. O refresh_token antigo é invalidado (rotação)
+// @Tags         auth
+// @Produce      json
+// @Success      200  {object}  map[string]string  "message"
+// @Failure      401  {object}  rest_errors.RestErrors
+// @Failure      500  {object}  rest_errors.RestErrors
+// @Router       /auth/refresh [post]
 func (ac *AuthController) Refresh(c *gin.Context) {
 	refreshToken, err := c.Cookie("refresh_token")
 	if err != nil {
@@ -134,6 +153,12 @@ func (ac *AuthController) Refresh(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Token refreshed"})
 }
 
+// @Summary      Logout
+// @Description  Invalida o refresh_token e limpa os cookies de sessão
+// @Tags         auth
+// @Produce      json
+// @Success      200  {object}  map[string]string  "message"
+// @Router       /auth/logout [post]
 func (ac *AuthController) Logout(c *gin.Context) {
 	refreshToken, err := c.Cookie("refresh_token")
 	if err == nil {
@@ -147,6 +172,18 @@ func (ac *AuthController) Logout(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
 }
 
+// @Summary      Atualizar perfil
+// @Description  Atualiza os dados do usuário autenticado (campos opcionais, apenas os enviados são alterados)
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body  body      request.UpdateProfileRequest  true  "Dados para atualização"
+// @Success      200   {object}  map[string]interface{}  "message e user"
+// @Failure      400   {object}  rest_errors.RestErrors
+// @Failure      401   {object}  rest_errors.RestErrors
+// @Failure      500   {object}  rest_errors.RestErrors
+// @Security     CookieAuth
+// @Router       /auth/profile [put]
 func (ac *AuthController) UpdateProfile(c *gin.Context) {
 	userID := c.GetString("userID")
 	if userID == "" {
@@ -189,6 +226,16 @@ func (ac *AuthController) UpdateProfile(c *gin.Context) {
 	})
 }
 
+// @Summary      Buscar perfil
+// @Description  Retorna os dados do usuário autenticado
+// @Tags         auth
+// @Produce      json
+// @Success      200  {object}  response.UserResponse
+// @Failure      401  {object}  rest_errors.RestErrors
+// @Failure      404  {object}  rest_errors.RestErrors
+// @Failure      500  {object}  rest_errors.RestErrors
+// @Security     CookieAuth
+// @Router       /auth/profile [get]
 func (ac *AuthController) GetProfile(c *gin.Context) {
 	userID := c.GetString("userID")
 	if userID == "" {
@@ -205,6 +252,16 @@ func (ac *AuthController) GetProfile(c *gin.Context) {
 	c.JSON(http.StatusOK, response.NewUserResponse(user))
 }
 
+// @Summary      Deletar conta
+// @Description  Remove a conta do usuário autenticado e limpa os cookies de sessão
+// @Tags         auth
+// @Produce      json
+// @Success      200  {object}  map[string]string  "message"
+// @Failure      401  {object}  rest_errors.RestErrors
+// @Failure      404  {object}  rest_errors.RestErrors
+// @Failure      500  {object}  rest_errors.RestErrors
+// @Security     CookieAuth
+// @Router       /auth/profile [delete]
 func (ac *AuthController) DeleteProfile(c *gin.Context) {
 	userID := c.GetString("userID")
 	if userID == "" {

@@ -19,6 +19,19 @@ func NewCostController(service service.CostService) *CostController {
 	return &CostController{service: service}
 }
 
+// @Summary      Criar custo
+// @Description  Cria um novo custo. Se groupId for informado, o valor é dividido entre os membros do grupo. ownerPercentage é opcional — se omitido, a divisão é igualitária
+// @Tags         costs
+// @Accept       json
+// @Produce      json
+// @Param        body  body      request.CreateCostRequest  true  "Dados do custo"
+// @Success      201   {object}  response.CostDetailResponse
+// @Failure      400   {object}  rest_errors.RestErrors
+// @Failure      401   {object}  rest_errors.RestErrors
+// @Failure      404   {object}  rest_errors.RestErrors  "Grupo não encontrado"
+// @Failure      500   {object}  rest_errors.RestErrors
+// @Security     CookieAuth
+// @Router       /cost [post]
 func (cc *CostController) CreateCost(c *gin.Context) {
 	userID := c.GetString("userID")
 
@@ -40,6 +53,15 @@ func (cc *CostController) CreateCost(c *gin.Context) {
 	c.JSON(http.StatusCreated, response.NewCostDetailResponse(created))
 }
 
+// @Summary      Listar custos
+// @Description  Retorna todos os custos do usuário autenticado (sem detalhes dos splits)
+// @Tags         costs
+// @Produce      json
+// @Success      200  {array}   response.CostResponse
+// @Failure      401  {object}  rest_errors.RestErrors
+// @Failure      500  {object}  rest_errors.RestErrors
+// @Security     CookieAuth
+// @Router       /costs [get]
 func (cc *CostController) FindAllCosts(c *gin.Context) {
 	userID := c.GetString("userID")
 
@@ -52,6 +74,18 @@ func (cc *CostController) FindAllCosts(c *gin.Context) {
 	c.JSON(http.StatusOK, response.NewCostResponseList(costs))
 }
 
+// @Summary      Buscar custo por ID
+// @Description  Retorna um custo com os detalhes de splits. Apenas o dono pode acessar
+// @Tags         costs
+// @Produce      json
+// @Param        id   path      string  true  "ID do custo"
+// @Success      200  {object}  response.CostDetailResponse
+// @Failure      401  {object}  rest_errors.RestErrors
+// @Failure      403  {object}  rest_errors.RestErrors  "Custo não pertence ao usuário"
+// @Failure      404  {object}  rest_errors.RestErrors
+// @Failure      500  {object}  rest_errors.RestErrors
+// @Security     CookieAuth
+// @Router       /cost/{id} [get]
 func (cc *CostController) FindCostByID(c *gin.Context) {
 	id := c.Param("id")
 	userID := c.GetString("userID")
@@ -65,6 +99,21 @@ func (cc *CostController) FindCostByID(c *gin.Context) {
 	c.JSON(http.StatusOK, response.NewCostDetailResponse(cost))
 }
 
+// @Summary      Atualizar custo
+// @Description  Atualiza os dados de um custo. Apenas o dono pode editar. Os splits são recalculados automaticamente
+// @Tags         costs
+// @Accept       json
+// @Produce      json
+// @Param        id    path      string                    true  "ID do custo"
+// @Param        body  body      request.UpdateCostRequest  true  "Dados para atualização"
+// @Success      200   {object}  response.CostDetailResponse
+// @Failure      400   {object}  rest_errors.RestErrors
+// @Failure      401   {object}  rest_errors.RestErrors
+// @Failure      403   {object}  rest_errors.RestErrors
+// @Failure      404   {object}  rest_errors.RestErrors
+// @Failure      500   {object}  rest_errors.RestErrors
+// @Security     CookieAuth
+// @Router       /cost/{id} [patch]
 func (cc *CostController) UpdateCost(c *gin.Context) {
 	id := c.Param("id")
 	userID := c.GetString("userID")
@@ -87,6 +136,18 @@ func (cc *CostController) UpdateCost(c *gin.Context) {
 	c.JSON(http.StatusOK, response.NewCostDetailResponse(updated))
 }
 
+// @Summary      Deletar custo
+// @Description  Remove um custo. Apenas o dono pode deletar
+// @Tags         costs
+// @Produce      json
+// @Param        id   path      string  true  "ID do custo"
+// @Success      200  {object}  map[string]string  "message"
+// @Failure      401  {object}  rest_errors.RestErrors
+// @Failure      403  {object}  rest_errors.RestErrors
+// @Failure      404  {object}  rest_errors.RestErrors
+// @Failure      500  {object}  rest_errors.RestErrors
+// @Security     CookieAuth
+// @Router       /cost/{id} [delete]
 func (cc *CostController) DeleteCost(c *gin.Context) {
 	id := c.Param("id")
 	userID := c.GetString("userID")

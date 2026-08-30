@@ -1,0 +1,1332 @@
+basePath: /
+definitions:
+  request.CreateContactRequest:
+    properties:
+      category:
+        enum:
+        - Family
+        - Friend
+        - Work
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+    required:
+    - category
+    - email
+    - name
+    - phone
+    type: object
+  request.CreateCostRequest:
+    properties:
+      category:
+        enum:
+        - Dinner
+        - Lunch
+        - Entertainment
+        - Travel
+        - Others
+        type: string
+      costName:
+        type: string
+      groupId:
+        type: string
+      ownerPercentage:
+        type: number
+      totalValue:
+        type: number
+    required:
+    - category
+    - costName
+    - totalValue
+    type: object
+  request.CreateGroupRequest:
+    properties:
+      category:
+        enum:
+        - Dinner
+        - Lunch
+        - Entertainment
+        - Travel
+        - Others
+        type: string
+      memberIds:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+    required:
+    - category
+    - name
+    type: object
+  request.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      phone:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    - phone
+    type: object
+  request.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  request.UpdateContactRequest:
+    properties:
+      category:
+        enum:
+        - Family
+        - Friend
+        - Work
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+    type: object
+  request.UpdateCostRequest:
+    properties:
+      category:
+        enum:
+        - Dinner
+        - Lunch
+        - Entertainment
+        - Travel
+        - Others
+        type: string
+      costName:
+        type: string
+      ownerPercentage:
+        type: number
+      totalValue:
+        type: number
+    type: object
+  request.UpdateGroupRequest:
+    properties:
+      category:
+        enum:
+        - Dinner
+        - Lunch
+        - Entertainment
+        - Travel
+        - Others
+        type: string
+      name:
+        type: string
+    type: object
+  request.UpdateProfileRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+    type: object
+  request.UpdateUserRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      phone:
+        type: string
+    type: object
+  response.ContactResponse:
+    properties:
+      category:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+    type: object
+  response.CostDetailResponse:
+    properties:
+      category:
+        type: string
+      costName:
+        type: string
+      createdAt:
+        type: string
+      groupId:
+        type: string
+      groupName:
+        type: string
+      id:
+        type: string
+      ownerPercentage:
+        type: number
+      ownerValue:
+        type: number
+      splitCount:
+        type: integer
+      splits:
+        items:
+          $ref: '#/definitions/response.SplitResponse'
+        type: array
+      totalValue:
+        type: number
+      updatedAt:
+        type: string
+    type: object
+  response.CostResponse:
+    properties:
+      category:
+        type: string
+      costName:
+        type: string
+      createdAt:
+        type: string
+      groupId:
+        type: string
+      groupName:
+        type: string
+      id:
+        type: string
+      ownerPercentage:
+        type: number
+      ownerValue:
+        type: number
+      splitCount:
+        type: integer
+      totalValue:
+        type: number
+    type: object
+  response.GroupDetailResponse:
+    properties:
+      category:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: string
+      members:
+        items:
+          $ref: '#/definitions/response.MemberResponse'
+        type: array
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  response.GroupResponse:
+    properties:
+      category:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  response.MemberResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  response.SplitResponse:
+    properties:
+      contactId:
+        type: string
+      contactName:
+        type: string
+      id:
+        type: string
+      percentage:
+        type: number
+      value:
+        type: number
+    type: object
+  response.UserResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+    type: object
+  rest_errors.Causes:
+    properties:
+      field:
+        type: string
+      message:
+        type: string
+    type: object
+  rest_errors.RestErrors:
+    properties:
+      causes:
+        items:
+          $ref: '#/definitions/rest_errors.Causes'
+        type: array
+      code:
+        type: integer
+      error:
+        type: string
+      message:
+        type: string
+    type: object
+host: localhost:3333
+info:
+  contact: {}
+  description: API de gestão financeira e divisão de custos
+  title: Internal System API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Autentica o usuário e retorna cookies de sessão (access_token e
+        refresh_token)
+      parameters:
+      - description: Credenciais do usuário
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/request.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message e user
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      summary: Login
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      description: Invalida o refresh_token e limpa os cookies de sessão
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Logout
+      tags:
+      - auth
+  /auth/profile:
+    delete:
+      description: Remove a conta do usuário autenticado e limpa os cookies de sessão
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      security:
+      - CookieAuth: []
+      summary: Deletar conta
+      tags:
+      - auth
+    get:
+      description: Retorna os dados do usuário autenticado
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.UserResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      security:
+      - CookieAuth: []
+      summary: Buscar perfil
+      tags:
+      - auth
+    put:
+      consumes:
+      - application/json
+      description: Atualiza os dados do usuário autenticado (campos opcionais, apenas
+        os enviados são alterados)
+      parameters:
+      - description: Dados para atualização
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message e user
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      security:
+      - CookieAuth: []
+      summary: Atualizar perfil
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      description: Gera um novo access_token usando o cookie refresh_token. O refresh_token
+        antigo é invalidado (rotação)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      summary: Refresh token
+      tags:
+      - auth
+  /contact:
+    post:
+      consumes:
+      - application/json
+      description: Cria um novo contato vinculado ao usuário autenticado
+      parameters:
+      - description: Dados do contato
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateContactRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.ContactResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      security:
+      - CookieAuth: []
+      summary: Criar contato
+      tags:
+      - contacts
+  /contact/{id}:
+    delete:
+      description: Remove um contato. Apenas o dono pode deletar
+      parameters:
+      - description: ID do contato
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      security:
+      - CookieAuth: []
+      summary: Deletar contato
+      tags:
+      - contacts
+    get:
+      description: Retorna um contato pelo ID. Apenas o dono pode acessar
+      parameters:
+      - description: ID do contato
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ContactResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "403":
+          description: Contato não pertence ao usuário
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      security:
+      - CookieAuth: []
+      summary: Buscar contato por ID
+      tags:
+      - contacts
+    patch:
+      consumes:
+      - application/json
+      description: Atualiza os dados de um contato. Apenas o dono pode editar. Campos
+        são opcionais (patch)
+      parameters:
+      - description: ID do contato
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Dados para atualização
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateContactRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ContactResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      security:
+      - CookieAuth: []
+      summary: Atualizar contato
+      tags:
+      - contacts
+  /contacts:
+    get:
+      description: Retorna todos os contatos do usuário autenticado
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/response.ContactResponse'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      security:
+      - CookieAuth: []
+      summary: Listar contatos
+      tags:
+      - contacts
+  /cost:
+    post:
+      consumes:
+      - application/json
+      description: Cria um novo custo. Se groupId for informado, o valor é dividido
+        entre os membros do grupo. ownerPercentage é opcional — se omitido, a divisão
+        é igualitária
+      parameters:
+      - description: Dados do custo
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateCostRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.CostDetailResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "404":
+          description: Grupo não encontrado
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      security:
+      - CookieAuth: []
+      summary: Criar custo
+      tags:
+      - costs
+  /cost/{id}:
+    delete:
+      description: Remove um custo. Apenas o dono pode deletar
+      parameters:
+      - description: ID do custo
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      security:
+      - CookieAuth: []
+      summary: Deletar custo
+      tags:
+      - costs
+    get:
+      description: Retorna um custo com os detalhes de splits. Apenas o dono pode
+        acessar
+      parameters:
+      - description: ID do custo
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.CostDetailResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "403":
+          description: Custo não pertence ao usuário
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      security:
+      - CookieAuth: []
+      summary: Buscar custo por ID
+      tags:
+      - costs
+    patch:
+      consumes:
+      - application/json
+      description: Atualiza os dados de um custo. Apenas o dono pode editar. Os splits
+        são recalculados automaticamente
+      parameters:
+      - description: ID do custo
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Dados para atualização
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateCostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.CostDetailResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      security:
+      - CookieAuth: []
+      summary: Atualizar custo
+      tags:
+      - costs
+  /costs:
+    get:
+      description: Retorna todos os custos do usuário autenticado (sem detalhes dos
+        splits)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/response.CostResponse'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      security:
+      - CookieAuth: []
+      summary: Listar custos
+      tags:
+      - costs
+  /group:
+    post:
+      consumes:
+      - application/json
+      description: Cria um novo grupo. É possível já adicionar membros (contatos)
+        pelo campo memberIds
+      parameters:
+      - description: Dados do grupo
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.GroupResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      security:
+      - CookieAuth: []
+      summary: Criar grupo
+      tags:
+      - groups
+  /group/{id}:
+    delete:
+      description: Remove um grupo. Apenas o dono pode deletar
+      parameters:
+      - description: ID do grupo
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      security:
+      - CookieAuth: []
+      summary: Deletar grupo
+      tags:
+      - groups
+    get:
+      description: Retorna um grupo com a lista de membros. Apenas o dono pode acessar
+      parameters:
+      - description: ID do grupo
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GroupDetailResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "403":
+          description: Grupo não pertence ao usuário
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      security:
+      - CookieAuth: []
+      summary: Buscar grupo por ID
+      tags:
+      - groups
+    patch:
+      consumes:
+      - application/json
+      description: Atualiza nome e/ou categoria do grupo. Apenas o dono pode editar
+      parameters:
+      - description: ID do grupo
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Dados para atualização
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GroupResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      security:
+      - CookieAuth: []
+      summary: Atualizar grupo
+      tags:
+      - groups
+  /group/{id}/member/{contactId}:
+    delete:
+      description: Remove um contato do grupo. Apenas o dono do grupo pode remover
+      parameters:
+      - description: ID do grupo
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ID do contato
+        in: path
+        name: contactId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      security:
+      - CookieAuth: []
+      summary: Remover membro
+      tags:
+      - groups
+    post:
+      description: Adiciona um contato como membro do grupo. Apenas o dono do grupo
+        pode adicionar
+      parameters:
+      - description: ID do grupo
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ID do contato
+        in: path
+        name: contactId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "409":
+          description: Membro já está no grupo
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      security:
+      - CookieAuth: []
+      summary: Adicionar membro
+      tags:
+      - groups
+  /groups:
+    get:
+      description: Retorna todos os grupos do usuário autenticado com o total
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: groups (array) e total (int)
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      security:
+      - CookieAuth: []
+      summary: Listar grupos
+      tags:
+      - groups
+  /user:
+    post:
+      consumes:
+      - application/json
+      description: Cria um novo usuário (registro). Não requer autenticação
+      parameters:
+      - description: Dados do usuário
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "409":
+          description: Email já cadastrado
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      summary: Criar usuário
+      tags:
+      - users
+  /user/{id}:
+    delete:
+      description: Remove um usuário pelo ID
+      parameters:
+      - description: ID do usuário
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      security:
+      - CookieAuth: []
+      summary: Deletar usuário
+      tags:
+      - users
+    get:
+      description: Retorna um usuário pelo ID
+      parameters:
+      - description: ID do usuário
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.UserResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      security:
+      - CookieAuth: []
+      summary: Buscar usuário por ID
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Atualiza os dados de um usuário pelo ID
+      parameters:
+      - description: ID do usuário
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Dados para atualização
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "409":
+          description: Email já em uso
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      security:
+      - CookieAuth: []
+      summary: Atualizar usuário
+      tags:
+      - users
+  /users:
+    get:
+      description: Retorna todos os usuários cadastrados
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/response.UserResponse'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      security:
+      - CookieAuth: []
+      summary: Listar usuários
+      tags:
+      - users
+schemes:
+- http
+securityDefinitions:
+  CookieAuth:
+    in: cookie
+    name: access_token
+    type: apiKey
+swagger: "2.0"

@@ -19,6 +19,17 @@ func NewUserController(service service.UserService) *UserController {
 	return &UserController{service: service}
 }
 
+// @Summary      Criar usuário
+// @Description  Cria um novo usuário (registro). Não requer autenticação
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        body  body      request.CreateUserRequest  true  "Dados do usuário"
+// @Success      201   {object}  response.UserResponse
+// @Failure      400   {object}  rest_errors.RestErrors
+// @Failure      409   {object}  rest_errors.RestErrors  "Email já cadastrado"
+// @Failure      500   {object}  rest_errors.RestErrors
+// @Router       /user [post]
 func (uc *UserController) CreateUser(c *gin.Context) {
 	var req request.CreateUserRequest
 
@@ -39,6 +50,15 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 	c.JSON(http.StatusCreated, response.NewUserResponse(created))
 }
 
+// @Summary      Listar usuários
+// @Description  Retorna todos os usuários cadastrados
+// @Tags         users
+// @Produce      json
+// @Success      200  {array}   response.UserResponse
+// @Failure      401  {object}  rest_errors.RestErrors
+// @Failure      500  {object}  rest_errors.RestErrors
+// @Security     CookieAuth
+// @Router       /users [get]
 func (uc *UserController) FindAllUsers(c *gin.Context) {
 	users, err := uc.service.FindAll()
 	if err != nil {
@@ -49,6 +69,17 @@ func (uc *UserController) FindAllUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, response.NewUserResponseList(users))
 }
 
+// @Summary      Buscar usuário por ID
+// @Description  Retorna um usuário pelo ID
+// @Tags         users
+// @Produce      json
+// @Param        id   path      string  true  "ID do usuário"
+// @Success      200  {object}  response.UserResponse
+// @Failure      401  {object}  rest_errors.RestErrors
+// @Failure      404  {object}  rest_errors.RestErrors
+// @Failure      500  {object}  rest_errors.RestErrors
+// @Security     CookieAuth
+// @Router       /user/{id} [get]
 func (uc *UserController) FindUserByID(c *gin.Context) {
 	id := c.Param("id")
 
@@ -61,6 +92,21 @@ func (uc *UserController) FindUserByID(c *gin.Context) {
 	c.JSON(http.StatusOK, response.NewUserResponse(user))
 }
 
+// @Summary      Atualizar usuário
+// @Description  Atualiza os dados de um usuário pelo ID
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        id    path      string                    true  "ID do usuário"
+// @Param        body  body      request.UpdateUserRequest  true  "Dados para atualização"
+// @Success      200   {object}  response.UserResponse
+// @Failure      400   {object}  rest_errors.RestErrors
+// @Failure      401   {object}  rest_errors.RestErrors
+// @Failure      404   {object}  rest_errors.RestErrors
+// @Failure      409   {object}  rest_errors.RestErrors  "Email já em uso"
+// @Failure      500   {object}  rest_errors.RestErrors
+// @Security     CookieAuth
+// @Router       /user/{id} [put]
 func (uc *UserController) UpdateUser(c *gin.Context) {
 	id := c.Param("id")
 
@@ -83,6 +129,17 @@ func (uc *UserController) UpdateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, response.NewUserResponse(updated))
 }
 
+// @Summary      Deletar usuário
+// @Description  Remove um usuário pelo ID
+// @Tags         users
+// @Produce      json
+// @Param        id   path      string  true  "ID do usuário"
+// @Success      200  {object}  map[string]string  "message"
+// @Failure      401  {object}  rest_errors.RestErrors
+// @Failure      404  {object}  rest_errors.RestErrors
+// @Failure      500  {object}  rest_errors.RestErrors
+// @Security     CookieAuth
+// @Router       /user/{id} [delete]
 func (uc *UserController) DeleteUser(c *gin.Context) {
 	id := c.Param("id")
 

@@ -1,3 +1,14 @@
+// @title           Internal System API
+// @version         1.0
+// @description     API de gestão financeira e divisão de custos
+// @host            localhost:3333
+// @BasePath        /
+// @schemes         http
+
+// @securityDefinitions.apikey  CookieAuth
+// @in                          cookie
+// @name                        access_token
+
 package main
 
 import (
@@ -12,6 +23,10 @@ import (
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/model/repository"
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/model/service"
 	"github.com/rafabcanedo/basic-internal-system/internal-system-backend/internal/routes"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "github.com/rafabcanedo/basic-internal-system/internal-system-backend/docs"
 )
 
 func main() {
@@ -68,6 +83,8 @@ func main() {
 	routes.ContactRoutes(router, contactCtrl)
 	routes.GroupRoutes(router, groupCtrl)
 	routes.CostRoutes(router, costCtrl)
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	port := ":3333"
 	log.Printf("Server running on %s", port)
