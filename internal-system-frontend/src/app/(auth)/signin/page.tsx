@@ -8,11 +8,7 @@ import { HookFormTextInput } from "@/components/hook-form-text-input"
 import Link from "next/link"
 import { signInSchema } from "@/validations/schemas"
 import { useAuthMutations } from "@/hooks/mutations/use-auth-mutations"
-
-interface IForm {
-  email: string;
-  password: string;
-}
+import { IForm } from "./interfaces"
 
 export default function SignInForm() {
 

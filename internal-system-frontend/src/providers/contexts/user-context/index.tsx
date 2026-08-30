@@ -1,13 +1,8 @@
 "use client"
 import { createContext, useContext, ReactNode } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { authService, IUserData } from "@/services/auth.service"
-
-type UserContextType = {
-    user: IUserData | null
-    isLoading: boolean
-    clearUser: () => void
-}
+import { authService, IUserData } from "@/services/auth"
+import { UserContextType } from "./types"
 
 const UserContext = createContext<UserContextType | null>(null)
 

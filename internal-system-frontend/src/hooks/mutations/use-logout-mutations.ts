@@ -1,6 +1,6 @@
 "use client"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { authService } from "@/services/auth.service"
+import { authService } from "@/services/auth"
 import { useUser } from "@/providers/contexts/user-context"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"

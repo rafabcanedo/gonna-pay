@@ -16,11 +16,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { ChartConfig } from "../../types";
-
-interface WalletChartsProps {
-  config: ChartConfig;
-}
+import { WalletChartsProps } from './interfaces'
 
 export const WalletCharts = ({ config }: WalletChartsProps) => {
   const chartData = config.data.map((item) => ({

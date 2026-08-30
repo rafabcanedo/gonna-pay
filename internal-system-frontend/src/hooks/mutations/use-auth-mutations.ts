@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { authService, ISignInRequest, ISignUpRequest, IAuthResponse } from "@/services/auth.service";
+import { authService, ISignInRequest, ISignUpRequest, IAuthResponse } from "@/services/auth";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 

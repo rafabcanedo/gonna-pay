@@ -8,12 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { ContactCategory } from "@/types";
-
-type SelectCategoryProps = {
-  value: ContactCategory | undefined;
-  onValueChange: (value: ContactCategory) => void;
-};
+import { SelectCategoryProps } from './types'
 
 export const SelectCategory: React.FC<SelectCategoryProps> = ({ value, onValueChange }) => {
   return (

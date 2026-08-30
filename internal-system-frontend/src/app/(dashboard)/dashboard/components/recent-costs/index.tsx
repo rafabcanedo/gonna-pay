@@ -8,14 +8,9 @@ import {
 } from "@/components/ui/table"
 import Link from "next/link"
 import { BadgeType } from "@/utils/badge-types"
-import { Cost } from "@/types"
+import { CostsTableProps } from '../interfaces'
 
 const LIMIT = 6
-
-interface CostsTableProps {
-  costs: Cost[]
-  total: number
-}
 
 export const RecentCosts = ({ costs }: CostsTableProps) => {
   const limitedCosts = costs.slice(0, LIMIT)

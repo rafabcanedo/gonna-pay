@@ -2,11 +2,7 @@
 
 import { FC, useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-
-interface IPropsDashboardCards {
- title: string;
- value: number;
-}
+import { IPropsDashboardCards } from '../interfaces'
 
 export const DashboardCards:FC<IPropsDashboardCards> = ({ title, value }) => {
  const [onSee, setOnSee] = useState(true)

@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { authService, IUpdateProfileRequest } from "@/services/auth.service"
+import { authService, IUpdateProfileRequest } from "@/services/auth"
 import { IRestError } from "./use-auth-mutations"
 import { toast } from "sonner"
 

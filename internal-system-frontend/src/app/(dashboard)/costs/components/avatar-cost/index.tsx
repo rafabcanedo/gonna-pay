@@ -1,8 +1,5 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-
-interface IAvatarCost {
-    name: string;
-}
+import { IAvatarCost } from './interfaces'
 
 export const AvatarCost = ({ name }: IAvatarCost) => {
 

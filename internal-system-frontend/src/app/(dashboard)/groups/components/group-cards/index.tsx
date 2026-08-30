@@ -3,12 +3,8 @@
 import { FC } from "react";
 import Link from "next/link";
 import { Pencil } from "lucide-react";
-import { GroupDetail } from "@/types";
 import { BadgeType } from "@/utils/badge-types";
-
-interface IPropsGroupCards {
-  group: GroupDetail;
-}
+import { IPropsGroupCards } from './interfaces'
 
 const getInitials = (name: string) => {
   const parts = name.trim().split(" ");

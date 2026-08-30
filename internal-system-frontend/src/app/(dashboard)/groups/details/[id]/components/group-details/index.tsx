@@ -26,9 +26,7 @@ const getInitials = (name: string) => {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
 }
 
-interface IGroupDetailProps {
-  groupId: string
-}
+import { IGroupDetailProps } from './interfaces'
 
 export const GroupDetails = ({ groupId }: IGroupDetailProps) => {
   const router = useRouter()

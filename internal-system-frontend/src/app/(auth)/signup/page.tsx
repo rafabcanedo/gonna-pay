@@ -8,13 +8,7 @@ import { HookFormTextInput } from "@/components/hook-form-text-input"
 import Link from "next/link"
 import { signUpSchema } from "@/validations/schemas"
 import { useAuthMutations } from "@/hooks/mutations/use-auth-mutations"
-
-interface IRegisterAccount {
-  name: string;
-  email: string;
-  password: string;
-  phone: string;
-}
+import { IRegisterAccount } from "./interfaces"
 
 export default function SignUpForm() {
 

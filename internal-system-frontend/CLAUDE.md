@@ -83,19 +83,34 @@ src/components/[component]/
 ├── index.tsx          # Component — rendering only
 ├── constants/
 │   └── index.ts       # Static data scoped to this component
+├── interfaces/
+│   └── index.ts       # Interface declarations only
 └── types/
-    └── index.ts       # Types used by the component and its neighboring files
+    └── index.ts       # Type declarations only — or mixed (used as generic)
 ```
+
+**When to use each subfolder:**
+- `constants/` — static data arrays, config objects, maps
+- `interfaces/` — when the file has **only** `interface` declarations
+- `types/` — when the file has **only** `type` declarations, or a mix of both `type` and `interface`
 
 The same pattern applies to routes inside `src/app/(dashboard)/`:
 
 ```
 src/app/(dashboard)/[feature]/
 ├── page.tsx
+├── constants/
+│   └── index.ts
+├── interfaces/
+│   └── index.ts
+├── types/
+│   └── index.ts
 ├── components/
 │   └── [component]/
 │       ├── index.tsx
 │       ├── constants/
+│       │   └── index.ts
+│       ├── interfaces/
 │       │   └── index.ts
 │       └── types/
 │           └── index.ts
@@ -104,6 +119,8 @@ src/app/(dashboard)/[feature]/
     └── components/
         └── [component]/
             ├── index.tsx
+            ├── interfaces/
+            │   └── index.ts
             └── types/
                 └── index.ts
 ```

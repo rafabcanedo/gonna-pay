@@ -1,10 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton"
-
-interface LoadingSkeletonProps {
-    type?: 'table' | 'card'
-    rows?: number
-    columns?: number
-}
+import { LoadingSkeletonProps } from './interfaces'
 
 export const ApiLoading = ({
     type = 'table',

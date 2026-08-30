@@ -6,16 +6,11 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-import { Contact } from "@/types"
 import { BadgeType } from "@/utils/badge-types"
 import Link from "next/link"
+import { RecentContactsProps } from '../interfaces'
 
 const LIMIT = 6
-
-interface RecentContactsProps {
-    contacts: Contact[]
-    total: number
-}
 
 export const RecentContacts = ({ contacts }: RecentContactsProps) => {
 

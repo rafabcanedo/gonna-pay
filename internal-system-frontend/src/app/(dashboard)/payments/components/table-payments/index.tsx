@@ -9,9 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-interface TablePaymentsProps {
-  total?: number;
-}
+import { TablePaymentsProps } from './interfaces'
 
 export const TablePayments = ({ total }: TablePaymentsProps) => {
   return (

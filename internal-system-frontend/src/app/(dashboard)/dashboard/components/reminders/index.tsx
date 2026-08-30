@@ -10,20 +10,7 @@ import {
 } from "@/components/ui/table";
 import { CreateReminders } from "../create-reminders";
 import { useEffect, useState } from "react";
-
-interface IReminder {
-  id: string;
-  name: string;
-  value: string;
-  date: Date;
-}
-
-interface IReminderSerialized {
-  id: string;
-  name: string;
-  value: string;
-  date: string;
-}
+import { IReminder, IReminderSerialized } from '../interfaces'
 
 export const Reminders = () => {
   const [reminders, setReminders] = useState<IReminder[]>([]);
