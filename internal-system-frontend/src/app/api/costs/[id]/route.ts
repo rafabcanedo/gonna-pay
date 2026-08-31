@@ -34,6 +34,40 @@ export async function GET(
   }
 }
 
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { id } = params
+    const body = await request.json()
+    const accessToken = request.cookies.get('access_token')?.value
+
+    const res = await fetch(`${API_BASE_URL}/cost/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(accessToken ? { Cookie: `access_token=${accessToken}` } : {}),
+      },
+      body: JSON.stringify(body),
+    })
+
+    const data = await res.json()
+
+    if (!res.ok) {
+      return NextResponse.json(
+        { error: data.error || 'Failed to update cost' },
+        { status: res.status }
+      )
+    }
+
+    return NextResponse.json(data)
+  } catch (error) {
+    console.error('[PATCH /api/costs/:id] Error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }

@@ -20,7 +20,7 @@ export const CostService = {
 
   update: async (id: string, data: UpdateCostInput) => {
     return apiCall<CostDetail>(`/costs/${id}`, {
-      method: 'PUT',
+      method: 'PATCH',
       body: JSON.stringify(data),
     })
   },

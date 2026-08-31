@@ -53,6 +53,11 @@ export type CreateGroupInput = {
   memberIds?: string[]
 }
 
+export type UpdateGroupInput = {
+  name?: string
+  category?: TransactionCategory
+}
+
 export type AddMemberInput = {
   contactId: string
 }
@@ -98,4 +103,14 @@ export type UpdateCostInput = {
   category: TransactionCategory
   totalValue: number
   ownerPercentage?: number
+}
+
+export interface IRestError {
+  message: string
+  error: string
+  code: number
+  causes?: Array<{
+    field: string
+    message: string
+  }>
 }

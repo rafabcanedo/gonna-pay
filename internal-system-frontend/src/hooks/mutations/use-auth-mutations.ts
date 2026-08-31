@@ -1,17 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { authService, ISignInRequest, ISignUpRequest, IAuthResponse } from "@/services/auth";
+import { IRestError } from "@/types";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-
-export interface IRestError {
-  message: string;
-  error: string;
-  code: number;
-  causes?: Array<{
-    field: string;
-    message: string;
-  }>;
-}
 
 export function useAuthMutations() {
   const router = useRouter();

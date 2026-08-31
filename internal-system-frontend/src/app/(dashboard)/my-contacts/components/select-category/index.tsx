@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { SelectCategoryProps } from './types'
+import { ContactCategory } from "@/types"
 
 export const SelectCategory: React.FC<SelectCategoryProps> = ({ value, onValueChange }) => {
   return (

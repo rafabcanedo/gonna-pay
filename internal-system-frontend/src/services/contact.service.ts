@@ -24,7 +24,7 @@ export const ContactService = {
 
   update: async (id: string, data: Partial<CreateContactInput>) => {
     return apiCall<Contact>(`/contacts/${id}`, {
-      method: 'PUT',
+      method: 'PATCH',
       body: JSON.stringify(data),
     })
   },
