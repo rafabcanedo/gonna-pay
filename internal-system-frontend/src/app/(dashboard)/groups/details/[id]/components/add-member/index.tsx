@@ -21,12 +21,7 @@ import {
 } from '@/components/ui/select'
 import { useContactsQuery } from '@/hooks/queries/use-contact-query'
 import { useAddMember } from '@/hooks/mutations/use-group-mutations'
-import type { GroupMember } from '@/types'
-
-interface IAddMemberProps {
-  groupId: string
-  currentMembers?: GroupMember[]
-}
+import { IAddMemberProps } from './interfaces'
 
 export const AddMember = ({ groupId, currentMembers = [] }: IAddMemberProps) => {
   const [open, setOpen] = useState(false)

@@ -16,16 +16,7 @@ import { HookFormTextInput } from "@/components/hook-form-text-input";
 import { FormProvider, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { SelectDate } from "../select-date";
-
-interface ICreateReminder {
-    name: string;
-    value: string;
-    date: Date;
-}
-
-interface CreateRemindersProps {
-    onAddReminder: (reminder: ICreateReminder) => void;
-}
+import { ICreateReminder, CreateRemindersProps } from '../interfaces'
 
 const createReminderSchema = yup.object().shape({
     name: yup

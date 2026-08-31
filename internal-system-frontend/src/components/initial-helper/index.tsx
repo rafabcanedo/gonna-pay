@@ -1,11 +1,5 @@
 import Link from "next/link";
-import { ElementType } from "react";
-
-type InitialCardsProps = {
-  name: string;
-  link?: string;
-  icon: ElementType;
-};
+import { InitialCardsProps } from './types'
 
 export const InitialHelper = ({ name, link, icon: Icon }: InitialCardsProps) => {
   const buttonContent = (

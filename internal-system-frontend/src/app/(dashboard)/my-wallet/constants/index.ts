@@ -1,4 +1,4 @@
-import { ChartConfig } from "../../types";
+import { ChartConfig } from "../types";
 
 export const chartConfigs: Record<string, ChartConfig> = {
   investments: {

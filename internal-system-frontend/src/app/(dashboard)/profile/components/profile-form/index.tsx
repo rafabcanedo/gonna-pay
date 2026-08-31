@@ -9,13 +9,7 @@ import { HookFormTextInput } from "@/components/hook-form-text-input"
 import { profileSchema } from "@/validations/schemas"
 import { useUser } from "@/providers/contexts/user-context"
 import { useUpdateProfileMutation } from "@/hooks/mutations/use-update-profile-mutation"
-import * as yup from "yup"
-
-type ProfileFormValues = yup.InferType<typeof profileSchema> & {
-  street?: string
-  neighborhood?: string
-  zip?: string
-}
+import { ProfileFormValues } from './types'
 
 export const ProfileForm = () => {
   const { user } = useUser()

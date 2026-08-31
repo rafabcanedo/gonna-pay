@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { authService, IUpdateProfileRequest } from "@/services/auth.service"
-import { IRestError } from "./use-auth-mutations"
+import { authService, IUpdateProfileRequest } from "@/services/auth"
+import { IRestError } from "@/types"
 import { toast } from "sonner"
 
 export function useUpdateProfileMutation() {

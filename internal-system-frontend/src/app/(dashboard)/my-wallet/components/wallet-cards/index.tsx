@@ -2,11 +2,7 @@
 
 import { FC, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
-
-interface IPropsWalletCards {
-  title: string;
-  value: number;
-}
+import { IPropsWalletCards } from './interfaces'
 
 export const WalletCards: FC<IPropsWalletCards> = ({ title, value }) => {
   const [onSee, setOnSee] = useState(true);

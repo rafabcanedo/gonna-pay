@@ -8,10 +8,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { forgotPasswordSchema } from "@/validations/schemas";
 import { HookFormTextInput } from "@/components/hook-form-text-input";
-
-type IForgotPassword = {
-  email: string;
-}
+import { IForgotPassword } from "./types"
 
 export default function ForgotYourPassword() {
 

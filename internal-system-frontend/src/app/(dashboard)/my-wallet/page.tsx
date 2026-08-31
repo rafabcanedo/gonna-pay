@@ -1,4 +1,4 @@
-import { chartConfigs } from "./components/chart-config";
+import { chartConfigs } from "./constants";
 import { WalletCards } from "./components/wallet-cards";
 import { WalletCharts } from "./components/wallet-charts";
 

@@ -1,5 +1,5 @@
 import { apiCall } from '@/lib/api-client'
-import type { GetGroupsResponse, Group, GroupDetail, CreateGroupInput, AddMemberInput } from '@/types'
+import type { GetGroupsResponse, Group, GroupDetail, CreateGroupInput, AddMemberInput, UpdateGroupInput } from '@/types'
 
 export const GroupService = {
   getAll: async () => {
@@ -17,6 +17,13 @@ export const GroupService = {
     })
   },
 
+  update: async (id: string, data: UpdateGroupInput) => {
+    return apiCall<Group>(`/groups/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    })
+  },
+
   delete: async (id: string) => {
     return apiCall<void>(`/groups/${id}`, {
       method: 'DELETE',
@@ -24,9 +31,8 @@ export const GroupService = {
   },
 
   addMember: async (groupId: string, data: AddMemberInput) => {
-    return apiCall<void>(`/groups/${groupId}/member`, {
+    return apiCall<void>(`/groups/${groupId}/member/${data.contactId}`, {
       method: 'POST',
-      body: JSON.stringify(data),
     })
   },
 

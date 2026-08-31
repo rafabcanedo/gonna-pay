@@ -3,10 +3,10 @@ import { API_BASE_URL } from '../../constants'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
     const accessToken = request.cookies.get('access_token')?.value
 
     const res = await fetch(`${API_BASE_URL}/contact/${id}`, {
@@ -34,17 +34,17 @@ export async function GET(
   }
 }
 
-export async function PUT(
+export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
     const body = await request.json()
     const accessToken = request.cookies.get('access_token')?.value
 
     const res = await fetch(`${API_BASE_URL}/contact/${id}`, {
-      method: 'PUT',
+      method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
         ...(accessToken ? { Cookie: `access_token=${accessToken}` } : {}),
@@ -63,17 +63,17 @@ export async function PUT(
 
     return NextResponse.json(data)
   } catch (error) {
-    console.error('[PUT /api/contacts/:id] Error:', error)
+    console.error('[PATCH /api/contacts/:id] Error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
     const accessToken = request.cookies.get('access_token')?.value
 
     const res = await fetch(`${API_BASE_URL}/contact/${id}`, {
