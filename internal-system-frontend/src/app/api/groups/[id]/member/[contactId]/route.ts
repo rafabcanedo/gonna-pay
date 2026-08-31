@@ -3,10 +3,10 @@ import { API_BASE_URL } from '../../../../constants'
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string; contactId: string } }
+  { params }: { params: Promise<{ id: string; contactId: string }> }
 ) {
   try {
-    const { id, contactId } = params
+    const { id, contactId } = await params
     const accessToken = request.cookies.get('access_token')?.value
 
     const res = await fetch(`${API_BASE_URL}/group/${id}/member/${contactId}`, {
@@ -34,10 +34,10 @@ export async function DELETE(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string; contactId: string } }
+  { params }: { params: Promise<{ id: string; contactId: string }> }
 ) {
   try {
-    const { id, contactId } = params
+    const { id, contactId } = await params
     const accessToken = request.cookies.get('access_token')?.value
 
     const res = await fetch(`${API_BASE_URL}/group/${id}/member/${contactId}`, {
