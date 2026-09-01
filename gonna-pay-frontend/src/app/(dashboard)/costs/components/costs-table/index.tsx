@@ -44,7 +44,7 @@ export const CostsTable = () => {
                     <TableCell className="font-medium text-zinc-800">
                       {cost.costName}
                     </TableCell>
-                    <TableCell>{cost.groupName}</TableCell>
+                    <TableCell>{cost.groupName || "-"}</TableCell>
                     <TableCell>
                       {cost.totalValue.toLocaleString("en-US", {
                         style: "currency",
