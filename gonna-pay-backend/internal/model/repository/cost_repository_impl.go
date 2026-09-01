@@ -17,6 +17,7 @@ type CostRepository interface {
 	FindAll(userID string) ([]*domains.Cost, error)
 	FindByID(id string) (*domains.Cost, error)
 	Delete(id string) error
+	GetGroupByID(groupID string) (*domains.Group, error)
 	GetGroupMembers(groupID string) ([]domains.Member, error)
 }
 
@@ -271,6 +272,21 @@ func (r *costRepository) FindByID(id string) (*domains.Cost, error) {
 func (r *costRepository) Delete(id string) error {
 	_, err := r.db.Exec(`DELETE FROM cost_entities WHERE id = $1`, id)
 	return err
+}
+
+func (r *costRepository) GetGroupByID(groupID string) (*domains.Group, error) {
+	var id, ownerID uuid.UUID
+	err := r.db.QueryRow(
+		`SELECT id, owner_id FROM group_entities WHERE id = $1`,
+		groupID,
+	).Scan(&id, &ownerID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, domains.NewNotFoundError("group not found")
+		}
+		return nil, err
+	}
+	return &domains.Group{ID: id.String(), OwnerID: ownerID.String()}, nil
 }
 
 func (r *costRepository) GetGroupMembers(groupID string) ([]domains.Member, error) {

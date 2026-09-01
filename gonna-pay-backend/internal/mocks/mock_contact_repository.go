@@ -10,30 +10,25 @@ import (
 	gomock "go.uber.org/mock/gomock"
 )
 
-// MockContactRepository is a mock of ContactRepository interface.
 type MockContactRepository struct {
 	ctrl     *gomock.Controller
 	recorder *MockContactRepositoryMockRecorder
 }
 
-// MockContactRepositoryMockRecorder is the mock recorder for MockContactRepository.
 type MockContactRepositoryMockRecorder struct {
 	mock *MockContactRepository
 }
 
-// NewMockContactRepository creates a new mock instance.
 func NewMockContactRepository(ctrl *gomock.Controller) *MockContactRepository {
 	mock := &MockContactRepository{ctrl: ctrl}
 	mock.recorder = &MockContactRepositoryMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockContactRepository) EXPECT() *MockContactRepositoryMockRecorder {
 	return m.recorder
 }
 
-// Create mocks base method.
 func (m *MockContactRepository) Create(contact *domains.Contact) (*domains.Contact, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Create", contact)
@@ -42,13 +37,11 @@ func (m *MockContactRepository) Create(contact *domains.Contact) (*domains.Conta
 	return ret0, ret1
 }
 
-// Create indicates an expected call of Create.
 func (mr *MockContactRepositoryMockRecorder) Create(contact any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockContactRepository)(nil).Create), contact)
 }
 
-// FindAll mocks base method.
 func (m *MockContactRepository) FindAll(ownerID string) ([]*domains.Contact, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindAll", ownerID)
@@ -57,13 +50,11 @@ func (m *MockContactRepository) FindAll(ownerID string) ([]*domains.Contact, err
 	return ret0, ret1
 }
 
-// FindAll indicates an expected call of FindAll.
 func (mr *MockContactRepositoryMockRecorder) FindAll(ownerID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockContactRepository)(nil).FindAll), ownerID)
 }
 
-// FindByID mocks base method.
 func (m *MockContactRepository) FindByID(id string) (*domains.Contact, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindByID", id)
@@ -72,13 +63,11 @@ func (m *MockContactRepository) FindByID(id string) (*domains.Contact, error) {
 	return ret0, ret1
 }
 
-// FindByID indicates an expected call of FindByID.
 func (mr *MockContactRepositoryMockRecorder) FindByID(id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockContactRepository)(nil).FindByID), id)
 }
 
-// Update mocks base method.
 func (m *MockContactRepository) Update(contact *domains.Contact) (*domains.Contact, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Update", contact)
@@ -87,13 +76,11 @@ func (m *MockContactRepository) Update(contact *domains.Contact) (*domains.Conta
 	return ret0, ret1
 }
 
-// Update indicates an expected call of Update.
 func (mr *MockContactRepositoryMockRecorder) Update(contact any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockContactRepository)(nil).Update), contact)
 }
 
-// Delete mocks base method.
 func (m *MockContactRepository) Delete(id string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", id)
@@ -101,8 +88,20 @@ func (m *MockContactRepository) Delete(id string) error {
 	return ret0
 }
 
-// Delete indicates an expected call of Delete.
 func (mr *MockContactRepositoryMockRecorder) Delete(id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockContactRepository)(nil).Delete), id)
+}
+
+func (m *MockContactRepository) ExistsByEmailAndOwner(email, ownerID string) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExistsByEmailAndOwner", email, ownerID)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (mr *MockContactRepositoryMockRecorder) ExistsByEmailAndOwner(email, ownerID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistsByEmailAndOwner", reflect.TypeOf((*MockContactRepository)(nil).ExistsByEmailAndOwner), email, ownerID)
 }

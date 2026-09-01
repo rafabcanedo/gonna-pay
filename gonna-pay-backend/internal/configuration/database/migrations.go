@@ -43,6 +43,7 @@ func RunMigrations() error {
 	}
 
 	gormDB.Exec(`CREATE INDEX IF NOT EXISTS idx_cost_splits_gin ON cost_entities USING GIN (splits)`)
+	gormDB.Exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_contact_owner_email ON contact_entities(owner_id, email) WHERE deleted_at IS NULL`)
 
 	// Recreate all FKs with the correct ON DELETE behavior.
 	// AutoMigrate does not alter existing constraints, so we drop and recreate them.

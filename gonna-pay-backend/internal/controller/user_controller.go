@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/configuration/rest_errors"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/configuration/validation"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/model/domains"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/model/service"
@@ -109,6 +110,10 @@ func (uc *UserController) FindUserByID(c *gin.Context) {
 // @Router       /user/{id} [put]
 func (uc *UserController) UpdateUser(c *gin.Context) {
 	id := c.Param("id")
+	if id != c.GetString("userID") {
+		c.JSON(http.StatusForbidden, rest_errors.NewForbiddenError("access denied"))
+		return
+	}
 
 	var req request.UpdateUserRequest
 
@@ -142,6 +147,10 @@ func (uc *UserController) UpdateUser(c *gin.Context) {
 // @Router       /user/{id} [delete]
 func (uc *UserController) DeleteUser(c *gin.Context) {
 	id := c.Param("id")
+	if id != c.GetString("userID") {
+		c.JSON(http.StatusForbidden, rest_errors.NewForbiddenError("access denied"))
+		return
+	}
 
 	if err := uc.service.Delete(id); err != nil {
 		response.RespondError(c, err)

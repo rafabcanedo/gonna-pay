@@ -25,6 +25,15 @@ func NewContactService(repo repository.ContactRepository) ContactService {
 }
 
 func (s *contactService) Create(contact *domains.Contact) (*domains.Contact, error) {
+	exists, err := s.repo.ExistsByEmailAndOwner(contact.Email, contact.OwnerID)
+	if err != nil {
+		logger.Error("error checking contact uniqueness", err)
+		return nil, err
+	}
+	if exists {
+		return nil, domains.NewConflictError("contact with this email already exists")
+	}
+
 	created, err := s.repo.Create(contact)
 	if err != nil {
 		logger.Error("error creating contact", err)

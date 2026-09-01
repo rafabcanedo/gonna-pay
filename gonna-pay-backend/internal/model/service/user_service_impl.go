@@ -84,6 +84,24 @@ func (s *userService) FindByEmail(email string) (*domains.User, error) {
 }
 
 func (s *userService) Update(user *domains.User) (*domains.User, error) {
+	if _, err := s.repo.FindByID(user.ID); err != nil {
+		if !errors.Is(err, domains.ErrNotFound) {
+			logger.Error("error finding user on update", err)
+		}
+		return nil, err
+	}
+
+	if user.Email != "" {
+		existing, err := s.repo.FindByEmail(user.Email)
+		if err != nil && !errors.Is(err, domains.ErrNotFound) {
+			logger.Error("error checking email uniqueness on update", err)
+			return nil, err
+		}
+		if existing != nil && existing.ID != user.ID {
+			return nil, domains.NewConflictError("email already in use")
+		}
+	}
+
 	if user.Password != "" {
 		if err := user.EncryptPassword(); err != nil {
 			logger.Error("error encrypting password on update", err)
@@ -101,6 +119,13 @@ func (s *userService) Update(user *domains.User) (*domains.User, error) {
 }
 
 func (s *userService) Delete(id string) error {
+	if _, err := s.repo.FindByID(id); err != nil {
+		if !errors.Is(err, domains.ErrNotFound) {
+			logger.Error("error finding user on delete", err)
+		}
+		return err
+	}
+
 	if err := s.repo.Delete(id); err != nil {
 		logger.Error("error deleting user", err)
 		return err

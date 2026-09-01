@@ -29,12 +29,23 @@ func (s *costService) Create(cost *domains.Cost, ownerPercentage *float64) (*dom
 	var members []domains.Member
 
 	if cost.GroupID != "" {
-		group, err := s.repo.GetGroupMembers(cost.GroupID)
+		group, err := s.repo.GetGroupByID(cost.GroupID)
+		if err != nil {
+			if !errors.Is(err, domains.ErrNotFound) {
+				logger.Error("error fetching group for cost creation", err)
+			}
+			return nil, err
+		}
+		if group.OwnerID != cost.UserID {
+			return nil, domains.NewForbiddenError("access denied")
+		}
+
+		groupMembers, err := s.repo.GetGroupMembers(cost.GroupID)
 		if err != nil {
 			logger.Error("error fetching group members for cost creation", err)
 			return nil, err
 		}
-		members = group
+		members = groupMembers
 
 		memberCount := len(members)
 		if ownerPercentage != nil {

@@ -17,6 +17,7 @@ type ContactRepository interface {
 	FindByID(id string) (*domains.Contact, error)
 	Update(contact *domains.Contact) (*domains.Contact, error)
 	Delete(id string) error
+	ExistsByEmailAndOwner(email, ownerID string) (bool, error)
 }
 
 type contactRepository struct {
@@ -107,4 +108,16 @@ func (r *contactRepository) Delete(id string) error {
 		time.Now(), id,
 	)
 	return err
+}
+
+func (r *contactRepository) ExistsByEmailAndOwner(email, ownerID string) (bool, error) {
+	var count int
+	err := r.db.QueryRow(
+		`SELECT COUNT(*) FROM contact_entities WHERE email = $1 AND owner_id = $2 AND deleted_at IS NULL`,
+		email, ownerID,
+	).Scan(&count)
+	if err != nil {
+		return false, err
+	}
+	return count > 0, nil
 }

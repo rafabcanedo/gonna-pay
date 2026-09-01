@@ -107,6 +107,19 @@ func (mr *MockCostRepositoryMockRecorder) Delete(id any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockCostRepository)(nil).Delete), id)
 }
 
+func (m *MockCostRepository) GetGroupByID(groupID string) (*domains.Group, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetGroupByID", groupID)
+	ret0, _ := ret[0].(*domains.Group)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (mr *MockCostRepositoryMockRecorder) GetGroupByID(groupID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGroupByID", reflect.TypeOf((*MockCostRepository)(nil).GetGroupByID), groupID)
+}
+
 // GetGroupMembers mocks base method.
 func (m *MockCostRepository) GetGroupMembers(groupID string) ([]domains.Member, error) {
 	m.ctrl.T.Helper()
