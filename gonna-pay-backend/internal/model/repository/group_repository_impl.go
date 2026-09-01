@@ -170,8 +170,26 @@ func (r *groupRepository) Update(group *domains.Group) (*domains.Group, error) {
 }
 
 func (r *groupRepository) Delete(id string) error {
-	_, err := r.db.Exec(`DELETE FROM group_entities WHERE id = $1`, id)
-	return err
+	tx, err := r.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	_, err = tx.Exec(
+		`UPDATE cost_entities SET owner_percentage = 100, splits = NULL WHERE group_id = $1`,
+		id,
+	)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(`DELETE FROM group_entities WHERE id = $1`, id)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 func (r *groupRepository) AddMember(groupID, contactID string) error {
