@@ -1,10 +1,10 @@
 'use client'
 
-import { useGroupsQuery } from '@/hooks/queries/use-group-query'
+import { useGroupsWithMembersQuery } from '@/hooks/queries/use-group-query'
 import { GroupCards } from '../group-cards'
 
 export const TableGroup = () => {
-  const { data } = useGroupsQuery()
+  const { data } = useGroupsWithMembersQuery()
   const groups = data?.groups ?? []
   const total = data?.total ?? 0
 
