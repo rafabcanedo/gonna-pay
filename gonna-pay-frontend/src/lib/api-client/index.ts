@@ -1,9 +1,6 @@
 import { API_BASE_URL } from '../constants'
 import { ApiError, ForbiddenError, InternalServerError, NetworkError, NotFoundError, ServiceUnavailableError, UnauthorizedError, ValidationError } from '../errors/api.error'
-
-interface NextInternalError extends Error {
-  digest: string
-}
+import { NextInternalError } from './interfaces'
 
 function isNextInternalError(error: unknown): error is NextInternalError {
   return (

@@ -6,8 +6,9 @@ import {
   HydrationBoundary,
   QueryClient,
 } from "@tanstack/react-query";
-import { CostService } from "@/services";
+import { ContactService, CostService } from "@/services";
 import { AvatarCost } from "./components/avatar-cost";
+import { Contact } from "@/types";
 
 export default async function Costs() {
   const queryClient = new QueryClient();
@@ -17,14 +18,12 @@ export default async function Costs() {
     queryFn: () => CostService.getAll(),
   });
 
-  const avatarList = [
-    { id: 1, name: "Isa" },
-    { id: 2, name: "Artur" },
-    { id: 3, name: "Joao" },
-    { id: 1, name: "Gabriela" },
-    { id: 2, name: "Rafael" },
-    { id: 3, name: "Daniela" },
-  ]
+  await queryClient.prefetchQuery({
+    queryKey: ["contacts"],
+    queryFn: () => ContactService.getAll(),
+  });
+
+  const contacts = queryClient.getQueryData<Contact[]>(["contacts"])
 
   return (
     <div className="flex flex-col px-8 w-full">
@@ -35,17 +34,17 @@ export default async function Costs() {
         </Link>
       </header>
 
-      <div className="flex justify-center items-center gap-8">
-        {avatarList.map((item) => (
-          <AvatarCost key={item.id} name={item.name} />
-        ))}
-      </div>
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <div className="flex justify-center items-center gap-8">
+          {contacts?.map((item) => (
+            <AvatarCost key={item.id} name={item.name} />
+          ))}
+        </div>
 
-      <div className="mt-12">
-        <HydrationBoundary state={dehydrate(queryClient)}>
+        <div className="mt-12">
           <CostsTable />
-        </HydrationBoundary>
-      </div>
+        </div>
+      </HydrationBoundary>
     </div>
   );
 }

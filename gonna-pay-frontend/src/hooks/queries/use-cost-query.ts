@@ -1,8 +1,8 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueries } from "@tanstack/react-query";
 import { CostService } from "@/services/cost.service";
-import type { GetCostsResponse } from "@/types";
+import type { GetCostsResponse, CostDetail } from "@/types";
 import { ApiError } from "@/lib/errors/api.error";
 
 export function useCostsQuery() {
@@ -11,4 +11,22 @@ export function useCostsQuery() {
     queryFn: () => CostService.getAll(),
     staleTime: 1000 * 60 * 5,
   });
+}
+
+export function useCostsWithSplitsQuery() {
+  const { data: costs = [], ...listQuery } = useCostsQuery()
+
+  const detailQueries = useQueries({
+    queries: costs.map((cost) => ({
+      queryKey: ["costs", cost.id],
+      queryFn: () => CostService.getById(cost.id),
+      staleTime: 1000 * 60 * 5,
+    })),
+  })
+
+  const costsWithSplits = detailQueries
+    .map((q) => q.data)
+    .filter((d): d is CostDetail => Boolean(d))
+
+  return { ...listQuery, data: costsWithSplits }
 }
