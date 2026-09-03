@@ -17,8 +17,8 @@ export function useCreateContact() {
     },
     onError: (error: ApiError) => {
       if (error.status !== 409) {
-    toast.error(error.message)
-    }
+        toast.error(error.message)
+      }
     },
   })
 }

@@ -19,6 +19,7 @@ import { ICreateCostForm } from "./types";
 import { useRouter } from "next/navigation";
 import { useCreateCost } from "@/hooks/mutations/use-cost-mutations";
 import { useGroupsQuery } from "@/hooks/queries/use-group-query";
+import { costCategoryOptions } from "@/app/(dashboard)/costs/constants";
 
 export default function CreateCostForm() {
   const router = useRouter();
@@ -65,13 +66,6 @@ export default function CreateCostForm() {
     router.push("/costs");
   };
 
-  const categoryOptions = [
-    { label: "Dinner", value: TransactionCategory.DINNER },
-    { label: "Lunch", value: TransactionCategory.LUNCH },
-    { label: "Entertainment", value: TransactionCategory.ENTERTAINMENT },
-    { label: "Travel", value: TransactionCategory.TRAVEL },
-    { label: "Others", value: TransactionCategory.OTHERS },
-  ];
 
   return (
     <div className="flex items-center justify-center min-h-screen">
@@ -94,7 +88,7 @@ export default function CreateCostForm() {
                 label="Category"
                 placeholder="Select a category"
                 groupLabel="Categories"
-                options={categoryOptions}
+                options={costCategoryOptions}
               />
 
               <HookFormTextInput

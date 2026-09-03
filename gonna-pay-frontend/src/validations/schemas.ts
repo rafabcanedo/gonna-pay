@@ -34,6 +34,16 @@ export const addContactSchema = yup.object({
     .required("Category is required"),
 });
 
+export const editContactSchema = yup.object({
+  name: trimmed(nameField(2)).optional(),
+  email: trimmed(emailField()).optional(),
+  phone: trimmed(phoneField()).optional(),
+  category: yup
+    .mixed<ContactCategory>()
+    .oneOf(Object.values(ContactCategory), "Invalid category")
+    .optional(),
+});
+
 export const createGroupSchema = yup.object({
   name: trimmed(nameField(2)),
   category: yup

@@ -30,3 +30,12 @@ export function useCostsWithSplitsQuery() {
 
   return { ...listQuery, data: costsWithSplits }
 }
+
+export function useCostQuery(id: string) {
+  return useQuery<CostDetail, ApiError>({
+    queryKey: ['costs', id],
+    queryFn: () => CostService.getById(id),
+    staleTime: 1000 * 60 * 5,
+    enabled: !!id,
+  })
+}
