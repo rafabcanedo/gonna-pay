@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { BadgeType } from '@/utils/badge-types'
+import { TableEmptyState } from '@/components/table-empty-state'
 import { useCostsQuery } from '@/hooks/queries/use-cost-query'
 import { useDeleteCost } from '@/hooks/mutations/use-cost-mutations'
 import type { Cost } from '@/types'
@@ -105,11 +106,7 @@ export const CostsTable = () => {
                     </TableRow>
                   ))
                 ) : (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center text-gray-500 py-10">
-                      No costs found
-                    </TableCell>
-                  </TableRow>
+                  <TableEmptyState colSpan={7} message="No costs found" />
                 )}
               </TableBody>
             </Table>
