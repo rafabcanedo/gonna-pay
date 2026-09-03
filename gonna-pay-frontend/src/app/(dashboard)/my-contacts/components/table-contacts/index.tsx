@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { BadgeType } from "@/utils/badge-types"
+import { TableEmptyState } from "@/components/table-empty-state"
 import { useContactsQuery } from "@/hooks/queries/use-contact-query"
 import { useDeleteContact } from "@/hooks/mutations/use-contact-mutations"
 import type { Contact } from "@/types"
@@ -99,11 +100,7 @@ export const TableContact = () => {
                     </TableRow>
                   ))
                 ) : (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center text-gray-500">
-                      No contacts found
-                    </TableCell>
-                  </TableRow>
+                  <TableEmptyState colSpan={5} message="No contacts found" />
                 )}
               </TableBody>
             </Table>

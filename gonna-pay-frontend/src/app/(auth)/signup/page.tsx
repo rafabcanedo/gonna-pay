@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { useForm, FormProvider } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import { HookFormTextInput } from "@/components/hook-form-text-input"
+import { HookFormPhoneInput } from "@/components/hook-form-phone-input"
 import Link from "next/link"
 import { signUpSchema } from "@/validations/schemas"
 import { useAuthMutations } from "@/hooks/mutations/use-auth-mutations"
@@ -35,7 +36,7 @@ export default function SignUpForm() {
               <HookFormTextInput title="Name" name="name" label="Jhon Jason" type="text" />
               <HookFormTextInput title="Email" name="email" label="jhon@email.com" type="text" />
               <HookFormTextInput title="Password" name="password" label="Password" type="password" />
-              <HookFormTextInput title="Phone" name="phone" label="+55 11 997117911" type="text" />
+              <HookFormPhoneInput title="Phone" name="phone" label="(11) 99711-7911" type="tel" />
             </CardContent>
             <CardFooter className="flex justify-end">
               <Button className="w-full bg-primary hover:bg-hover" type="submit" disabled={registerMutation.isPending}>

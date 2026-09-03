@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { FormProvider, useForm, type SubmitHandler } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
 import { HookFormTextInput } from "@/components/hook-form-text-input"
+import { HookFormPhoneInput, formatPhone } from "@/components/hook-form-phone-input"
 import { profileSchema } from "@/validations/schemas"
 import { useUser } from "@/providers/contexts/user-context"
 import { useUpdateProfileMutation } from "@/hooks/mutations/use-update-profile-mutation"
@@ -26,7 +27,7 @@ export const ProfileForm = () => {
 
   useEffect(() => {
     if (user) {
-      reset({ name: user.name, email: user.email, phone: user.phone })
+      reset({ name: user.name, email: user.email, phone: formatPhone(user.phone ?? '') })
     }
   }, [user, reset])
 
@@ -46,7 +47,7 @@ export const ProfileForm = () => {
             <CardContent className="grid grid-cols-2 gap-4 text-zinc-600">
               <HookFormTextInput title="Name" name="name" label="John Jason" type="text" />
               <HookFormTextInput title="Email" name="email" label="john@example.com" type="text" />
-              <HookFormTextInput title="Phone" name="phone" label="+55 11 997117911" type="text" />
+              <HookFormPhoneInput title="Phone" name="phone" label="(11) 99711-7911" type="tel" />
 
               <HookFormTextInput title="Street" name="street" label="Street" type="text" disabled />
               <HookFormTextInput title="Neighborhood" name="neighborhood" label="Neighborhood" type="text" disabled />
