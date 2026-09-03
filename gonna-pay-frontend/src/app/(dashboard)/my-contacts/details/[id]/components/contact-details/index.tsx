@@ -12,6 +12,7 @@ import { SelectCategory } from '@/app/(dashboard)/my-contacts/components/select-
 import { editContactSchema } from '@/validations/schemas'
 import { useContactQuery } from '@/hooks/queries/use-contact-query'
 import { useUpdateContact } from '@/hooks/mutations/use-contact-mutations'
+import { HookFormPhoneInput, formatPhone } from '@/components/hook-form-phone-input'
 import type { ContactCategory } from '@/types'
 import { IPropsContactDetails } from './interfaces'
 import type { EditContactForm } from './types'
@@ -35,7 +36,7 @@ export const ContactDetails = ({ contactId }: IPropsContactDetails) => {
       reset({
         name: contact.name,
         email: contact.email,
-        phone: contact.phone,
+        phone: formatPhone(contact.phone ?? ''),
         category: contact.category as ContactCategory,
       })
     }
@@ -66,7 +67,7 @@ export const ContactDetails = ({ contactId }: IPropsContactDetails) => {
             <CardContent className="flex flex-col gap-4">
               <HookFormTextInput title="Name" name="name" label="John Jason" type="text" />
               <HookFormTextInput title="Email" name="email" label="john@example.com" type="email" />
-              <HookFormTextInput title="Phone" name="phone" label="+55 11 997117911" type="text" />
+              <HookFormPhoneInput title="Phone" name="phone" label="(11) 99711-7911" type="tel" />
               <SelectCategory
                 value={watch('category')}
                 onValueChange={(value: ContactCategory) =>

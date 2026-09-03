@@ -22,7 +22,7 @@ export const nameField = (min = 6) =>
 export const phoneField = () =>
   yup
     .string()
-    .matches(/^\(?\d{2}\)?[\s-]?\d{4,5}-?\d{4}$/, messages.phoneInvalid)
+    .matches(/^\(\d{2}\) \d{4,5}-\d{4}$/, messages.phoneInvalid)
     .required(messages.required);
 
   

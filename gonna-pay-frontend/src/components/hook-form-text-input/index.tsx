@@ -1,6 +1,6 @@
 import React, { FC } from 'react'
 import { useFormContext } from 'react-hook-form';
-import { Input } from '../ui/input';
+import { Input } from '@/components/ui/input';
 import { ITextInput } from './types'
 
 export const HookFormTextInput: FC<ITextInput> = ({

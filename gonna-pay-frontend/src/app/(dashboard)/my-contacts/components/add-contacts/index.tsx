@@ -13,6 +13,7 @@ import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button";
 import { ContactCategory, CreateContactInput } from "@/types";
 import { HookFormTextInput } from "@/components/hook-form-text-input";
+import { HookFormPhoneInput } from "@/components/hook-form-phone-input";
 import { SelectCategory } from "../select-category";
 import { addContactSchema } from "@/validations/schemas";
 import { FormProvider, useForm } from "react-hook-form";
@@ -156,11 +157,11 @@ export const AddContact = () => {
                 </DialogHeader>
 
                 <div className="flex flex-col gap-4 py-4">
-                  <HookFormTextInput
+                  <HookFormPhoneInput
                     title="Phone"
                     name="phone"
-                    label="+55 11 997117911"
-                    type="text"
+                    label="(11) 99711-7911"
+                    type="tel"
                   />
                   <SelectCategory
                     value={methods.watch("category")}
