@@ -1,5 +1,6 @@
 import { GraphPayments } from "./components/graph-payments";
 import { TablePayments } from "./components/table-payments";
+import { TableCostSplits } from "./components/table-cost-splits";
 
 export default function Payments() {
   return (
@@ -12,9 +13,9 @@ export default function Payments() {
         <GraphPayments />
       </div>
 
-      <div>
-        <TablePayments />
-      </div>
+      <TablePayments />
+
+      <TableCostSplits />
     </div>
   );
 }
