@@ -1,6 +1,7 @@
 "use client"
 
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"
+import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
+import { Logo } from "@/components/logo"
 import { Button } from "@/components/ui/button"
 import { useForm, FormProvider } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
@@ -28,8 +29,8 @@ export default function SignInForm() {
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(handleOnSubmit)}>
           <Card className="w-[350px]">
-            <CardHeader>
-              <CardTitle className="text-center">Sign In</CardTitle>
+            <CardHeader className="flex items-center justify-center">
+              <Logo size="md" />
             </CardHeader>
             <CardContent className="space-y-4">
               <HookFormTextInput title="Email" name="email" label="jhon@email.com" type="text" />
