@@ -30,9 +30,12 @@ export function SideBar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <div className="flex items-center justify-between group-data-[collapsible=icon]:justify-center px-2 py-2">
           <div className="group-data-[collapsible=icon]:hidden">
-            <Logo />
+            <Logo size="sm" />
           </div>
           <SidebarTrigger />
+        </div>
+        <div className="hidden group-data-[collapsible=icon]:flex justify-center pb-2">
+          <Logo variant="icon" />
         </div>
         <div className="group-data-[collapsible=icon]:hidden">
           <SearchForm />
