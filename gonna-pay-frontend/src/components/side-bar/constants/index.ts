@@ -1,5 +1,5 @@
-import { House, Wallet, Receipt, Users, Banknote, BookUser, CircleUser, BookText } from "lucide-react";
-import { NavGroup, NavItem } from "../types";
+import { House, Wallet, Receipt, Users, Banknote, BookUser, BookText } from "lucide-react";
+import { NavGroup } from "../types";
 
 export const navMain: NavGroup[] = [
   {
@@ -21,8 +21,4 @@ export const navMain: NavGroup[] = [
       { title: "Contact Us",       url: "#", icon: BookText },
     ],
   },
-]
-
-export const navAccount: NavItem[] = [
-  { title: "My Account", url: "/profile", icon: CircleUser },
 ]

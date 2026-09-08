@@ -84,7 +84,7 @@ export const TableContact = () => {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem
-                              onClick={() => router.push(`/my-contacts/details/${contact.id}`)}
+                              onClick={() => router.push(`/my-contacts/details/${contact.id}?name=${encodeURIComponent(contact.name)}`)}
                             >
                               Edit
                             </DropdownMenuItem>

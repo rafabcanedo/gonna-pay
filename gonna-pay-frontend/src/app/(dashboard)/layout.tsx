@@ -5,6 +5,7 @@ import { ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { SideBar } from "@/components/side-bar";
+import { DashboardNavbar } from "@/components/dashboard-navbar";
 import { AppProviders } from "@/providers";
 
 const poppins = Poppins({
@@ -55,7 +56,10 @@ export default function PrivateLayout({
         <AppProviders>
           <SidebarProvider>
             <SideBar />
-            <main className="flex-1 px-8">{children}</main>
+            <div className="flex-1 flex flex-col min-h-screen">
+              <DashboardNavbar />
+              <main className="flex-1 px-8">{children}</main>
+            </div>
           </SidebarProvider>
           <Toaster richColors position="bottom-center" />
         </AppProviders>

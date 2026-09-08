@@ -90,7 +90,7 @@ export const CostsTable = () => {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem
-                              onClick={() => router.push(`/costs/details/${cost.id}`)}
+                              onClick={() => router.push(`/costs/details/${cost.id}?name=${encodeURIComponent(cost.costName)}`)}
                             >
                               Edit
                             </DropdownMenuItem>
