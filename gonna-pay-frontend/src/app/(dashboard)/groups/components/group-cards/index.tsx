@@ -14,7 +14,7 @@ const getInitials = (name: string) => {
 
 export const GroupCards: FC<IPropsGroupCards> = ({ group }) => {
   return (
-    <Link href={`/groups/details/${group.id}`}>
+    <Link href={`/groups/details/${group.id}?name=${encodeURIComponent(group.name)}`}>
       <div className="w-full shadow rounded-xl px-5 py-4 flex flex-col gap-4 hover:shadow-md transition-shadow cursor-pointer">
         <div className="flex flex-row items-center justify-between">
           <span className="font-poppins font-semibold text-lg text-zinc-700">
