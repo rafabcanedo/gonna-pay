@@ -21,10 +21,10 @@ function buildSpendingData(costs: Cost[]): SpendingChartPoint[] {
     const dateStr = date.toDateString()
     const dayCosts = costs.filter((c) => new Date(c.createdAt).toDateString() === dateStr)
     const spending = dayCosts.reduce((sum, c) => sum + c.ownerValue, 0)
-    const receivable = dayCosts
+    const income = dayCosts
       .filter((c) => c.groupId)
       .reduce((sum, c) => sum + (c.totalValue - c.ownerValue), 0)
-    return { day, spending, receivable }
+    return { day, spending, income }
   })
 }
 

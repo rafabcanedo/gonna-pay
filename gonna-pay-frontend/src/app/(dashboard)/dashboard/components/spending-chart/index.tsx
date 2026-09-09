@@ -8,13 +8,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
-import type { ChartConfig } from '@/components/ui/chart'
 import type { IPropsSpendingChart } from './interfaces'
-
-const chartConfig = {
-  spending:   { label: 'Spending',   color: '#3b82f6' },
-  receivable: { label: 'Receivable', color: '#22c55e' },
-} satisfies ChartConfig
+import { incomeSpendingChartConfig } from '@/constants'
 
 export function SpendingChart({ data }: IPropsSpendingChart) {
   return (
@@ -22,7 +17,7 @@ export function SpendingChart({ data }: IPropsSpendingChart) {
       <h2 className="font-mono text-lg font-semibold text-zinc-600 mb-4">
         Last 7 Days
       </h2>
-      <ChartContainer config={chartConfig} className="h-[220px] w-full">
+      <ChartContainer config={incomeSpendingChartConfig} className="h-[220px] w-full">
         <BarChart accessibilityLayer data={data}>
           <CartesianGrid vertical={false} />
           <XAxis dataKey="day" tickLine={false} axisLine={false} tickMargin={10} />
@@ -33,8 +28,8 @@ export function SpendingChart({ data }: IPropsSpendingChart) {
           />
           <ChartTooltip content={<ChartTooltipContent />} />
           <ChartLegend content={<ChartLegendContent />} />
-          <Bar dataKey="spending"   fill="var(--color-spending)"   radius={4} />
-          <Bar dataKey="receivable" fill="var(--color-receivable)" radius={4} />
+          <Bar dataKey="spending" fill="var(--color-spending)" radius={4} />
+          <Bar dataKey="income"   fill="var(--color-income)"   radius={4} />
         </BarChart>
       </ChartContainer>
     </div>

@@ -19,7 +19,8 @@ import {
 } from '@/components/ui/select'
 import { useCostsQuery } from '@/hooks/queries/use-cost-query'
 import type { TimeRange } from '../../types'
-import { areaChartConfig, descriptionMap, timeRanges } from './constants'
+import { incomeSpendingChartConfig } from '@/constants'
+import { descriptionMap, timeRanges } from './constants'
 import { buildPaymentsData, formatDate } from '../../lib/utils'
 
 export const GraphPayments = () => {
@@ -56,16 +57,16 @@ export const GraphPayments = () => {
       </CardHeader>
 
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
-        <ChartContainer config={areaChartConfig} className="aspect-auto h-[250px] w-full">
+        <ChartContainer config={incomeSpendingChartConfig} className="aspect-auto h-[250px] w-full">
           <AreaChart data={chartData}>
             <defs>
               <linearGradient id="fillIncome" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={areaChartConfig.income.color} stopOpacity={0.8} />
-                <stop offset="95%" stopColor={areaChartConfig.income.color} stopOpacity={0.1} />
+                <stop offset="5%" stopColor={incomeSpendingChartConfig.income.color} stopOpacity={0.8} />
+                <stop offset="95%" stopColor={incomeSpendingChartConfig.income.color} stopOpacity={0.1} />
               </linearGradient>
               <linearGradient id="fillSpending" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={areaChartConfig.spending.color} stopOpacity={0.8} />
-                <stop offset="95%" stopColor={areaChartConfig.spending.color} stopOpacity={0.1} />
+                <stop offset="5%" stopColor={incomeSpendingChartConfig.spending.color} stopOpacity={0.8} />
+                <stop offset="95%" stopColor={incomeSpendingChartConfig.spending.color} stopOpacity={0.1} />
               </linearGradient>
             </defs>
 
@@ -89,7 +90,7 @@ export const GraphPayments = () => {
               dataKey="income"
               type="natural"
               fill="url(#fillIncome)"
-              stroke={areaChartConfig.income.color}
+              stroke={incomeSpendingChartConfig.income.color}
               stackId={undefined}
             />
 
@@ -97,7 +98,7 @@ export const GraphPayments = () => {
               dataKey="spending"
               type="natural"
               fill="url(#fillSpending)"
-              stroke={areaChartConfig.spending.color}
+              stroke={incomeSpendingChartConfig.spending.color}
               stackId={undefined}
             />
 

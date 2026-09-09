@@ -6,13 +6,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
-import type { ChartConfig } from '@/components/ui/chart'
 import type { IPropsCategoryChart } from './interfaces'
-import { CATEGORY_COLORS } from './constants'
-
-const chartConfig = {
-  total: { label: 'Total' },
-} satisfies ChartConfig
+import { CATEGORY_COLORS, chartConfig } from './constants'
 
 export function CategoryChart({ data }: IPropsCategoryChart) {
   return (

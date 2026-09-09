@@ -1,16 +1,4 @@
-import type { ChartConfig } from '@/components/ui/chart'
 import { TimeRange } from '../../../types';
-
-export const areaChartConfig = {
-  income: {
-    label: 'Income',
-    color: '#22c55e',
-  },
-  spending: {
-    label: 'Spending',
-    color: '#3b82f6',
-  },
-} satisfies ChartConfig
 
 export const descriptionMap: Record<TimeRange, string> = {
   '7d': 'Showing income and spending for the last 7 days',
