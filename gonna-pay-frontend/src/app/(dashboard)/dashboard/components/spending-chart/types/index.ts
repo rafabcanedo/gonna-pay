@@ -1,4 +1,5 @@
 export type SpendingChartPoint = {
-  month: string
-  total: number
+  day: string
+  spending: number
+  receivable: number
 }

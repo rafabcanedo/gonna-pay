@@ -13,12 +13,19 @@ import type { SpendingChartPoint } from "./components/spending-chart/types";
 import type { CategoryChartPoint } from "./components/category-chart/types";
 
 function buildSpendingData(costs: Cost[]): SpendingChartPoint[] {
-  const map = new Map<string, number>()
-  for (const cost of costs) {
-    const month = new Date(cost.createdAt).toLocaleString('en-US', { month: 'short' })
-    map.set(month, (map.get(month) ?? 0) + cost.totalValue)
-  }
-  return Array.from(map, ([month, total]) => ({ month, total }))
+  const today = new Date()
+  return Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(today)
+    date.setDate(today.getDate() - (6 - i))
+    const day = date.toLocaleString('en-US', { weekday: 'short' })
+    const dateStr = date.toDateString()
+    const dayCosts = costs.filter((c) => new Date(c.createdAt).toDateString() === dateStr)
+    const spending = dayCosts.reduce((sum, c) => sum + c.ownerValue, 0)
+    const receivable = dayCosts
+      .filter((c) => c.groupId)
+      .reduce((sum, c) => sum + (c.totalValue - c.ownerValue), 0)
+    return { day, spending, receivable }
+  })
 }
 
 function buildCategoryData(costs: Cost[]): CategoryChartPoint[] {
