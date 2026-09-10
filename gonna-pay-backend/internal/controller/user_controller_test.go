@@ -165,6 +165,7 @@ func TestUpdateUser(t *testing.T) {
 		mockService.EXPECT().Update(gomock.Any()).Return(m.User, nil)
 
 		ctx, rec := testutil.NewTestContext()
+		testutil.SetAuthUser(ctx, m.ID)
 		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: m.ID}}, map[string]any{
 			"name": testutil.UserUpdatedName,
 		})
@@ -183,6 +184,7 @@ func TestUpdateUser(t *testing.T) {
 		uc := controller.NewUserController(mockService)
 
 		ctx, rec := testutil.NewTestContext()
+		testutil.SetAuthUser(ctx, testutil.UserID)
 		testutil.MakePatch(ctx, gin.Params{{Key: "id", Value: testutil.UserID}}, map[string]any{
 			"email": "not-an-email",
 		})
@@ -202,6 +204,7 @@ func TestDeleteUser(t *testing.T) {
 		mockService.EXPECT().Delete(testutil.UserID).Return(nil)
 
 		ctx, rec := testutil.NewTestContext()
+		testutil.SetAuthUser(ctx, testutil.UserID)
 		testutil.MakeDelete(ctx, gin.Params{{Key: "id", Value: testutil.UserID}})
 
 		uc.DeleteUser(ctx)
@@ -217,6 +220,7 @@ func TestDeleteUser(t *testing.T) {
 		mockService.EXPECT().Delete(testutil.UserID).Return(domains.NewNotFoundError("user not found"))
 
 		ctx, rec := testutil.NewTestContext()
+		testutil.SetAuthUser(ctx, testutil.UserID)
 		testutil.MakeDelete(ctx, gin.Params{{Key: "id", Value: testutil.UserID}})
 
 		uc.DeleteUser(ctx)

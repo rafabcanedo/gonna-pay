@@ -2,7 +2,9 @@ package controller_test
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
+	"net/url"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -230,6 +232,64 @@ func TestUpdateContact(t *testing.T) {
 		cc.UpdateContact(ctx)
 
 		assert.Equal(t, http.StatusForbidden, rec.Code)
+	})
+}
+
+func TestFindContactsByFrequency(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		mockService := mocks.NewMockContactService(ctrl)
+		cc := controller.NewContactController(mockService)
+
+		expected := []domains.ContactFrequency{
+			{ContactID: testutil.ContactID, ContactName: testutil.ContactName, SharedCosts: 3},
+		}
+		mockService.EXPECT().FindContactsByFrequency(testutil.UserID, 5).Return(expected, nil)
+
+		ctx, rec := testutil.NewTestContext()
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakeGet(ctx, nil, url.Values{"limit": {"5"}})
+
+		cc.FindContactsByFrequency(ctx)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var body []response.ContactFrequencyResponse
+		json.Unmarshal(rec.Body.Bytes(), &body)
+		assert.Len(t, body, 1)
+		assert.Equal(t, testutil.ContactID, body[0].ContactID)
+		assert.Equal(t, 3, body[0].SharedCosts)
+	})
+
+	t.Run("invalid limit defaults to 5", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		mockService := mocks.NewMockContactService(ctrl)
+		cc := controller.NewContactController(mockService)
+
+		mockService.EXPECT().FindContactsByFrequency(testutil.UserID, 5).Return([]domains.ContactFrequency{}, nil)
+
+		ctx, rec := testutil.NewTestContext()
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakeGet(ctx, nil, url.Values{"limit": {"abc"}})
+
+		cc.FindContactsByFrequency(ctx)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+	})
+
+	t.Run("service error", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		mockService := mocks.NewMockContactService(ctrl)
+		cc := controller.NewContactController(mockService)
+
+		mockService.EXPECT().FindContactsByFrequency(testutil.UserID, 5).Return(nil, errors.New("db error"))
+
+		ctx, rec := testutil.NewTestContext()
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakeGet(ctx, nil, url.Values{"limit": {"5"}})
+
+		cc.FindContactsByFrequency(ctx)
+
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
 	})
 }
 

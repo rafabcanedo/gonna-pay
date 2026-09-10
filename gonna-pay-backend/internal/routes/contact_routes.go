@@ -20,5 +20,6 @@ func ContactRoutes(router *gin.Engine, ctrl *controller.ContactController) {
     contacts.Use(auth.Middleware())
     {
         contacts.GET("", ctrl.FindAllContacts)
+        contacts.GET("/frequency", ctrl.FindContactsByFrequency)
     }
 }

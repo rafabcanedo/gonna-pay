@@ -105,3 +105,16 @@ func (mr *MockContactRepositoryMockRecorder) ExistsByEmailAndOwner(email, ownerI
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistsByEmailAndOwner", reflect.TypeOf((*MockContactRepository)(nil).ExistsByEmailAndOwner), email, ownerID)
 }
+
+func (m *MockContactRepository) FindContactsByFrequency(userID string, limit int) ([]domains.ContactFrequency, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindContactsByFrequency", userID, limit)
+	ret0, _ := ret[0].([]domains.ContactFrequency)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (mr *MockContactRepositoryMockRecorder) FindContactsByFrequency(userID, limit any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindContactsByFrequency", reflect.TypeOf((*MockContactRepository)(nil).FindContactsByFrequency), userID, limit)
+}

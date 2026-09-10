@@ -9,6 +9,12 @@ type Contact struct {
 	Category string `json:"category"`
 }
 
+type ContactFrequency struct {
+	ContactID   string
+	ContactName string
+	SharedCosts int
+}
+
 func NewContact(ownerID, name, email, phone, category string) *Contact {
 	return &Contact{
 		OwnerID:  ownerID,

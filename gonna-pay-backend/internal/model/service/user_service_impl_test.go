@@ -167,6 +167,8 @@ func TestUserService_Update(t *testing.T) {
 
 		m := testutil.NewUserMock()
 		m.User.Name = testutil.UserUpdatedName
+		mockRepo.EXPECT().FindByID(m.ID).Return(m.User, nil)
+		mockRepo.EXPECT().FindByEmail(m.Email).Return(nil, domains.NewNotFoundError("not found"))
 		mockRepo.EXPECT().Update(m.User).Return(m.User, nil)
 
 		result, err := svc.Update(m.User)
@@ -183,6 +185,8 @@ func TestUserService_Update(t *testing.T) {
 		m := testutil.NewUserMock()
 		m.User.Password = "nova-senha"
 
+		mockRepo.EXPECT().FindByID(m.ID).Return(m.User, nil)
+		mockRepo.EXPECT().FindByEmail(m.Email).Return(nil, domains.NewNotFoundError("not found"))
 		mockRepo.EXPECT().Update(gomock.Any()).DoAndReturn(func(u *domains.User) (*domains.User, error) {
 			assert.NotEqual(t, "nova-senha", u.Password)
 			return m.User, nil
@@ -199,6 +203,8 @@ func TestUserService_Delete(t *testing.T) {
 		mockRepo := mocks.NewMockUserRepository(ctrl)
 		svc := service.NewUserService(mockRepo)
 
+		m := testutil.NewUserMock()
+		mockRepo.EXPECT().FindByID(testutil.UserID).Return(m.User, nil)
 		mockRepo.EXPECT().Delete(testutil.UserID).Return(nil)
 
 		err := svc.Delete(testutil.UserID)
@@ -210,6 +216,8 @@ func TestUserService_Delete(t *testing.T) {
 		mockRepo := mocks.NewMockUserRepository(ctrl)
 		svc := service.NewUserService(mockRepo)
 
+		m := testutil.NewUserMock()
+		mockRepo.EXPECT().FindByID(testutil.UserID).Return(m.User, nil)
 		mockRepo.EXPECT().Delete(testutil.UserID).Return(errors.New("db error"))
 
 		err := svc.Delete(testutil.UserID)

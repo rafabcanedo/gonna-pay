@@ -14,6 +14,7 @@ type ContactService interface {
 	FindByID(id, ownerID string) (*domains.Contact, error)
 	Update(contact *domains.Contact) (*domains.Contact, error)
 	Delete(id, ownerID string) error
+	FindContactsByFrequency(userID string, limit int) ([]domains.ContactFrequency, error)
 }
 
 type contactService struct {
@@ -112,4 +113,18 @@ func (s *contactService) Delete(id, ownerID string) error {
 	}
 
 	return nil
+}
+
+func (s *contactService) FindContactsByFrequency(userID string, limit int) ([]domains.ContactFrequency, error) {
+	if limit <= 0 {
+		limit = 5
+	}
+
+	contacts, err := s.repo.FindContactsByFrequency(userID, limit)
+	if err != nil {
+		logger.Error("error finding top contacts", err)
+		return nil, err
+	}
+
+	return contacts, nil
 }

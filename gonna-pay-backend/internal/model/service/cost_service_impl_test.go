@@ -37,9 +37,11 @@ func TestCostService_Create(t *testing.T) {
 		svc := service.NewCostService(mockRepo)
 
 		m := testutil.NewCostMock()
+		g := testutil.NewGroupMock()
 		cost := domains.NewCost(testutil.UserID, testutil.GroupID, m.Name, m.Category, m.TotalValue, 0)
 		members := []domains.Member{{ID: testutil.ContactID, Name: testutil.ContactName}, {ID: "contact-2", Name: "Pedro"}}
 
+		mockRepo.EXPECT().GetGroupByID(testutil.GroupID).Return(g.Group, nil)
 		mockRepo.EXPECT().GetGroupMembers(testutil.GroupID).Return(members, nil)
 		mockRepo.EXPECT().Create(gomock.Any(), members).Return(m.Cost, nil)
 
@@ -56,6 +58,7 @@ func TestCostService_Create(t *testing.T) {
 		svc := service.NewCostService(mockRepo)
 
 		m := testutil.NewCostMock()
+		g := testutil.NewGroupMock()
 		cost := domains.NewCost(testutil.UserID, testutil.GroupID, m.Name, m.Category, m.TotalValue, 0)
 		members := []domains.Member{
 			{ID: testutil.ContactID, Name: testutil.ContactName},
@@ -63,6 +66,7 @@ func TestCostService_Create(t *testing.T) {
 			{ID: "contact-3", Name: "João"},
 		}
 
+		mockRepo.EXPECT().GetGroupByID(testutil.GroupID).Return(g.Group, nil)
 		mockRepo.EXPECT().GetGroupMembers(testutil.GroupID).Return(members, nil)
 		mockRepo.EXPECT().Create(gomock.Any(), members).Return(m.Cost, nil)
 
@@ -77,7 +81,9 @@ func TestCostService_Create(t *testing.T) {
 		mockRepo := mocks.NewMockCostRepository(ctrl)
 		svc := service.NewCostService(mockRepo)
 
+		g := testutil.NewGroupMock()
 		cost := domains.NewCost(testutil.UserID, testutil.GroupID, testutil.CostName, testutil.CostCategory, 100.0, 0)
+		mockRepo.EXPECT().GetGroupByID(testutil.GroupID).Return(g.Group, nil)
 		mockRepo.EXPECT().GetGroupMembers(testutil.GroupID).Return([]domains.Member{{ID: testutil.ContactID, Name: testutil.ContactName}}, nil)
 
 		_, err := svc.Create(cost, float64Ptr(0))
@@ -90,7 +96,9 @@ func TestCostService_Create(t *testing.T) {
 		mockRepo := mocks.NewMockCostRepository(ctrl)
 		svc := service.NewCostService(mockRepo)
 
+		g := testutil.NewGroupMock()
 		cost := domains.NewCost(testutil.UserID, testutil.GroupID, testutil.CostName, testutil.CostCategory, 100.0, 0)
+		mockRepo.EXPECT().GetGroupByID(testutil.GroupID).Return(g.Group, nil)
 		mockRepo.EXPECT().GetGroupMembers(testutil.GroupID).Return([]domains.Member{{ID: testutil.ContactID, Name: testutil.ContactName}}, nil)
 
 		_, err := svc.Create(cost, float64Ptr(100))
@@ -103,7 +111,9 @@ func TestCostService_Create(t *testing.T) {
 		mockRepo := mocks.NewMockCostRepository(ctrl)
 		svc := service.NewCostService(mockRepo)
 
+		g := testutil.NewGroupMock()
 		cost := domains.NewCost(testutil.UserID, testutil.GroupID, testutil.CostName, testutil.CostCategory, 100.0, 0)
+		mockRepo.EXPECT().GetGroupByID(testutil.GroupID).Return(g.Group, nil)
 		mockRepo.EXPECT().GetGroupMembers(testutil.GroupID).Return(nil, errors.New("db error"))
 
 		_, err := svc.Create(cost, nil)

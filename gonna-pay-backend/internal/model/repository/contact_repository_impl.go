@@ -18,6 +18,7 @@ type ContactRepository interface {
 	Update(contact *domains.Contact) (*domains.Contact, error)
 	Delete(id string) error
 	ExistsByEmailAndOwner(email, ownerID string) (bool, error)
+	FindContactsByFrequency(userID string, limit int) ([]domains.ContactFrequency, error)
 }
 
 type contactRepository struct {
@@ -120,4 +121,35 @@ func (r *contactRepository) ExistsByEmailAndOwner(email, ownerID string) (bool, 
 		return false, err
 	}
 	return count > 0, nil
+}
+
+func (r *contactRepository) FindContactsByFrequency(userID string, limit int) ([]domains.ContactFrequency, error) {
+	rows, err := r.db.Query(
+		`SELECT elem->>'contactId', elem->>'contactName', COUNT(*)
+		FROM cost_entities c, jsonb_array_elements(c.splits) AS elem
+		WHERE c.user_id = $1
+		GROUP BY elem->>'contactId', elem->>'contactName'
+		ORDER BY COUNT(*) DESC
+		LIMIT $2`,
+		userID, limit,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []domains.ContactFrequency
+	for rows.Next() {
+		var t domains.ContactFrequency
+		if err := rows.Scan(&t.ContactID, &t.ContactName, &t.SharedCosts); err != nil {
+			return nil, err
+		}
+		result = append(result, t)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

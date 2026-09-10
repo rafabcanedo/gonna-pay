@@ -27,3 +27,21 @@ func NewContactResponseList(contacts []*domains.Contact) []ContactResponse {
 	}
 	return out
 }
+
+type ContactFrequencyResponse struct {
+	ContactID   string `json:"contactId"`
+	ContactName string `json:"contactName"`
+	SharedCosts int    `json:"sharedCosts"`
+}
+
+func NewContactFrequencyResponseList(contacts []domains.ContactFrequency) []ContactFrequencyResponse {
+	out := make([]ContactFrequencyResponse, len(contacts))
+	for i, c := range contacts {
+		out[i] = ContactFrequencyResponse{
+			ContactID:   c.ContactID,
+			ContactName: c.ContactName,
+			SharedCosts: c.SharedCosts,
+		}
+	}
+	return out
+}
