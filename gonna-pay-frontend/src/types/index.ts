@@ -22,6 +22,14 @@ export type Contact = {
 
 export type GetContactsResponse = Contact[]
 
+export type ContactFrequency = {
+  contactId: string
+  contactName: string
+  sharedCosts: number
+}
+
+export type GetContactFrequencyResponse = ContactFrequency[]
+
 export type CreateContactInput = Omit<Contact, 'id'>
 
 export type GroupMember = {

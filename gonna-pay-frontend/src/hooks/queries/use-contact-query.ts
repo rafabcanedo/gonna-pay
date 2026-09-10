@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { ContactService } from '@/services/contact.service'
-import type { Contact, GetContactsResponse } from '@/types'
+import type { Contact, GetContactsResponse, GetContactFrequencyResponse } from '@/types'
 import { ApiError } from '@/lib/errors/api.error'
 
 export function useContactsQuery() {
@@ -19,5 +19,13 @@ export function useContactQuery(id: string) {
     queryFn: () => ContactService.getById(id),
     staleTime: 1000 * 60 * 5,
     enabled: !!id,
+  })
+}
+
+export function useContactFrequencyQuery(limit = 5) {
+  return useQuery<GetContactFrequencyResponse, ApiError>({
+    queryKey: ['contacts', 'frequency', limit],
+    queryFn: () => ContactService.getFrequency(limit),
+    staleTime: 1000 * 60 * 5,
   })
 }

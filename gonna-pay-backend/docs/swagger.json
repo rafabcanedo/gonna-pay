@@ -5,7 +5,7 @@
     "swagger": "2.0",
     "info": {
         "description": "API de gestão financeira e divisão de custos",
-        "title": "Internal System API",
+        "title": "Gonna Pay API",
         "contact": {},
         "version": "1.0"
     },
@@ -548,6 +548,54 @@
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/response.ContactResponse"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/rest_errors.RestErrors"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest_errors.RestErrors"
+                        }
+                    }
+                }
+            }
+        },
+        "/contacts/frequency": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Retorna os contatos que mais aparecem nos custos do usuário autenticado",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "contacts"
+                ],
+                "summary": "Contatos por frequência",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Número máximo de contatos (padrão: 5)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/response.ContactFrequencyResponse"
                             }
                         }
                     },
@@ -1791,6 +1839,20 @@
                 },
                 "phone": {
                     "type": "string"
+                }
+            }
+        },
+        "response.ContactFrequencyResponse": {
+            "type": "object",
+            "properties": {
+                "contactId": {
+                    "type": "string"
+                },
+                "contactName": {
+                    "type": "string"
+                },
+                "sharedCosts": {
+                    "type": "integer"
                 }
             }
         },

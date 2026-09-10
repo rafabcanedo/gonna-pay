@@ -156,6 +156,15 @@ definitions:
       phone:
         type: string
     type: object
+  response.ContactFrequencyResponse:
+    properties:
+      contactId:
+        type: string
+      contactName:
+        type: string
+      sharedCosts:
+        type: integer
+    type: object
   response.ContactResponse:
     properties:
       category:
@@ -308,7 +317,7 @@ host: localhost:3333
 info:
   contact: {}
   description: API de gestão financeira e divisão de custos
-  title: Internal System API
+  title: Gonna Pay API
   version: "1.0"
 paths:
   /auth/login:
@@ -669,6 +678,36 @@ paths:
       security:
       - CookieAuth: []
       summary: Listar contatos
+      tags:
+      - contacts
+  /contacts/frequency:
+    get:
+      description: Retorna os contatos que mais aparecem nos custos do usuário autenticado
+      parameters:
+      - description: 'Número máximo de contatos (padrão: 5)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/response.ContactFrequencyResponse'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/rest_errors.RestErrors'
+      security:
+      - CookieAuth: []
+      summary: Contatos por frequência
       tags:
       - contacts
   /cost:

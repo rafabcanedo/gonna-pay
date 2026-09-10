@@ -8,7 +8,10 @@ import {
 } from "@tanstack/react-query";
 import { ContactService, CostService } from "@/services";
 import { AvatarCost } from "./components/avatar-cost";
-import { Contact } from "@/types";
+import { CostsSummary } from "./components/costs-summary";
+import { CategoryBreakdown } from "./components/category-breakdown";
+import { buildCostsSummary, buildCategoryBreakdown } from "./lib/utils";
+import type { Contact, Cost } from "@/types";
 
 export default async function Costs() {
   const queryClient = new QueryClient();
@@ -23,7 +26,11 @@ export default async function Costs() {
     queryFn: () => ContactService.getAll(),
   });
 
-  const contacts = queryClient.getQueryData<Contact[]>(["contacts"])
+  const contacts = queryClient.getQueryData<Contact[]>(["contacts"]) ?? []
+  const costs = queryClient.getQueryData<Cost[]>(["costs"]) ?? []
+
+  const summary = buildCostsSummary(costs)
+  const breakdown = buildCategoryBreakdown(costs)
 
   return (
     <div className="flex flex-col px-8 w-full">
@@ -34,14 +41,24 @@ export default async function Costs() {
         </Link>
       </header>
 
+      <div className="flex flex-row gap-4 mt-8">
+        <CostsSummary {...summary} />
+      </div>
+
+      {breakdown.length > 0 && (
+        <div className="mt-4">
+          <CategoryBreakdown data={breakdown} />
+        </div>
+      )}
+
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <div className="flex justify-center items-center gap-8">
-          {contacts?.map((item) => (
+        <div className="flex justify-center items-center gap-8 mt-4">
+          {contacts.map((item) => (
             <AvatarCost key={item.id} name={item.name} />
           ))}
         </div>
 
-        <div className="mt-12">
+        <div className="mt-8">
           <CostsTable />
         </div>
       </HydrationBoundary>
