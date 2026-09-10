@@ -106,3 +106,18 @@ func (mr *MockContactServiceMockRecorder) Delete(id, ownerID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockContactService)(nil).Delete), id, ownerID)
 }
+
+// FindContactsByFrequency mocks base method.
+func (m *MockContactService) FindContactsByFrequency(userID string, limit int) ([]domains.ContactFrequency, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindContactsByFrequency", userID, limit)
+	ret0, _ := ret[0].([]domains.ContactFrequency)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindContactsByFrequency indicates an expected call of FindContactsByFrequency.
+func (mr *MockContactServiceMockRecorder) FindContactsByFrequency(userID, limit any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindContactsByFrequency", reflect.TypeOf((*MockContactService)(nil).FindContactsByFrequency), userID, limit)
+}

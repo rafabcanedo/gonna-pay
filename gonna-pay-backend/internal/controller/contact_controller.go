@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/configuration/validation"
@@ -159,4 +160,33 @@ func (cc *ContactController) DeleteContact(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "contact deleted successfully"})
+}
+
+// @Summary      Contatos por frequência
+// @Description  Retorna os contatos que mais aparecem nos custos do usuário autenticado
+// @Tags         contacts
+// @Produce      json
+// @Param        limit  query     int  false  "Número máximo de contatos (padrão: 5)"
+// @Success      200    {array}   response.ContactFrequencyResponse
+// @Failure      401    {object}  rest_errors.RestErrors
+// @Failure      500    {object}  rest_errors.RestErrors
+// @Security     CookieAuth
+// @Router       /contacts/frequency [get]
+func (cc *ContactController) FindContactsByFrequency(c *gin.Context) {
+	userID := c.GetString("userID")
+
+	limit := 5
+	if raw := c.Query("limit"); raw != "" {
+		if parsed, err := strconv.Atoi(raw); err == nil {
+			limit = parsed
+		}
+	}
+
+	contacts, err := cc.service.FindContactsByFrequency(userID, limit)
+	if err != nil {
+		response.RespondError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.NewContactFrequencyResponseList(contacts))
 }

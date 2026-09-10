@@ -19,6 +19,7 @@ func TestContactService_Create(t *testing.T) {
 		svc := service.NewContactService(mockRepo)
 
 		m := testutil.NewContactMock()
+		mockRepo.EXPECT().ExistsByEmailAndOwner(m.Email, m.OwnerID).Return(false, nil)
 		mockRepo.EXPECT().Create(gomock.Any()).Return(m.Contact, nil)
 
 		result, err := svc.Create(domains.NewContact(m.OwnerID, m.Name, m.Email, m.Phone, m.Category))
@@ -32,6 +33,7 @@ func TestContactService_Create(t *testing.T) {
 		mockRepo := mocks.NewMockContactRepository(ctrl)
 		svc := service.NewContactService(mockRepo)
 
+		mockRepo.EXPECT().ExistsByEmailAndOwner(testutil.ContactEmail, testutil.UserID).Return(false, nil)
 		mockRepo.EXPECT().Create(gomock.Any()).Return(nil, errors.New("db error"))
 
 		_, err := svc.Create(domains.NewContact(testutil.UserID, testutil.ContactName, testutil.ContactEmail, testutil.ContactPhone, testutil.ContactCategory))
@@ -185,6 +187,48 @@ func TestContactService_Update(t *testing.T) {
 		_, err := svc.Update(incoming)
 
 		assert.ErrorIs(t, err, domains.ErrForbidden)
+	})
+}
+
+func TestContactService_FindContactsByFrequency(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		mockRepo := mocks.NewMockContactRepository(ctrl)
+		svc := service.NewContactService(mockRepo)
+
+		expected := []domains.ContactFrequency{
+			{ContactID: testutil.ContactID, ContactName: testutil.ContactName, SharedCosts: 3},
+		}
+		mockRepo.EXPECT().FindContactsByFrequency(testutil.UserID, 5).Return(expected, nil)
+
+		result, err := svc.FindContactsByFrequency(testutil.UserID, 5)
+
+		assert.NoError(t, err)
+		assert.Len(t, result, 1)
+		assert.Equal(t, testutil.ContactID, result[0].ContactID)
+		assert.Equal(t, 3, result[0].SharedCosts)
+	})
+
+	t.Run("limit <= 0 defaults to 5", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		mockRepo := mocks.NewMockContactRepository(ctrl)
+		svc := service.NewContactService(mockRepo)
+
+		mockRepo.EXPECT().FindContactsByFrequency(testutil.UserID, 5).Return([]domains.ContactFrequency{}, nil)
+
+		_, err := svc.FindContactsByFrequency(testutil.UserID, 0)
+		assert.NoError(t, err)
+	})
+
+	t.Run("repo error", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		mockRepo := mocks.NewMockContactRepository(ctrl)
+		svc := service.NewContactService(mockRepo)
+
+		mockRepo.EXPECT().FindContactsByFrequency(testutil.UserID, 5).Return(nil, errors.New("db error"))
+
+		_, err := svc.FindContactsByFrequency(testutil.UserID, 5)
+		assert.Error(t, err)
 	})
 }
 
