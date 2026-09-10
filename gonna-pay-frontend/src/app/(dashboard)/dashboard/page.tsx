@@ -7,34 +7,9 @@ import { RecentCosts } from "./components/recent-costs";
 import { RemindersWidget } from "./components/reminders-widget";
 import { SpendingChart } from "./components/spending-chart";
 import { CategoryChart } from "./components/category-chart";
-import { GetContactsResponse, GetCostsResponse, Cost } from "@/types";
+import { GetContactsResponse, GetCostsResponse } from "@/types";
 import { apiCall } from "@/lib/api-client";
-import type { SpendingChartPoint } from "./components/spending-chart/types";
-import type { CategoryChartPoint } from "./components/category-chart/types";
-
-function buildSpendingData(costs: Cost[]): SpendingChartPoint[] {
-  const today = new Date()
-  return Array.from({ length: 7 }, (_, i) => {
-    const date = new Date(today)
-    date.setDate(today.getDate() - (6 - i))
-    const day = date.toLocaleString('en-US', { weekday: 'short' })
-    const dateStr = date.toDateString()
-    const dayCosts = costs.filter((c) => new Date(c.createdAt).toDateString() === dateStr)
-    const spending = dayCosts.reduce((sum, c) => sum + c.ownerValue, 0)
-    const income = dayCosts
-      .filter((c) => c.groupId)
-      .reduce((sum, c) => sum + (c.totalValue - c.ownerValue), 0)
-    return { day, spending, income }
-  })
-}
-
-function buildCategoryData(costs: Cost[]): CategoryChartPoint[] {
-  const map = new Map<string, number>()
-  for (const cost of costs) {
-    map.set(cost.category, (map.get(cost.category) ?? 0) + cost.totalValue)
-  }
-  return Array.from(map, ([category, total]) => ({ category, total }))
-}
+import { buildSpendingData, buildCategoryData, buildTotals } from "./lib/utils";
 
 export default async function Dashboard() {
   const costs = await apiCall<GetCostsResponse>('/costs')
@@ -42,12 +17,14 @@ export default async function Dashboard() {
 
   const spendingData = buildSpendingData(costs)
   const categoryData = buildCategoryData(costs)
+  const { amount, income, spending } = buildTotals(costs)
 
   return (
     <div className="flex flex-col gap-8 py-8">
       <div className="flex flex-row gap-8">
-        <DashboardCards title="Amount" value={3200} />
-        <DashboardCards title="Money box" value={800} />
+        <DashboardCards title="Amount" value={amount} />
+        <DashboardCards title="Income" value={income} />
+        <DashboardCards title="Spending" value={spending} />
       </div>
 
       <div className="flex flex-row items-center justify-between gap-16 h-14">
