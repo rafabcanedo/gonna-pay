@@ -1,8 +1,9 @@
 import { apiCall } from '@/lib/api-client'
-import type { 
-  GetContactsResponse, 
-  Contact, 
-  CreateContactInput 
+import type {
+  GetContactsResponse,
+  Contact,
+  CreateContactInput,
+  GetContactFrequencyResponse,
 } from '@/types'
 
 export const ContactService = {
@@ -33,5 +34,9 @@ export const ContactService = {
     return apiCall<void>(`/contacts/${id}`, {
       method: 'DELETE',
     })
+  },
+
+  getFrequency: async (limit = 5) => {
+    return apiCall<GetContactFrequencyResponse>(`/contacts/frequency?limit=${limit}`)
   },
 }

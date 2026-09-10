@@ -569,6 +569,54 @@ const docTemplate = `{
                 }
             }
         },
+        "/contacts/frequency": {
+            "get": {
+                "security": [
+                    {
+                        "CookieAuth": []
+                    }
+                ],
+                "description": "Retorna os contatos que mais aparecem nos custos do usuário autenticado",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "contacts"
+                ],
+                "summary": "Contatos por frequência",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Número máximo de contatos (padrão: 5)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/response.ContactFrequencyResponse"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/rest_errors.RestErrors"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/rest_errors.RestErrors"
+                        }
+                    }
+                }
+            }
+        },
         "/cost": {
             "post": {
                 "security": [
@@ -1797,6 +1845,20 @@ const docTemplate = `{
                 }
             }
         },
+        "response.ContactFrequencyResponse": {
+            "type": "object",
+            "properties": {
+                "contactId": {
+                    "type": "string"
+                },
+                "contactName": {
+                    "type": "string"
+                },
+                "sharedCosts": {
+                    "type": "integer"
+                }
+            }
+        },
         "response.ContactResponse": {
             "type": "object",
             "properties": {
@@ -2040,7 +2102,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:3333",
 	BasePath:         "/",
 	Schemes:          []string{"http"},
-	Title:            "Internal System API",
+	Title:            "Gonna Pay API",
 	Description:      "API de gestão financeira e divisão de custos",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
