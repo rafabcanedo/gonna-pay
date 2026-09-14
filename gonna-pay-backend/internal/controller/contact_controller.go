@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/configuration/validation"
+	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/httputil"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/model/domains"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/model/service"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/view/request"
@@ -47,7 +48,7 @@ func (cc *ContactController) CreateContact(c *gin.Context) {
 
 	created, err := cc.service.Create(contact)
 	if err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 
@@ -68,7 +69,7 @@ func (cc *ContactController) FindAllContacts(c *gin.Context) {
 
 	contacts, err := cc.service.FindAll(ownerID)
 	if err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 
@@ -93,7 +94,7 @@ func (cc *ContactController) FindContactByID(c *gin.Context) {
 
 	contact, err := cc.service.FindByID(id, ownerID)
 	if err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 
@@ -131,7 +132,7 @@ func (cc *ContactController) UpdateContact(c *gin.Context) {
 
 	updated, err := cc.service.Update(contact)
 	if err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 
@@ -155,7 +156,7 @@ func (cc *ContactController) DeleteContact(c *gin.Context) {
 	ownerID := c.GetString("userID")
 
 	if err := cc.service.Delete(id, ownerID); err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 
@@ -184,7 +185,7 @@ func (cc *ContactController) FindContactsByFrequency(c *gin.Context) {
 
 	contacts, err := cc.service.FindContactsByFrequency(userID, limit)
 	if err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 

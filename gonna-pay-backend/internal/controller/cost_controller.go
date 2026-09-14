@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/configuration/validation"
+	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/httputil"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/model/domains"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/model/service"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/view/request"
@@ -46,7 +47,7 @@ func (cc *CostController) CreateCost(c *gin.Context) {
 
 	created, err := cc.service.Create(cost, req.OwnerPercentage)
 	if err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 
@@ -67,7 +68,7 @@ func (cc *CostController) FindAllCosts(c *gin.Context) {
 
 	costs, err := cc.service.FindAll(userID)
 	if err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 
@@ -92,7 +93,7 @@ func (cc *CostController) FindCostByID(c *gin.Context) {
 
 	cost, err := cc.service.FindByID(id, userID)
 	if err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 
@@ -129,7 +130,7 @@ func (cc *CostController) UpdateCost(c *gin.Context) {
 
 	updated, err := cc.service.Update(id, userID, cost, req.OwnerPercentage)
 	if err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 
@@ -153,7 +154,7 @@ func (cc *CostController) DeleteCost(c *gin.Context) {
 	userID := c.GetString("userID")
 
 	if err := cc.service.Delete(id, userID); err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 

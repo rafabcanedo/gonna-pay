@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/configuration/rest_errors"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/configuration/validation"
+	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/httputil"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/model/domains"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/model/service"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/view/request"
@@ -44,7 +45,7 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 
 	created, err := uc.service.Create(user)
 	if err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 
@@ -63,7 +64,7 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 func (uc *UserController) FindAllUsers(c *gin.Context) {
 	users, err := uc.service.FindAll()
 	if err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 
@@ -86,7 +87,7 @@ func (uc *UserController) FindUserByID(c *gin.Context) {
 
 	user, err := uc.service.FindByID(id)
 	if err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 
@@ -127,7 +128,7 @@ func (uc *UserController) UpdateUser(c *gin.Context) {
 
 	updated, err := uc.service.Update(user)
 	if err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 
@@ -153,7 +154,7 @@ func (uc *UserController) DeleteUser(c *gin.Context) {
 	}
 
 	if err := uc.service.Delete(id); err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 

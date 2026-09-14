@@ -9,6 +9,7 @@ import (
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/configuration/logger"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/configuration/rest_errors"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/configuration/validation"
+	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/httputil"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/model/repository"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/model/service"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/view/request"
@@ -120,7 +121,7 @@ func (ac *AuthController) Refresh(c *gin.Context) {
 
 	user, err := ac.userService.FindByID(stored.UserID.String())
 	if err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 
@@ -200,7 +201,7 @@ func (ac *AuthController) UpdateProfile(c *gin.Context) {
 
 	current, err := ac.userService.FindByID(userID)
 	if err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 
@@ -216,7 +217,7 @@ func (ac *AuthController) UpdateProfile(c *gin.Context) {
 
 	updated, err := ac.userService.Update(current)
 	if err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 
@@ -245,7 +246,7 @@ func (ac *AuthController) GetProfile(c *gin.Context) {
 
 	user, err := ac.userService.FindByID(userID)
 	if err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 
@@ -270,7 +271,7 @@ func (ac *AuthController) DeleteProfile(c *gin.Context) {
 	}
 
 	if err := ac.userService.Delete(userID); err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 
