@@ -10,7 +10,7 @@ import (
 
 type UserService interface {
 	Create(user *domains.User) (*domains.User, error)
-	FindAll() ([]*domains.User, error)
+	FindAll(page, limit int) ([]*domains.User, int64, error)
 	FindByID(id string) (*domains.User, error)
 	FindByEmail(email string) (*domains.User, error)
 	Update(user *domains.User) (*domains.User, error)
@@ -49,14 +49,16 @@ func (s *userService) Create(user *domains.User) (*domains.User, error) {
 	return created, nil
 }
 
-func (s *userService) FindAll() ([]*domains.User, error) {
-	users, err := s.repo.FindAll()
+func (s *userService) FindAll(page, limit int) ([]*domains.User, int64, error) {
+	offset := (page - 1) * limit
+
+	users, total, err := s.repo.FindAll(limit, offset)
 	if err != nil {
 		logger.Error("error finding all users", err)
-		return nil, err
+		return nil, 0, err
 	}
 
-	return users, nil
+	return users, total, nil
 }
 
 func (s *userService) FindByID(id string) (*domains.User, error) {

@@ -10,7 +10,7 @@ import (
 
 type GroupService interface {
 	Create(group *domains.Group, memberIDs []string) (*domains.Group, error)
-	FindAll(ownerID string) ([]*domains.Group, error)
+	FindAll(ownerID string, page, limit int) ([]*domains.Group, int64, error)
 	FindByID(id, ownerID string) (*domains.Group, error)
 	Update(group *domains.Group, ownerID string) (*domains.Group, error)
 	Delete(id, ownerID string) error
@@ -47,14 +47,16 @@ func (s *groupService) Create(group *domains.Group, memberIDs []string) (*domain
 	return created, nil
 }
 
-func (s *groupService) FindAll(ownerID string) ([]*domains.Group, error) {
-	groups, err := s.repo.FindAll(ownerID)
+func (s *groupService) FindAll(ownerID string, page, limit int) ([]*domains.Group, int64, error) {
+	offset := (page - 1) * limit
+
+	groups, total, err := s.repo.FindAll(ownerID, limit, offset)
 	if err != nil {
 		logger.Error("error finding all groups", err)
-		return nil, err
+		return nil, 0, err
 	}
 
-	return groups, nil
+	return groups, total, nil
 }
 
 func (s *groupService) findAndAuthorize(id, ownerID string) (*domains.Group, error) {

@@ -83,12 +83,13 @@ func TestUserService_FindAll(t *testing.T) {
 		m1 := testutil.NewUserMock()
 		m2 := testutil.NewUserMock()
 		m2.User.ID = testutil.UserID2
-		mockRepo.EXPECT().FindAll().Return([]*domains.User{m1.User, m2.User}, nil)
+		mockRepo.EXPECT().FindAll(20, 0).Return([]*domains.User{m1.User, m2.User}, int64(2), nil)
 
-		result, err := svc.FindAll()
+		result, total, err := svc.FindAll(1, 20)
 
 		assert.NoError(t, err)
 		assert.Len(t, result, 2)
+		assert.Equal(t, int64(2), total)
 	})
 
 	t.Run("repo error", func(t *testing.T) {
@@ -96,9 +97,9 @@ func TestUserService_FindAll(t *testing.T) {
 		mockRepo := mocks.NewMockUserRepository(ctrl)
 		svc := service.NewUserService(mockRepo)
 
-		mockRepo.EXPECT().FindAll().Return(nil, errors.New("db error"))
+		mockRepo.EXPECT().FindAll(20, 0).Return(nil, int64(0), errors.New("db error"))
 
-		_, err := svc.FindAll()
+		_, _, err := svc.FindAll(1, 20)
 		assert.Error(t, err)
 	})
 }

@@ -14,7 +14,7 @@ import (
 type CostRepository interface {
 	Create(cost *domains.Cost, members []domains.Member) (*domains.Cost, error)
 	Update(id string, cost *domains.Cost) (*domains.Cost, error)
-	FindAll(userID string) ([]*domains.Cost, error)
+	FindAll(userID string, limit, offset int) ([]*domains.Cost, int64, error)
 	FindByID(id string) (*domains.Cost, error)
 	Delete(id string) error
 	GetGroupByID(groupID string) (*domains.Group, error)
@@ -132,7 +132,14 @@ func (r *costRepository) Update(id string, cost *domains.Cost) (*domains.Cost, e
 	}, nil
 }
 
-func (r *costRepository) FindAll(userID string) ([]*domains.Cost, error) {
+func (r *costRepository) FindAll(userID string, limit, offset int) ([]*domains.Cost, int64, error) {
+	var total int64
+
+	err := r.db.QueryRow(`SELECT COUNT(*) FROM cost_entities WHERE user_id = $1`, userID).Scan(&total)
+	if err != nil {
+		return nil, 0, err
+	}
+
 	rows, err := r.db.Query(`
 		SELECT
 			c.id, c.user_id, c.group_id, c.cost_name, c.total_value, c.owner_percentage, c.category, c.created_at, c.updated_at,
@@ -141,9 +148,10 @@ func (r *costRepository) FindAll(userID string) ([]*domains.Cost, error) {
 		FROM cost_entities c
 		LEFT JOIN group_entities g ON g.id = c.group_id
 		WHERE c.user_id = $1
-	`, userID)
+		LIMIT $2 OFFSET $3
+	`, userID, limit, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -168,7 +176,7 @@ func (r *costRepository) FindAll(userID string) ([]*domains.Cost, error) {
 			&groupName,
 			&splitCount,
 		); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 
 		groupID := ""
@@ -197,10 +205,10 @@ func (r *costRepository) FindAll(userID string) ([]*domains.Cost, error) {
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return costs, nil
+	return costs, total, nil
 }
 
 func (r *costRepository) FindByID(id string) (*domains.Cost, error) {

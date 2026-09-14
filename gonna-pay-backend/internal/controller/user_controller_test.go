@@ -3,6 +3,7 @@ package controller_test
 import (
 	"encoding/json"
 	"net/http"
+	"net/url"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -104,7 +105,7 @@ func TestFindAllUsers(t *testing.T) {
 		m1 := testutil.NewUserMock()
 		m2 := testutil.NewUserMock()
 		m2.User.ID = testutil.UserID2
-		mockService.EXPECT().FindAll().Return([]*domains.User{m1.User, m2.User}, nil)
+		mockService.EXPECT().FindAll(1, 20).Return([]*domains.User{m1.User, m2.User}, int64(2), nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.MakeGet(ctx, nil, nil)
@@ -112,9 +113,47 @@ func TestFindAllUsers(t *testing.T) {
 		uc.FindAllUsers(ctx)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
-		var body []response.UserResponse
+		var body response.PaginatedResponse[response.UserResponse]
 		json.Unmarshal(rec.Body.Bytes(), &body)
-		assert.Len(t, body, 2)
+		assert.Equal(t, int64(2), body.Total)
+		assert.Equal(t, 1, body.TotalPages)
+	})
+
+	t.Run("custom page and limit", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		mockService := mocks.NewMockUserService(ctrl)
+		uc := controller.NewUserController(mockService)
+
+		m := testutil.NewUserMock()
+		mockService.EXPECT().FindAll(2, 10).Return([]*domains.User{m.User}, int64(11), nil)
+
+		ctx, rec := testutil.NewTestContext()
+		testutil.MakeGet(ctx, nil, url.Values{"page": {"2"}, "limit": {"10"}})
+
+		uc.FindAllUsers(ctx)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var body response.PaginatedResponse[response.UserResponse]
+		json.Unmarshal(rec.Body.Bytes(), &body)
+		assert.Equal(t, 2, body.Page)
+		assert.Equal(t, 10, body.Limit)
+		assert.Equal(t, int64(11), body.Total)
+		assert.Equal(t, 2, body.TotalPages)
+	})
+
+	t.Run("service error", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		mockService := mocks.NewMockUserService(ctrl)
+		uc := controller.NewUserController(mockService)
+
+		mockService.EXPECT().FindAll(1, 20).Return(nil, int64(0), domains.NewNotFoundError("not found"))
+
+		ctx, rec := testutil.NewTestContext()
+		testutil.MakeGet(ctx, nil, nil)
+
+		uc.FindAllUsers(ctx)
+
+		assert.Equal(t, http.StatusNotFound, rec.Code)
 	})
 }
 

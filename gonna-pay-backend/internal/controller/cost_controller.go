@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/configuration/validation"
@@ -58,7 +59,9 @@ func (cc *CostController) CreateCost(c *gin.Context) {
 // @Description  Retorna todos os custos do usuário autenticado (sem detalhes dos splits)
 // @Tags         costs
 // @Produce      json
-// @Success      200  {array}   response.CostResponse
+// @Param        page   query     int  false  "Número da página (padrão: 1)"
+// @Param        limit  query     int  false  "Itens por página (padrão: 20, máximo: 100)"
+// @Success      200  {object}  response.PaginatedResponse[response.CostResponse]
 // @Failure      401  {object}  rest_errors.RestErrors
 // @Failure      500  {object}  rest_errors.RestErrors
 // @Security     CookieAuth
@@ -66,13 +69,31 @@ func (cc *CostController) CreateCost(c *gin.Context) {
 func (cc *CostController) FindAllCosts(c *gin.Context) {
 	userID := c.GetString("userID")
 
-	costs, err := cc.service.FindAll(userID)
+	page := 1
+	limit := 20
+
+	if p := c.Query("page"); p != "" {
+		if parsed, err := strconv.Atoi(p); err == nil && parsed > 0 {
+			page = parsed
+		}
+	}
+
+	if l := c.Query("limit"); l != "" {
+		if parsed, err := strconv.Atoi(l); err == nil && parsed > 0 && parsed <= 100 {
+			limit = parsed
+		}
+	}
+
+	costs, total, err := cc.service.FindAll(userID, page, limit)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, response.NewCostResponseList(costs))
+	c.JSON(http.StatusOK, response.NewPaginatedResponse(
+		response.NewCostResponseList(costs),
+		page, limit, total,
+	))
 }
 
 // @Summary      Buscar custo por ID

@@ -12,7 +12,7 @@ import (
 type CostService interface {
 	Create(cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error)
 	Update(id, userID string, cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error)
-	FindAll(userID string) ([]*domains.Cost, error)
+	FindAll(userID string, page, limit int) ([]*domains.Cost, int64, error)
 	FindByID(id, userID string) (*domains.Cost, error)
 	Delete(id, userID string) error
 }
@@ -121,14 +121,16 @@ func (s *costService) Update(id, userID string, cost *domains.Cost, ownerPercent
 	return updated, nil
 }
 
-func (s *costService) FindAll(userID string) ([]*domains.Cost, error) {
-	costs, err := s.repo.FindAll(userID)
+func (s *costService) FindAll(userID string, page, limit int) ([]*domains.Cost, int64, error) {
+	offset := (page - 1) * limit
+
+	costs, total, err := s.repo.FindAll(userID, limit, offset)
 	if err != nil {
 		logger.Error("error finding all costs", err)
-		return nil, err
+		return nil, 0, err
 	}
 
-	return costs, nil
+	return costs, total, nil
 }
 
 func (s *costService) FindByID(id, userID string) (*domains.Cost, error) {

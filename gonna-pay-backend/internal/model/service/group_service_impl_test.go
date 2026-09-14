@@ -85,12 +85,13 @@ func TestGroupService_FindAll(t *testing.T) {
 		m1 := testutil.NewGroupMock()
 		m2 := testutil.NewGroupMock()
 		m2.Group.ID = "group-2"
-		mockRepo.EXPECT().FindAll(testutil.UserID).Return([]*domains.Group{m1.Group, m2.Group}, nil)
+		mockRepo.EXPECT().FindAll(testutil.UserID, 20, 0).Return([]*domains.Group{m1.Group, m2.Group}, int64(2), nil)
 
-		result, err := svc.FindAll(testutil.UserID)
+		result, total, err := svc.FindAll(testutil.UserID, 1, 20)
 
 		assert.NoError(t, err)
 		assert.Len(t, result, 2)
+		assert.Equal(t, int64(2), total)
 	})
 
 	t.Run("repo error", func(t *testing.T) {
@@ -98,9 +99,9 @@ func TestGroupService_FindAll(t *testing.T) {
 		mockRepo := mocks.NewMockGroupRepository(ctrl)
 		svc := service.NewGroupService(mockRepo)
 
-		mockRepo.EXPECT().FindAll(testutil.UserID).Return(nil, errors.New("db error"))
+		mockRepo.EXPECT().FindAll(testutil.UserID, 20, 0).Return(nil, int64(0), errors.New("db error"))
 
-		_, err := svc.FindAll(testutil.UserID)
+		_, _, err := svc.FindAll(testutil.UserID, 1, 20)
 		assert.Error(t, err)
 	})
 }
