@@ -151,3 +151,122 @@ func TestNewGroupDetailResponse(t *testing.T) {
 		assert.Empty(t, r.Members)
 	})
 }
+
+func TestNewUserResponse(t *testing.T) {
+	t.Run("all fields are mapped", func(t *testing.T) {
+		user := &domains.User{
+			ID:    "user-1",
+			Name:  "Rafael",
+			Email: "rafael@email.com",
+			Phone: "11999999999",
+		}
+
+		r := response.NewUserResponse(user)
+
+		assert.Equal(t, "user-1", r.ID)
+		assert.Equal(t, "Rafael", r.Name)
+		assert.Equal(t, "rafael@email.com", r.Email)
+		assert.Equal(t, "11999999999", r.Phone)
+	})
+}
+
+func TestNewUserResponseList(t *testing.T) {
+	t.Run("empty list returns empty slice", func(t *testing.T) {
+		r := response.NewUserResponseList([]*domains.User{})
+
+		assert.NotNil(t, r)
+		assert.Empty(t, r)
+	})
+
+	t.Run("all items are mapped", func(t *testing.T) {
+		users := []*domains.User{
+			{ID: "user-1", Name: "Rafael", Email: "rafael@email.com", Phone: "11999999999"},
+			{ID: "user-2", Name: "Ana", Email: "ana@email.com", Phone: "11888888888"},
+		}
+
+		r := response.NewUserResponseList(users)
+
+		assert.Len(t, r, 2)
+		assert.Equal(t, "user-1", r[0].ID)
+		assert.Equal(t, "user-2", r[1].ID)
+	})
+}
+
+func TestNewContactResponse(t *testing.T) {
+	t.Run("all fields are mapped", func(t *testing.T) {
+		contact := &domains.Contact{
+			ID:       "contact-1",
+			Name:     "Ana",
+			Email:    "ana@email.com",
+			Phone:    "11999999999",
+			Category: "Friend",
+		}
+
+		r := response.NewContactResponse(contact)
+
+		assert.Equal(t, "contact-1", r.ID)
+		assert.Equal(t, "Ana", r.Name)
+		assert.Equal(t, "ana@email.com", r.Email)
+		assert.Equal(t, "11999999999", r.Phone)
+		assert.Equal(t, "Friend", r.Category)
+	})
+}
+
+func TestNewContactResponseList(t *testing.T) {
+	t.Run("empty list returns empty slice", func(t *testing.T) {
+		r := response.NewContactResponseList([]*domains.Contact{})
+
+		assert.NotNil(t, r)
+		assert.Empty(t, r)
+	})
+
+	t.Run("all items are mapped", func(t *testing.T) {
+		contacts := []*domains.Contact{
+			{ID: "contact-1", Name: "Ana", Email: "ana@email.com", Phone: "11999999999", Category: "Friend"},
+			{ID: "contact-2", Name: "Pedro", Email: "pedro@email.com", Phone: "11888888888", Category: "Work"},
+		}
+
+		r := response.NewContactResponseList(contacts)
+
+		assert.Len(t, r, 2)
+		assert.Equal(t, "contact-1", r[0].ID)
+		assert.Equal(t, "contact-2", r[1].ID)
+	})
+}
+
+func TestNewContactFrequencyResponseList(t *testing.T) {
+	t.Run("all fields are mapped", func(t *testing.T) {
+		contacts := []domains.ContactFrequency{
+			{ContactID: "contact-1", ContactName: "Ana", SharedCosts: 3},
+		}
+
+		r := response.NewContactFrequencyResponseList(contacts)
+
+		assert.Len(t, r, 1)
+		assert.Equal(t, "contact-1", r[0].ContactID)
+		assert.Equal(t, "Ana", r[0].ContactName)
+		assert.Equal(t, 3, r[0].SharedCosts)
+	})
+
+	t.Run("empty list returns empty slice", func(t *testing.T) {
+		r := response.NewContactFrequencyResponseList([]domains.ContactFrequency{})
+
+		assert.NotNil(t, r)
+		assert.Empty(t, r)
+	})
+
+	t.Run("multiple items preserve order", func(t *testing.T) {
+		contacts := []domains.ContactFrequency{
+			{ContactID: "contact-1", ContactName: "Ana", SharedCosts: 5},
+			{ContactID: "contact-2", ContactName: "Pedro", SharedCosts: 2},
+		}
+
+		r := response.NewContactFrequencyResponseList(contacts)
+
+		assert.Len(t, r, 2)
+		assert.Equal(t, "contact-1", r[0].ContactID)
+		assert.Equal(t, 5, r[0].SharedCosts)
+		assert.Equal(t, "contact-2", r[1].ContactID)
+		assert.Equal(t, 2, r[1].SharedCosts)
+	})
+}

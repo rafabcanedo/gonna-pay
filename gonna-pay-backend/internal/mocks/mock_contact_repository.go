@@ -42,17 +42,18 @@ func (mr *MockContactRepositoryMockRecorder) Create(contact any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockContactRepository)(nil).Create), contact)
 }
 
-func (m *MockContactRepository) FindAll(ownerID string) ([]*domains.Contact, error) {
+func (m *MockContactRepository) FindAll(ownerID string, limit, offset int) ([]*domains.Contact, int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindAll", ownerID)
+	ret := m.ctrl.Call(m, "FindAll", ownerID, limit, offset)
 	ret0, _ := ret[0].([]*domains.Contact)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret1, _ := ret[1].(int64)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
-func (mr *MockContactRepositoryMockRecorder) FindAll(ownerID any) *gomock.Call {
+func (mr *MockContactRepositoryMockRecorder) FindAll(ownerID, limit, offset any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockContactRepository)(nil).FindAll), ownerID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockContactRepository)(nil).FindAll), ownerID, limit, offset)
 }
 
 func (m *MockContactRepository) FindByID(id string) (*domains.Contact, error) {

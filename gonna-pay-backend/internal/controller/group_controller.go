@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/configuration/validation"
+	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/httputil"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/model/domains"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/model/service"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/view/request"
@@ -46,7 +47,7 @@ func (gc *GroupController) CreateGroup(c *gin.Context) {
 
 	created, err := gc.service.Create(group, req.MemberIDs)
 	if err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 
@@ -67,7 +68,7 @@ func (gc *GroupController) FindAllGroups(c *gin.Context) {
 
 	groups, err := gc.service.FindAll(ownerID)
 	if err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 
@@ -96,7 +97,7 @@ func (gc *GroupController) FindGroupByID(c *gin.Context) {
 
 	group, err := gc.service.FindByID(id, ownerID)
 	if err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 
@@ -134,7 +135,7 @@ func (gc *GroupController) UpdateGroup(c *gin.Context) {
 
 	updated, err := gc.service.Update(group, ownerID)
 	if err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 
@@ -158,7 +159,7 @@ func (gc *GroupController) DeleteGroup(c *gin.Context) {
 	ownerID := c.GetString("userID")
 
 	if err := gc.service.Delete(id, ownerID); err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 
@@ -185,7 +186,7 @@ func (gc *GroupController) AddMember(c *gin.Context) {
 	ownerID := c.GetString("userID")
 
 	if err := gc.service.AddMember(groupID, contactID, ownerID); err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 
@@ -211,7 +212,7 @@ func (gc *GroupController) RemoveMember(c *gin.Context) {
 	ownerID := c.GetString("userID")
 
 	if err := gc.service.RemoveMember(groupID, contactID, ownerID); err != nil {
-		response.RespondError(c, err)
+		httputil.RespondError(c, err)
 		return
 	}
 
