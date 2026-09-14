@@ -11,6 +11,7 @@ const (
 	UserName        = "Rafael"
 	UserEmail       = "rafael@email.com"
 	UserPhone       = "11999999999"
+	UserPassword    = "senha123"
 	UserUpdatedName = "Rafael Novo"
 
 	ContactName        = "Ana"
