@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/configuration/rest_errors"
@@ -56,19 +57,39 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 // @Description  Retorna todos os usuários cadastrados
 // @Tags         users
 // @Produce      json
-// @Success      200  {array}   response.UserResponse
+// @Param        page   query     int  false  "Número da página (padrão: 1)"
+// @Param        limit  query     int  false  "Itens por página (padrão: 20, máximo: 100)"
+// @Success      200  {object}  response.PaginatedResponse[response.UserResponse]
 // @Failure      401  {object}  rest_errors.RestErrors
 // @Failure      500  {object}  rest_errors.RestErrors
 // @Security     CookieAuth
 // @Router       /users [get]
 func (uc *UserController) FindAllUsers(c *gin.Context) {
-	users, err := uc.service.FindAll()
+	page := 1
+	limit := 20
+
+	if p := c.Query("page"); p != "" {
+		if parsed, err := strconv.Atoi(p); err == nil && parsed > 0 {
+			page = parsed
+		}
+	}
+
+	if l := c.Query("limit"); l != "" {
+		if parsed, err := strconv.Atoi(l); err == nil && parsed > 0 && parsed <= 100 {
+			limit = parsed
+		}
+	}
+
+	users, total, err := uc.service.FindAll(page, limit)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, response.NewUserResponseList(users))
+	c.JSON(http.StatusOK, response.NewPaginatedResponse(
+		response.NewUserResponseList(users),
+		page, limit, total,
+	))
 }
 
 // @Summary      Buscar usuário por ID

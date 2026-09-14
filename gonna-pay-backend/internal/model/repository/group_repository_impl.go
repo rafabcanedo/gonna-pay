@@ -12,7 +12,7 @@ import (
 
 type GroupRepository interface {
 	Create(group *domains.Group, memberIDs []string) (*domains.Group, error)
-	FindAll(ownerID string) ([]*domains.Group, error)
+	FindAll(ownerID string, limit, offset int) ([]*domains.Group, int64, error)
 	FindByID(id string) (*domains.Group, error)
 	Update(group *domains.Group) (*domains.Group, error)
 	Delete(id string) error
@@ -66,13 +66,20 @@ func (r *groupRepository) Create(group *domains.Group, memberIDs []string) (*dom
 	return domains.NewGroupWithID(e.ID.String(), group.OwnerID, group.Name, group.Category, now, now, nil), nil
 }
 
-func (r *groupRepository) FindAll(ownerID string) ([]*domains.Group, error) {
+func (r *groupRepository) FindAll(ownerID string, limit, offset int) ([]*domains.Group, int64, error) {
+	var total int64
+
+	err := r.db.QueryRow(`SELECT COUNT(*) FROM group_entities WHERE owner_id = $1`, ownerID).Scan(&total)
+	if err != nil {
+		return nil, 0, err
+	}
+
 	rows, err := r.db.Query(
-		`SELECT id, owner_id, name, category, created_at, updated_at FROM group_entities WHERE owner_id = $1`,
-		ownerID,
+		`SELECT id, owner_id, name, category, created_at, updated_at FROM group_entities WHERE owner_id = $1 LIMIT $2 OFFSET $3`,
+		ownerID, limit, offset,
 	)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -80,16 +87,16 @@ func (r *groupRepository) FindAll(ownerID string) ([]*domains.Group, error) {
 	for rows.Next() {
 		var e entity.GroupEntity
 		if err := rows.Scan(&e.ID, &e.OwnerID, &e.Name, &e.Category, &e.CreatedAt, &e.UpdatedAt); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		groups = append(groups, converter.ConvertGroupEntityToDomain(e))
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return groups, nil
+	return groups, total, nil
 }
 
 func (r *groupRepository) FindByID(id string) (*domains.Group, error) {

@@ -64,18 +64,19 @@ func (mr *MockCostServiceMockRecorder) Update(id, userID, cost, ownerPercentage 
 }
 
 // FindAll mocks base method.
-func (m *MockCostService) FindAll(userID string) ([]*domains.Cost, error) {
+func (m *MockCostService) FindAll(userID string, page, limit int) ([]*domains.Cost, int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindAll", userID)
+	ret := m.ctrl.Call(m, "FindAll", userID, page, limit)
 	ret0, _ := ret[0].([]*domains.Cost)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret1, _ := ret[1].(int64)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // FindAll indicates an expected call of FindAll.
-func (mr *MockCostServiceMockRecorder) FindAll(userID any) *gomock.Call {
+func (mr *MockCostServiceMockRecorder) FindAll(userID, page, limit any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockCostService)(nil).FindAll), userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockCostService)(nil).FindAll), userID, page, limit)
 }
 
 // FindByID mocks base method.

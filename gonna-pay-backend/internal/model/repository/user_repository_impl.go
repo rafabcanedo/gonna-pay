@@ -12,7 +12,7 @@ import (
 
 type UserRepository interface {
 	Create(user *domains.User) (*domains.User, error)
-	FindAll() ([]*domains.User, error)
+	FindAll(limit, offset int) ([]*domains.User, int64, error)
 	FindByID(id string) (*domains.User, error)
 	FindByEmail(email string) (*domains.User, error)
 	Update(user *domains.User) (*domains.User, error)
@@ -42,10 +42,17 @@ func (r *userRepository) Create(user *domains.User) (*domains.User, error) {
 	return converter.ConvertEntityToDomain(*e), nil
 }
 
-func (r *userRepository) FindAll() ([]*domains.User, error) {
-	rows, err := r.db.Query(`SELECT id, name, email, password, phone FROM users_entities`)
+func (r *userRepository) FindAll(limit, offset int) ([]*domains.User, int64, error) {
+	var total int64
+
+	err := r.db.QueryRow(`SELECT COUNT(*) FROM users_entities`).Scan(&total)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
+	}
+
+	rows, err := r.db.Query(`SELECT id, name, email, password, phone FROM users_entities LIMIT $1 OFFSET $2`, limit, offset)
+	if err != nil {
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -53,16 +60,16 @@ func (r *userRepository) FindAll() ([]*domains.User, error) {
 	for rows.Next() {
 		var e entity.UsersEntity
 		if err := rows.Scan(&e.ID, &e.Name, &e.Email, &e.Password, &e.Phone); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		users = append(users, converter.ConvertEntityToDomain(e))
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return users, nil
+	return users, total, nil
 }
 
 func (r *userRepository) FindByID(id string) (*domains.User, error) {

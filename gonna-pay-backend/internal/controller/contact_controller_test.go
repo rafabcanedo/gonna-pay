@@ -89,7 +89,7 @@ func TestFindAllContacts(t *testing.T) {
 		m1 := testutil.NewContactMock()
 		m2 := testutil.NewContactMock()
 		m2.Contact.ID = "contact-2"
-		mockService.EXPECT().FindAll(testutil.UserID).Return([]*domains.Contact{m1.Contact, m2.Contact}, nil)
+		mockService.EXPECT().FindAll(testutil.UserID, 1, 20).Return([]*domains.Contact{m1.Contact, m2.Contact}, int64(2), nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -98,9 +98,49 @@ func TestFindAllContacts(t *testing.T) {
 		cc.FindAllContacts(ctx)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
-		var body []response.ContactResponse
+		var body response.PaginatedResponse[response.ContactResponse]
 		json.Unmarshal(rec.Body.Bytes(), &body)
-		assert.Len(t, body, 2)
+		assert.Equal(t, int64(2), body.Total)
+		assert.Equal(t, 1, body.TotalPages)
+	})
+
+	t.Run("custom page and limit", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		mockService := mocks.NewMockContactService(ctrl)
+		cc := controller.NewContactController(mockService)
+
+		m := testutil.NewContactMock()
+		mockService.EXPECT().FindAll(testutil.UserID, 2, 10).Return([]*domains.Contact{m.Contact}, int64(11), nil)
+
+		ctx, rec := testutil.NewTestContext()
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakeGet(ctx, nil, url.Values{"page": {"2"}, "limit": {"10"}})
+
+		cc.FindAllContacts(ctx)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var body response.PaginatedResponse[response.ContactResponse]
+		json.Unmarshal(rec.Body.Bytes(), &body)
+		assert.Equal(t, 2, body.Page)
+		assert.Equal(t, 10, body.Limit)
+		assert.Equal(t, int64(11), body.Total)
+		assert.Equal(t, 2, body.TotalPages)
+	})
+
+	t.Run("service error", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		mockService := mocks.NewMockContactService(ctrl)
+		cc := controller.NewContactController(mockService)
+
+		mockService.EXPECT().FindAll(testutil.UserID, 1, 20).Return(nil, int64(0), errors.New("db error"))
+
+		ctx, rec := testutil.NewTestContext()
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakeGet(ctx, nil, nil)
+
+		cc.FindAllContacts(ctx)
+
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
 	})
 }
 
