@@ -10,7 +10,7 @@ import (
 
 type ContactService interface {
 	Create(contact *domains.Contact) (*domains.Contact, error)
-	FindAll(ownerID string) ([]*domains.Contact, error)
+	FindAll(ownerID string, page, limit int) ([]*domains.Contact, int64, error)
 	FindByID(id, ownerID string) (*domains.Contact, error)
 	Update(contact *domains.Contact) (*domains.Contact, error)
 	Delete(id, ownerID string) error
@@ -44,14 +44,16 @@ func (s *contactService) Create(contact *domains.Contact) (*domains.Contact, err
 	return created, nil
 }
 
-func (s *contactService) FindAll(ownerID string) ([]*domains.Contact, error) {
-	contacts, err := s.repo.FindAll(ownerID)
+func (s *contactService) FindAll(ownerID string, page, limit int) ([]*domains.Contact, int64, error) {
+	offset := (page - 1) * limit
+
+	contacts, total, err := s.repo.FindAll(ownerID, limit, offset)
 	if err != nil {
 		logger.Error("error finding all contacts", err)
-		return nil, err
+		return nil, 0, err
 	}
 
-	return contacts, nil
+	return contacts, total, nil
 }
 
 func (s *contactService) findAndAuthorize(id, ownerID string) (*domains.Contact, error) {

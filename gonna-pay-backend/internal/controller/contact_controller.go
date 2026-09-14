@@ -59,7 +59,9 @@ func (cc *ContactController) CreateContact(c *gin.Context) {
 // @Description  Retorna todos os contatos do usuário autenticado
 // @Tags         contacts
 // @Produce      json
-// @Success      200  {array}   response.ContactResponse
+// @Param        page   query     int  false  "Número da página (padrão: 1)"
+// @Param        limit  query     int  false  "Itens por página (padrão: 20, máximo: 100)"
+// @Success      200  {object}  response.PaginatedResponse[response.ContactResponse]
 // @Failure      401  {object}  rest_errors.RestErrors
 // @Failure      500  {object}  rest_errors.RestErrors
 // @Security     CookieAuth
@@ -67,13 +69,31 @@ func (cc *ContactController) CreateContact(c *gin.Context) {
 func (cc *ContactController) FindAllContacts(c *gin.Context) {
 	ownerID := c.GetString("userID")
 
-	contacts, err := cc.service.FindAll(ownerID)
+	page := 1
+	limit := 20
+
+	if p := c.Query("page"); p != "" {
+		if parsed, err := strconv.Atoi(p); err == nil && parsed > 0 {
+			page = parsed
+		}
+	}
+
+	if l := c.Query("limit"); l != "" {
+		if parsed, err := strconv.Atoi(l); err == nil && parsed > 0 && parsed <= 100 {
+			limit = parsed
+		}
+	}
+
+	contacts, total, err := cc.service.FindAll(ownerID, page, limit)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, response.NewContactResponseList(contacts))
+	c.JSON(http.StatusOK, response.NewPaginatedResponse(
+		response.NewContactResponseList(contacts),
+		page, limit, total,
+	))
 }
 
 // @Summary      Buscar contato por ID

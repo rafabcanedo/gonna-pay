@@ -13,7 +13,7 @@ import (
 
 type ContactRepository interface {
 	Create(contact *domains.Contact) (*domains.Contact, error)
-	FindAll(ownerID string) ([]*domains.Contact, error)
+	FindAll(ownerID string, limit, offset int) ([]*domains.Contact, int64, error)
 	FindByID(id string) (*domains.Contact, error)
 	Update(contact *domains.Contact) (*domains.Contact, error)
 	Delete(id string) error
@@ -44,13 +44,25 @@ func (r *contactRepository) Create(contact *domains.Contact) (*domains.Contact, 
 	return converter.ConvertContactEntityToDomain(*e), nil
 }
 
-func (r *contactRepository) FindAll(ownerID string) ([]*domains.Contact, error) {
-	rows, err := r.db.Query(
-		`SELECT id, owner_id, name, email, phone, category FROM contact_entities WHERE owner_id = $1 AND deleted_at IS NULL`,
-		ownerID,
-	)
+func (r *contactRepository) FindAll(ownerID string, limit, offset int) ([]*domains.Contact, int64, error) {
+	var total int64
+
+	err := r.db.QueryRow(`SELECT COUNT(*) FROM contact_entities WHERE owner_id = $1 AND deleted_at IS NULL`, ownerID).Scan(&total)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
+	}
+
+	rows, err := r.db.Query(
+		`SELECT id, owner_id, name, email, phone, category 
+		 FROM contact_entities 
+		 WHERE owner_id = $1 AND deleted_at IS NULL
+		 ORDER BY created_at DESC
+		 LIMIT $2 OFFSET $3`,
+		ownerID, limit, offset,
+	)
+
+	if err != nil {
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -58,16 +70,16 @@ func (r *contactRepository) FindAll(ownerID string) ([]*domains.Contact, error) 
 	for rows.Next() {
 		var e entity.ContactEntity
 		if err := rows.Scan(&e.ID, &e.OwnerID, &e.Name, &e.Email, &e.Phone, &e.Category); err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		contacts = append(contacts, converter.ConvertContactEntityToDomain(e))
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return contacts, nil
+	return contacts, total, nil
 }
 
 func (r *contactRepository) FindByID(id string) (*domains.Contact, error) {
