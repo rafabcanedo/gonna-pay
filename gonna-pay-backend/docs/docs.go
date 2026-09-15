@@ -544,14 +544,25 @@ const docTemplate = `{
                     "contacts"
                 ],
                 "summary": "Listar contatos",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Número da página (padrão: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Itens por página (padrão: 20, máximo: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/response.ContactResponse"
-                            }
+                            "$ref": "#/definitions/response.ContactsListResponse"
                         }
                     },
                     "401": {
@@ -886,14 +897,25 @@ const docTemplate = `{
                     "costs"
                 ],
                 "summary": "Listar custos",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Número da página (padrão: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Itens por página (padrão: 20, máximo: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/response.CostResponse"
-                            }
+                            "$ref": "#/definitions/response.CostsListResponse"
                         }
                     },
                     "401": {
@@ -1318,7 +1340,7 @@ const docTemplate = `{
                         "CookieAuth": []
                     }
                 ],
-                "description": "Retorna todos os grupos do usuário autenticado com o total",
+                "description": "Retorna todos os grupos do usuário autenticado com paginação",
                 "produces": [
                     "application/json"
                 ],
@@ -1326,12 +1348,25 @@ const docTemplate = `{
                     "groups"
                 ],
                 "summary": "Listar grupos",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Número da página (padrão: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Itens por página (padrão: 20, máximo: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "groups (array) e total (int)",
+                        "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
+                            "$ref": "#/definitions/response.PaginatedGroupResponse"
                         }
                     },
                     "401": {
@@ -1595,14 +1630,25 @@ const docTemplate = `{
                     "users"
                 ],
                 "summary": "Listar usuários",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Número da página (padrão: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Itens por página (padrão: 20, máximo: 100)",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/response.UserResponse"
-                            }
+                            "$ref": "#/definitions/response.PaginatedUserResponse"
                         }
                     },
                     "401": {
@@ -1865,6 +1911,9 @@ const docTemplate = `{
                 "category": {
                     "type": "string"
                 },
+                "createdAt": {
+                    "type": "string"
+                },
                 "email": {
                     "type": "string"
                 },
@@ -1876,6 +1925,58 @@ const docTemplate = `{
                 },
                 "phone": {
                     "type": "string"
+                }
+            }
+        },
+        "response.ContactStatsResponse": {
+            "type": "object",
+            "properties": {
+                "byCategory": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                }
+            }
+        },
+        "response.ContactsListResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.ContactResponse"
+                    }
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "stats": {
+                    "$ref": "#/definitions/response.ContactStatsResponse"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
+                }
+            }
+        },
+        "response.CostCategoryBreakdownResponse": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "percentage": {
+                    "type": "number"
+                },
+                "total": {
+                    "type": "number"
                 }
             }
         },
@@ -1958,6 +2059,52 @@ const docTemplate = `{
                 }
             }
         },
+        "response.CostStatsResponse": {
+            "type": "object",
+            "properties": {
+                "byCategory": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.CostCategoryBreakdownResponse"
+                    }
+                },
+                "inSplits": {
+                    "type": "number"
+                },
+                "solo": {
+                    "type": "number"
+                },
+                "thisMonth": {
+                    "type": "number"
+                }
+            }
+        },
+        "response.CostsListResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.CostResponse"
+                    }
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "stats": {
+                    "$ref": "#/definitions/response.CostStatsResponse"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
+                }
+            }
+        },
         "response.GroupDetailResponse": {
             "type": "object",
             "properties": {
@@ -2015,6 +2162,52 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "response.PaginatedGroupResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.GroupResponse"
+                    }
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
+                }
+            }
+        },
+        "response.PaginatedUserResponse": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.UserResponse"
+                    }
+                },
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
                 }
             }
         },
