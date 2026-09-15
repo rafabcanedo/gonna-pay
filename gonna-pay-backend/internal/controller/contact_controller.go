@@ -91,9 +91,15 @@ func (cc *ContactController) FindAllContacts(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response.NewPaginatedResponse(
+	stats, err := cc.service.FindStats(ownerID)
+	if err != nil {
+		httputil.RespondError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.NewContactsListResponse(
 		response.NewContactResponseList(contacts),
-		page, limit, total,
+		page, limit, total, stats,
 	))
 }
 

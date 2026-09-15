@@ -90,9 +90,15 @@ func (cc *CostController) FindAllCosts(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response.NewPaginatedResponse(
+	stats, err := cc.service.FindStats(userID)
+	if err != nil {
+		httputil.RespondError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.NewCostsListResponse(
 		response.NewCostResponseList(costs),
-		page, limit, total,
+		page, limit, total, stats,
 	))
 }
 

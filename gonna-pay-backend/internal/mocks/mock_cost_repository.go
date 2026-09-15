@@ -121,6 +121,21 @@ func (mr *MockCostRepositoryMockRecorder) GetGroupByID(groupID any) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGroupByID", reflect.TypeOf((*MockCostRepository)(nil).GetGroupByID), groupID)
 }
 
+// FindStats mocks base method.
+func (m *MockCostRepository) FindStats(userID string) (*domains.CostStats, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindStats", userID)
+	ret0, _ := ret[0].(*domains.CostStats)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindStats indicates an expected call of FindStats.
+func (mr *MockCostRepositoryMockRecorder) FindStats(userID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindStats", reflect.TypeOf((*MockCostRepository)(nil).FindStats), userID)
+}
+
 // GetGroupMembers mocks base method.
 func (m *MockCostRepository) GetGroupMembers(groupID string) ([]domains.Member, error) {
 	m.ctrl.T.Helper()

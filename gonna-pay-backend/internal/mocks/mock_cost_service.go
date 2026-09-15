@@ -94,6 +94,21 @@ func (mr *MockCostServiceMockRecorder) FindByID(id, userID any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockCostService)(nil).FindByID), id, userID)
 }
 
+// FindStats mocks base method.
+func (m *MockCostService) FindStats(userID string) (*domains.CostStats, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindStats", userID)
+	ret0, _ := ret[0].(*domains.CostStats)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindStats indicates an expected call of FindStats.
+func (mr *MockCostServiceMockRecorder) FindStats(userID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindStats", reflect.TypeOf((*MockCostService)(nil).FindStats), userID)
+}
+
 // Delete mocks base method.
 func (m *MockCostService) Delete(id, userID string) error {
 	m.ctrl.T.Helper()

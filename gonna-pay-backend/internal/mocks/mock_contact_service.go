@@ -108,6 +108,21 @@ func (mr *MockContactServiceMockRecorder) Delete(id, ownerID any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockContactService)(nil).Delete), id, ownerID)
 }
 
+// FindStats mocks base method.
+func (m *MockContactService) FindStats(ownerID string) (*domains.ContactStats, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindStats", ownerID)
+	ret0, _ := ret[0].(*domains.ContactStats)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindStats indicates an expected call of FindStats.
+func (mr *MockContactServiceMockRecorder) FindStats(ownerID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindStats", reflect.TypeOf((*MockContactService)(nil).FindStats), ownerID)
+}
+
 // FindContactsByFrequency mocks base method.
 func (m *MockContactService) FindContactsByFrequency(userID string, limit int) ([]domains.ContactFrequency, error) {
 	m.ctrl.T.Helper()

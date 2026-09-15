@@ -56,3 +56,16 @@ func NewCostWithID(id, userID, groupID, groupName, costName, category string, to
 func (c *Cost) OwnerValue() float64 {
 	return c.TotalValue * c.OwnerPercentage / 100
 }
+
+type CostCategoryBreakdown struct {
+	Category   string
+	Total      float64
+	Percentage float64
+}
+
+type CostStats struct {
+	ThisMonth  float64
+	InSplits   float64
+	Solo       float64
+	ByCategory []CostCategoryBreakdown
+}

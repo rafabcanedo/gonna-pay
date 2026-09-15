@@ -18,6 +18,10 @@ type ContactFrequency struct {
 	SharedCosts int
 }
 
+type ContactStats struct {
+	ByCategory map[string]int64
+}
+
 func NewContact(ownerID, name, email, phone, category string) *Contact {
 	return &Contact{
 		OwnerID:  ownerID,
