@@ -32,15 +32,17 @@ func NewContactRepository(db *sql.DB) ContactRepository {
 func (r *contactRepository) Create(contact *domains.Contact) (*domains.Contact, error) {
 	e := converter.ConvertContactDomainToEntity(contact)
 	e.ID = uuid.New()
+	now := time.Now()
 
 	_, err := r.db.Exec(
-		`INSERT INTO contact_entities (id, owner_id, name, email, phone, category) VALUES ($1, $2, $3, $4, $5, $6)`,
-		e.ID, e.OwnerID, e.Name, e.Email, e.Phone, e.Category,
+		`INSERT INTO contact_entities (id, owner_id, name, email, phone, category, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+		e.ID, e.OwnerID, e.Name, e.Email, e.Phone, e.Category, now,
 	)
 	if err != nil {
 		return nil, err
 	}
 
+	e.CreatedAt = now
 	return converter.ConvertContactEntityToDomain(*e), nil
 }
 
@@ -53,8 +55,8 @@ func (r *contactRepository) FindAll(ownerID string, limit, offset int) ([]*domai
 	}
 
 	rows, err := r.db.Query(
-		`SELECT id, owner_id, name, email, phone, category 
-		 FROM contact_entities 
+		`SELECT id, owner_id, name, email, phone, category, created_at
+		 FROM contact_entities
 		 WHERE owner_id = $1 AND deleted_at IS NULL
 		 ORDER BY created_at DESC
 		 LIMIT $2 OFFSET $3`,
@@ -69,7 +71,7 @@ func (r *contactRepository) FindAll(ownerID string, limit, offset int) ([]*domai
 	var contacts []*domains.Contact
 	for rows.Next() {
 		var e entity.ContactEntity
-		if err := rows.Scan(&e.ID, &e.OwnerID, &e.Name, &e.Email, &e.Phone, &e.Category); err != nil {
+		if err := rows.Scan(&e.ID, &e.OwnerID, &e.Name, &e.Email, &e.Phone, &e.Category, &e.CreatedAt); err != nil {
 			return nil, 0, err
 		}
 		contacts = append(contacts, converter.ConvertContactEntityToDomain(e))
@@ -86,11 +88,11 @@ func (r *contactRepository) FindByID(id string) (*domains.Contact, error) {
 	var e entity.ContactEntity
 
 	row := r.db.QueryRow(
-		`SELECT id, owner_id, name, email, phone, category FROM contact_entities WHERE id = $1 AND deleted_at IS NULL`,
+		`SELECT id, owner_id, name, email, phone, category, created_at FROM contact_entities WHERE id = $1 AND deleted_at IS NULL`,
 		id,
 	)
 
-	err := row.Scan(&e.ID, &e.OwnerID, &e.Name, &e.Email, &e.Phone, &e.Category)
+	err := row.Scan(&e.ID, &e.OwnerID, &e.Name, &e.Email, &e.Phone, &e.Category, &e.CreatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domains.NewNotFoundError("contact not found")

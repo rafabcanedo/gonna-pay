@@ -15,6 +15,7 @@ type ContactEntity struct {
 	Phone     string                `gorm:"type:varchar(20)"`
 	Category  enums.ContactCategory `gorm:"type:varchar(20);not null"`
 	DeletedAt *time.Time            `gorm:"index"`
+	CreatedAt time.Time
 
 	Owner UsersEntity `gorm:"foreignKey:OwnerID;constraint:OnDelete:CASCADE;"`
 }

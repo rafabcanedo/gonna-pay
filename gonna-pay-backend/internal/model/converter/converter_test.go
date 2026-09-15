@@ -47,7 +47,7 @@ func TestConvertCostDomainToEntity(t *testing.T) {
 
 func TestConvertContactDomainToEntity(t *testing.T) {
 	t.Run("with ID - UUID is parsed", func(t *testing.T) {
-		contact := domains.NewContactWithID(validContactID, validUserID, "Ana", "ana@email.com", "11999999999", "Friend")
+		contact := domains.NewContactWithID(validContactID, validUserID, "Ana", "ana@email.com", "11999999999", "Friend", time.Time{})
 
 		e := converter.ConvertContactDomainToEntity(contact)
 

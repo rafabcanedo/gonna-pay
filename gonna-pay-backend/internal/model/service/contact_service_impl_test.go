@@ -3,6 +3,7 @@ package service_test
 import (
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/mocks"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/model/domains"
@@ -108,7 +109,7 @@ func TestContactService_Update(t *testing.T) {
 		svc := service.NewContactService(mockRepo)
 
 		m := testutil.NewContactMock()
-		incoming := domains.NewContactWithID(m.ID, m.OwnerID, testutil.ContactUpdatedName, "nova@email.com", "11888888888", "Work")
+		incoming := domains.NewContactWithID(m.ID, m.OwnerID, testutil.ContactUpdatedName, "nova@email.com", "11888888888", "Work", time.Time{})
 
 		mockRepo.EXPECT().FindByID(m.ID).Return(m.Contact, nil)
 		mockRepo.EXPECT().Update(gomock.Any()).DoAndReturn(func(c *domains.Contact) (*domains.Contact, error) {
@@ -131,7 +132,7 @@ func TestContactService_Update(t *testing.T) {
 		svc := service.NewContactService(mockRepo)
 
 		m := testutil.NewContactMock()
-		incoming := domains.NewContactWithID(m.ID, m.OwnerID, testutil.ContactUpdatedName, "", "", "")
+		incoming := domains.NewContactWithID(m.ID, m.OwnerID, testutil.ContactUpdatedName, "", "", "", time.Time{})
 
 		mockRepo.EXPECT().FindByID(m.ID).Return(m.Contact, nil)
 		mockRepo.EXPECT().Update(gomock.Any()).DoAndReturn(func(c *domains.Contact) (*domains.Contact, error) {
@@ -152,7 +153,7 @@ func TestContactService_Update(t *testing.T) {
 		svc := service.NewContactService(mockRepo)
 
 		m := testutil.NewContactMock()
-		incoming := domains.NewContactWithID(m.ID, m.OwnerID, testutil.ContactUpdatedName, "", "", "")
+		incoming := domains.NewContactWithID(m.ID, m.OwnerID, testutil.ContactUpdatedName, "", "", "", time.Time{})
 
 		mockRepo.EXPECT().FindByID(m.ID).Return(m.Contact, nil)
 		mockRepo.EXPECT().Update(gomock.Any()).Return(nil, errors.New("db error"))

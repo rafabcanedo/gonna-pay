@@ -1,22 +1,28 @@
 package response
 
-import "github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/model/domains"
+import (
+	"time"
+
+	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/model/domains"
+)
 
 type ContactResponse struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Phone    string `json:"phone"`
-	Category string `json:"category"`
+	ID        string    `json:"id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Phone     string    `json:"phone"`
+	Category  string    `json:"category"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 func NewContactResponse(c *domains.Contact) ContactResponse {
 	return ContactResponse{
-		ID:       c.ID,
-		Name:     c.Name,
-		Email:    c.Email,
-		Phone:    c.Phone,
-		Category: c.Category,
+		ID:        c.ID,
+		Name:      c.Name,
+		Email:     c.Email,
+		Phone:     c.Phone,
+		Category:  c.Category,
+		CreatedAt: c.CreatedAt,
 	}
 }
 

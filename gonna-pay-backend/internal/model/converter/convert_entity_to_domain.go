@@ -23,6 +23,7 @@ func ConvertContactEntityToDomain(e entity.ContactEntity) *domains.Contact {
 		e.Email,
 		e.Phone,
 		string(e.Category),
+		e.CreatedAt,
 	)
 }
 

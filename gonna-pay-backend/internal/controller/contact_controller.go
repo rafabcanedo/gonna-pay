@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/configuration/validation"
@@ -148,7 +149,7 @@ func (cc *ContactController) UpdateContact(c *gin.Context) {
 		return
 	}
 
-	contact := domains.NewContactWithID(id, ownerID, req.Name, req.Email, req.Phone, req.Category)
+	contact := domains.NewContactWithID(id, ownerID, req.Name, req.Email, req.Phone, req.Category, time.Time{})
 
 	updated, err := cc.service.Update(contact)
 	if err != nil {

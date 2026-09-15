@@ -57,7 +57,7 @@ func NewUserMock() UserMock {
 }
 
 func NewContactMock() ContactMock {
-	c := domains.NewContactWithID(ContactID, UserID, ContactName, ContactEmail, ContactPhone, ContactCategory)
+	c := domains.NewContactWithID(ContactID, UserID, ContactName, ContactEmail, ContactPhone, ContactCategory, time.Now())
 	return ContactMock{
 		Contact:  c,
 		ID:       ContactID,
