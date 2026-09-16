@@ -10,8 +10,7 @@ import { ContactService, CostService } from "@/services";
 import { AvatarCost } from "./components/avatar-cost";
 import { CostsSummary } from "./components/costs-summary";
 import { CategoryBreakdown } from "./components/category-breakdown";
-import { buildCostsSummary, buildCategoryBreakdown } from "./lib/utils";
-import type { Contact, Cost } from "@/types";
+import type { Contact, GetCostsResponse } from "@/types";
 
 export default async function Costs() {
   const queryClient = new QueryClient();
@@ -27,10 +26,8 @@ export default async function Costs() {
   });
 
   const contacts = queryClient.getQueryData<Contact[]>(["contacts"]) ?? []
-  const costs = queryClient.getQueryData<Cost[]>(["costs"]) ?? []
-
-  const summary = buildCostsSummary(costs)
-  const breakdown = buildCategoryBreakdown(costs)
+  const costsResponse = queryClient.getQueryData<GetCostsResponse>(["costs"])
+  const stats = costsResponse?.stats
 
   return (
     <div className="flex flex-col px-8 w-full">
@@ -42,12 +39,12 @@ export default async function Costs() {
       </header>
 
       <div className="flex flex-row gap-4 mt-8">
-        <CostsSummary {...summary} />
+        {stats && <CostsSummary thisMonth={stats.thisMonth} inSplits={stats.inSplits} solo={stats.solo} />}
       </div>
 
-      {breakdown.length > 0 && (
+      {stats && stats.byCategory.length > 0 && (
         <div className="mt-4">
-          <CategoryBreakdown data={breakdown} />
+          <CategoryBreakdown data={stats.byCategory} />
         </div>
       )}
 

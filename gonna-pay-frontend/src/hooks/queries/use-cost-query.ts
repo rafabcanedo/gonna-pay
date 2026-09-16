@@ -14,7 +14,8 @@ export function useCostsQuery() {
 }
 
 export function useCostsWithSplitsQuery() {
-  const { data: costs = [], ...listQuery } = useCostsQuery()
+  const { data: response, ...listQuery } = useCostsQuery()
+  const costs = response?.data ?? []
 
   const detailQueries = useQueries({
     queries: costs.map((cost) => ({

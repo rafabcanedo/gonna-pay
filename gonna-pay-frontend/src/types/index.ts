@@ -96,7 +96,27 @@ export type CostDetail = Cost & {
   splits: CostSplit[]
 }
 
-export type GetCostsResponse = Cost[]
+export type CostCategoryBreakdown = {
+  category: TransactionCategory
+  total: number
+  percentage: number
+}
+
+export type CostStats = {
+  thisMonth: number
+  inSplits: number
+  solo: number
+  byCategory: CostCategoryBreakdown[]
+}
+
+export type GetCostsResponse = {
+  data: Cost[]
+  page: number
+  limit: number
+  total: number
+  totalPages: number
+  stats: CostStats
+}
 
 export type CreateCostInput = {
   groupId?: string

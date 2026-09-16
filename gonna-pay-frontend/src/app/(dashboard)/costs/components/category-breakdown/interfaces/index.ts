@@ -1,5 +1,5 @@
-import type { CategoryBreakdownPoint } from '../types'
+import type { CostCategoryBreakdown } from '@/types'
 
 export interface IPropsCategoryBreakdown {
-  data: CategoryBreakdownPoint[]
+  data: CostCategoryBreakdown[]
 }

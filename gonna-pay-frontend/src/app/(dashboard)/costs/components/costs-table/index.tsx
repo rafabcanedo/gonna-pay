@@ -41,8 +41,8 @@ export const CostsTable = () => {
 
   const [costToDelete, setCostToDelete] = useState<Cost | null>(null)
 
-  const costs = data ?? []
-  const total = data?.length ?? 0
+  const costs = data?.data ?? []
+  const total = data?.total ?? 0
 
   return (
     <>
