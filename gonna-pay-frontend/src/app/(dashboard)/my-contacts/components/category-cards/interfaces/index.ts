@@ -1,5 +1,5 @@
-import type { Contact } from '@/types'
+import type { ContactStats } from '@/types'
 
 export interface IPropsCategoryCards {
-  contacts: Contact[]
+  stats: ContactStats
 }

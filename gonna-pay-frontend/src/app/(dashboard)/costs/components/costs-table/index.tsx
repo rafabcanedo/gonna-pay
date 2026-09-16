@@ -32,17 +32,20 @@ import { BadgeType } from '@/utils/badge-types'
 import { TableEmptyState } from '@/components/table-empty-state'
 import { useCostsQuery } from '@/hooks/queries/use-cost-query'
 import { useDeleteCost } from '@/hooks/mutations/use-cost-mutations'
+import { TablePagination } from '@/components/table-pagination'
 import type { Cost } from '@/types'
 
 export const CostsTable = () => {
   const router = useRouter()
-  const { data } = useCostsQuery()
+  const [page, setPage] = useState(1)
+  const { data } = useCostsQuery(page)
   const { mutate: deleteCost, isPending } = useDeleteCost()
 
   const [costToDelete, setCostToDelete] = useState<Cost | null>(null)
 
   const costs = data?.data ?? []
   const total = data?.total ?? 0
+  const totalPages = data?.totalPages ?? 1
 
   return (
     <>
@@ -53,7 +56,7 @@ export const CostsTable = () => {
             <span className="text-xs">{total} costs</span>
           </div>
 
-          <div className="px-2 pb-2">
+          <div className="px-2">
             <Table className="w-full">
               <TableHeader>
                 <TableRow>
@@ -111,6 +114,12 @@ export const CostsTable = () => {
               </TableBody>
             </Table>
           </div>
+
+          {totalPages > 1 && (
+            <div className="px-6 pb-4">
+              <TablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
+            </div>
+          )}
         </div>
       </div>
 

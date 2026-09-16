@@ -5,10 +5,10 @@ import { CostService } from "@/services/cost.service";
 import type { GetCostsResponse, CostDetail } from "@/types";
 import { ApiError } from "@/lib/errors/api.error";
 
-export function useCostsQuery() {
+export function useCostsQuery(page = 1, limit = 20) {
   return useQuery<GetCostsResponse, ApiError>({
-    queryKey: ["costs"],
-    queryFn: () => CostService.getAll(),
+    queryKey: ["costs", { page, limit }],
+    queryFn: () => CostService.getAll(new URLSearchParams({ page: String(page), limit: String(limit) })),
     staleTime: 1000 * 60 * 5,
   });
 }

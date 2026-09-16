@@ -10,23 +10,23 @@ import { ContactService, CostService } from "@/services";
 import { AvatarCost } from "./components/avatar-cost";
 import { CostsSummary } from "./components/costs-summary";
 import { CategoryBreakdown } from "./components/category-breakdown";
-import type { Contact, GetCostsResponse } from "@/types";
+import type { GetContactsResponse, GetCostsResponse } from "@/types";
 
 export default async function Costs() {
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({
-    queryKey: ["costs"],
-    queryFn: () => CostService.getAll(),
+    queryKey: ["costs", { page: 1, limit: 20 }],
+    queryFn: () => CostService.getAll(new URLSearchParams({ page: "1", limit: "20" })),
   });
 
   await queryClient.prefetchQuery({
-    queryKey: ["contacts"],
-    queryFn: () => ContactService.getAll(),
+    queryKey: ["contacts", { page: 1, limit: 20 }],
+    queryFn: () => ContactService.getAll(new URLSearchParams({ page: "1", limit: "20" })),
   });
 
-  const contacts = queryClient.getQueryData<Contact[]>(["contacts"]) ?? []
-  const costsResponse = queryClient.getQueryData<GetCostsResponse>(["costs"])
+  const contacts = queryClient.getQueryData<GetContactsResponse>(["contacts", { page: 1, limit: 20 }])?.data ?? []
+  const costsResponse = queryClient.getQueryData<GetCostsResponse>(["costs", { page: 1, limit: 20 }])
   const stats = costsResponse?.stats
 
   return (

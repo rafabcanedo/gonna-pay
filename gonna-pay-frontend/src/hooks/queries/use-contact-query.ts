@@ -5,10 +5,10 @@ import { ContactService } from '@/services/contact.service'
 import type { Contact, GetContactsResponse, GetContactFrequencyResponse } from '@/types'
 import { ApiError } from '@/lib/errors/api.error'
 
-export function useContactsQuery() {
+export function useContactsQuery(page = 1, limit = 20) {
   return useQuery<GetContactsResponse, ApiError>({
-    queryKey: ['contacts'],
-    queryFn: () => ContactService.getAll(),
+    queryKey: ['contacts', { page, limit }],
+    queryFn: () => ContactService.getAll(new URLSearchParams({ page: String(page), limit: String(limit) })),
     staleTime: 1000 * 60 * 5,
   })
 }

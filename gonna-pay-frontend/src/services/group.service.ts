@@ -2,8 +2,9 @@ import { apiCall } from '@/lib/api-client'
 import type { GetGroupsResponse, Group, GroupDetail, CreateGroupInput, AddMemberInput, UpdateGroupInput } from '@/types'
 
 export const GroupService = {
-  getAll: async () => {
-    return apiCall<GetGroupsResponse>('/groups')
+  getAll: async (params?: URLSearchParams) => {
+    const query = params ? `?${params.toString()}` : ''
+    return apiCall<GetGroupsResponse>(`/groups${query}`)
   },
 
   getById: async (id: string) => {

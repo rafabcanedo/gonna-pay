@@ -2,11 +2,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { IPropsCategoryCards } from './interfaces'
 import { CONTACT_CATEGORIES } from './constants'
 
-export function CategoryCards({ contacts }: IPropsCategoryCards) {
+export function CategoryCards({ stats }: IPropsCategoryCards) {
   return (
     <>
       {CONTACT_CATEGORIES.map(({ label, value }) => {
-        const count = contacts.filter((c) => c.category === value).length
+        const count = stats.byCategory[value] ?? 0
         return (
           <Card key={value} className="w-40">
             <CardHeader>

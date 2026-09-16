@@ -31,7 +31,7 @@ export const AddMember = ({ groupId, currentMembers = [] }: IAddMemberProps) => 
   const { mutateAsync: addMember, isPending } = useAddMember()
 
   const currentMemberIds = new Set(currentMembers.map((m) => m.id))
-  const availableContacts = (contacts ?? []).filter((c) => !currentMemberIds.has(c.id))
+  const availableContacts = (contacts?.data ?? []).filter((c) => !currentMemberIds.has(c.id))
 
   const handleSubmit = async () => {
     if (!selectedContactId) return

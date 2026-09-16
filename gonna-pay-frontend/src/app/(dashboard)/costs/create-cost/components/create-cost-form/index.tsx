@@ -26,7 +26,7 @@ export default function CreateCostForm() {
   const { mutateAsync: createCost, isPending } = useCreateCost();
   const { data: groupsData } = useGroupsQuery();
 
-  const groupOptions = (groupsData?.groups ?? []).map((group) => ({
+  const groupOptions = (groupsData?.data ?? []).map((group) => ({
     label: group.name,
     value: group.id,
   }));

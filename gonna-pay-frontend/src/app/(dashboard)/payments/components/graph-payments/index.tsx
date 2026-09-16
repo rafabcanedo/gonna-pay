@@ -25,9 +25,9 @@ import { buildPaymentsData, formatDate } from '../../lib/utils'
 
 export const GraphPayments = () => {
   const [timeRange, setTimeRange] = React.useState<TimeRange>('30d')
-  const { data: costs = [] } = useCostsQuery()
+  const { data: response } = useCostsQuery()
 
-  const chartData = buildPaymentsData(costs, timeRange)
+  const chartData = buildPaymentsData(response?.data ?? [], timeRange)
 
   return (
     <Card className="pt-0">

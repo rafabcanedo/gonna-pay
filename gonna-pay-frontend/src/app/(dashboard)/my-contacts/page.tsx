@@ -4,14 +4,14 @@ import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query
 import { TableContact } from "./components/table-contacts";
 import { CategoryCards } from "./components/category-cards";
 import { TopContacts } from "./components/top-contacts";
-import type { Contact } from "@/types";
+import type { GetContactsResponse } from "@/types";
 
 export default async function MyContacts() {
   const queryClient = new QueryClient()
 
   await queryClient.prefetchQuery({
-    queryKey: ['contacts'],
-    queryFn: () => ContactService.getAll(),
+    queryKey: ['contacts', { page: 1, limit: 20 }],
+    queryFn: () => ContactService.getAll(new URLSearchParams({ page: "1", limit: "20" })),
   })
 
   await queryClient.prefetchQuery({
@@ -19,7 +19,8 @@ export default async function MyContacts() {
     queryFn: () => ContactService.getFrequency(5),
   })
 
-  const contacts = queryClient.getQueryData<Contact[]>(['contacts']) ?? []
+  const contactsResponse = queryClient.getQueryData<GetContactsResponse>(['contacts', { page: 1, limit: 20 }])
+  const stats = contactsResponse?.stats
 
   return (
     <div className="px-8 w-full">
@@ -31,7 +32,7 @@ export default async function MyContacts() {
       </header>
 
       <div className="flex flex-row items-start gap-4 mt-8">
-        <CategoryCards contacts={contacts} />
+        {stats && <CategoryCards stats={stats} />}
         <HydrationBoundary state={dehydrate(queryClient)}>
           <TopContacts />
         </HydrationBoundary>
