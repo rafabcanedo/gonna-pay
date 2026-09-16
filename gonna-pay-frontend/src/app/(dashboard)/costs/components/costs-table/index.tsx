@@ -56,7 +56,7 @@ export const CostsTable = () => {
             <span className="text-xs">{total} costs</span>
           </div>
 
-          <div className="px-2">
+          <div className="px-2 pb-2">
             <Table className="w-full">
               <TableHeader>
                 <TableRow>
