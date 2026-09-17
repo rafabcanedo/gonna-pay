@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { IPropsCategoryBreakdown } from './interfaces'
+import { CATEGORY_BAR_COLORS, DEFAULT_BAR_COLOR } from './constants'
 
 export function CategoryBreakdown({ data }: IPropsCategoryBreakdown) {
   return (
@@ -13,7 +14,7 @@ export function CategoryBreakdown({ data }: IPropsCategoryBreakdown) {
             <span className="text-sm text-zinc-600 w-28 shrink-0">{category}</span>
             <div className="flex-1 h-2 rounded-full bg-zinc-100">
               <div
-                className="h-2 rounded-full bg-zinc-700"
+                className={`h-2 rounded-full ${CATEGORY_BAR_COLORS[category] ?? DEFAULT_BAR_COLOR}`}
                 style={{ width: `${percentage}%` }}
               />
             </div>

@@ -2,9 +2,8 @@ import { AddContact } from "./components/add-contacts";
 import { ContactService } from "@/services";
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
 import { TableContact } from "./components/table-contacts";
-import { CategoryCards } from "./components/category-cards";
+import { ContactsStats } from "./components/contacts-stats";
 import { TopContacts } from "./components/top-contacts";
-import type { GetContactsResponse } from "@/types";
 
 export default async function MyContacts() {
   const queryClient = new QueryClient()
@@ -19,9 +18,6 @@ export default async function MyContacts() {
     queryFn: () => ContactService.getFrequency(5),
   })
 
-  const contactsResponse = queryClient.getQueryData<GetContactsResponse>(['contacts', { page: 1, limit: 20 }])
-  const stats = contactsResponse?.stats
-
   return (
     <div className="px-8 w-full">
       <header className="flex flex-row items-center justify-between h-12 mt-4">
@@ -31,18 +27,16 @@ export default async function MyContacts() {
         <AddContact />
       </header>
 
-      <div className="flex flex-row items-start gap-4 mt-8">
-        {stats && <CategoryCards stats={stats} />}
-        <HydrationBoundary state={dehydrate(queryClient)}>
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <div className="flex flex-row items-start gap-4 mt-8">
+          <ContactsStats />
           <TopContacts />
-        </HydrationBoundary>
-      </div>
+        </div>
 
-      <div className="mt-8">
-        <HydrationBoundary state={dehydrate(queryClient)}>
+        <div className="mt-8">
           <TableContact />
-        </HydrationBoundary>
-      </div>
+        </div>
+      </HydrationBoundary>
     </div>
   );
 }
