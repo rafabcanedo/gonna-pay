@@ -7,8 +7,15 @@ import { TableCostSplits } from './components/table-cost-splits'
 export default async function Payments() {
   const queryClient = new QueryClient()
 
-  await queryClient.prefetchQuery({ queryKey: ['costs'], queryFn: () => CostService.getAll() })
-  await queryClient.prefetchQuery({ queryKey: ['contacts'], queryFn: () => ContactService.getAll() })
+  await queryClient.prefetchQuery({
+    queryKey: ['costs', { page: 1, limit: 20 }],
+    queryFn: () => CostService.getAll(new URLSearchParams({ page: "1", limit: "20" })),
+  })
+
+  await queryClient.prefetchQuery({
+    queryKey: ['contacts', { page: 1, limit: 20 }],
+    queryFn: () => ContactService.getAll(new URLSearchParams({ page: "1", limit: "20" })),
+  })
 
   return (
     <div className="flex flex-col p-8 w-full">

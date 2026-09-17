@@ -169,6 +169,8 @@ definitions:
     properties:
       category:
         type: string
+      createdAt:
+        type: string
       email:
         type: string
       id:
@@ -177,6 +179,40 @@ definitions:
         type: string
       phone:
         type: string
+    type: object
+  response.ContactStatsResponse:
+    properties:
+      byCategory:
+        additionalProperties:
+          format: int64
+          type: integer
+        type: object
+    type: object
+  response.ContactsListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/response.ContactResponse'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      stats:
+        $ref: '#/definitions/response.ContactStatsResponse'
+      total:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  response.CostCategoryBreakdownResponse:
+    properties:
+      category:
+        type: string
+      percentage:
+        type: number
+      total:
+        type: number
     type: object
   response.CostDetailResponse:
     properties:
@@ -230,6 +266,36 @@ definitions:
       totalValue:
         type: number
     type: object
+  response.CostStatsResponse:
+    properties:
+      byCategory:
+        items:
+          $ref: '#/definitions/response.CostCategoryBreakdownResponse'
+        type: array
+      inSplits:
+        type: number
+      solo:
+        type: number
+      thisMonth:
+        type: number
+    type: object
+  response.CostsListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/response.CostResponse'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      stats:
+        $ref: '#/definitions/response.CostStatsResponse'
+      total:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
   response.GroupDetailResponse:
     properties:
       category:
@@ -268,6 +334,36 @@ definitions:
         type: string
       name:
         type: string
+    type: object
+  response.PaginatedGroupResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/response.GroupResponse'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  response.PaginatedUserResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/response.UserResponse'
+        type: array
+      limit:
+        type: integer
+      page:
+        type: integer
+      total:
+        type: integer
+      totalPages:
+        type: integer
     type: object
   response.SplitResponse:
     properties:
@@ -658,15 +754,22 @@ paths:
   /contacts:
     get:
       description: Retorna todos os contatos do usuário autenticado
+      parameters:
+      - description: 'Número da página (padrão: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Itens por página (padrão: 20, máximo: 100)'
+        in: query
+        name: limit
+        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/response.ContactResponse'
-            type: array
+            $ref: '#/definitions/response.ContactsListResponse'
         "401":
           description: Unauthorized
           schema:
@@ -881,15 +984,22 @@ paths:
     get:
       description: Retorna todos os custos do usuário autenticado (sem detalhes dos
         splits)
+      parameters:
+      - description: 'Número da página (padrão: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Itens por página (padrão: 20, máximo: 100)'
+        in: query
+        name: limit
+        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/response.CostResponse'
-            type: array
+            $ref: '#/definitions/response.CostsListResponse'
         "401":
           description: Unauthorized
           schema:
@@ -1165,15 +1275,23 @@ paths:
       - groups
   /groups:
     get:
-      description: Retorna todos os grupos do usuário autenticado com o total
+      description: Retorna todos os grupos do usuário autenticado com paginação
+      parameters:
+      - description: 'Número da página (padrão: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Itens por página (padrão: 20, máximo: 100)'
+        in: query
+        name: limit
+        type: integer
       produces:
       - application/json
       responses:
         "200":
-          description: groups (array) e total (int)
+          description: OK
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/response.PaginatedGroupResponse'
         "401":
           description: Unauthorized
           schema:
@@ -1339,15 +1457,22 @@ paths:
   /users:
     get:
       description: Retorna todos os usuários cadastrados
+      parameters:
+      - description: 'Número da página (padrão: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Itens por página (padrão: 20, máximo: 100)'
+        in: query
+        name: limit
+        type: integer
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/response.UserResponse'
-            type: array
+            $ref: '#/definitions/response.PaginatedUserResponse'
         "401":
           description: Unauthorized
           schema:

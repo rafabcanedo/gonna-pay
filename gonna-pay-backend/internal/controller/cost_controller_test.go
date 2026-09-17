@@ -107,6 +107,7 @@ func TestFindAllCosts(t *testing.T) {
 		m2 := testutil.NewCostMock()
 		m2.Cost.ID = "cost-2"
 		mockService.EXPECT().FindAll(testutil.UserID, 1, 20).Return([]*domains.Cost{m1.Cost, m2.Cost}, int64(2), nil)
+		mockService.EXPECT().FindStats(testutil.UserID).Return(&domains.CostStats{ByCategory: []domains.CostCategoryBreakdown{}}, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -115,7 +116,7 @@ func TestFindAllCosts(t *testing.T) {
 		cc.FindAllCosts(ctx)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
-		var body response.PaginatedResponse[response.CostResponse]
+		var body response.CostsListResponse
 		json.Unmarshal(rec.Body.Bytes(), &body)
 		assert.Equal(t, int64(2), body.Total)
 		assert.Equal(t, 1, body.TotalPages)
@@ -128,6 +129,7 @@ func TestFindAllCosts(t *testing.T) {
 
 		m := testutil.NewCostMock()
 		mockService.EXPECT().FindAll(testutil.UserID, 2, 10).Return([]*domains.Cost{m.Cost}, int64(11), nil)
+		mockService.EXPECT().FindStats(testutil.UserID).Return(&domains.CostStats{ByCategory: []domains.CostCategoryBreakdown{}}, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -136,7 +138,7 @@ func TestFindAllCosts(t *testing.T) {
 		cc.FindAllCosts(ctx)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
-		var body response.PaginatedResponse[response.CostResponse]
+		var body response.CostsListResponse
 		json.Unmarshal(rec.Body.Bytes(), &body)
 		assert.Equal(t, 2, body.Page)
 		assert.Equal(t, 10, body.Limit)

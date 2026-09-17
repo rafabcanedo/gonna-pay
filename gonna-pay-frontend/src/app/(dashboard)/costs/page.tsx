@@ -8,29 +8,23 @@ import {
 } from "@tanstack/react-query";
 import { ContactService, CostService } from "@/services";
 import { AvatarCost } from "./components/avatar-cost";
-import { CostsSummary } from "./components/costs-summary";
-import { CategoryBreakdown } from "./components/category-breakdown";
-import { buildCostsSummary, buildCategoryBreakdown } from "./lib/utils";
-import type { Contact, Cost } from "@/types";
+import { CostsStats } from "./components/costs-stats";
+import type { GetContactsResponse } from "@/types";
 
 export default async function Costs() {
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({
-    queryKey: ["costs"],
-    queryFn: () => CostService.getAll(),
+    queryKey: ["costs", { page: 1, limit: 20 }],
+    queryFn: () => CostService.getAll(new URLSearchParams({ page: "1", limit: "20" })),
   });
 
   await queryClient.prefetchQuery({
-    queryKey: ["contacts"],
-    queryFn: () => ContactService.getAll(),
+    queryKey: ["contacts", { page: 1, limit: 20 }],
+    queryFn: () => ContactService.getAll(new URLSearchParams({ page: "1", limit: "20" })),
   });
 
-  const contacts = queryClient.getQueryData<Contact[]>(["contacts"]) ?? []
-  const costs = queryClient.getQueryData<Cost[]>(["costs"]) ?? []
-
-  const summary = buildCostsSummary(costs)
-  const breakdown = buildCategoryBreakdown(costs)
+  const contacts = queryClient.getQueryData<GetContactsResponse>(["contacts", { page: 1, limit: 20 }])?.data ?? []
 
   return (
     <div className="flex flex-col px-8 w-full">
@@ -41,22 +35,16 @@ export default async function Costs() {
         </Link>
       </header>
 
-      <div className="flex flex-row gap-4 mt-8">
-        <CostsSummary {...summary} />
-      </div>
-
-      {breakdown.length > 0 && (
-        <div className="mt-4">
-          <CategoryBreakdown data={breakdown} />
-        </div>
-      )}
-
-      <HydrationBoundary state={dehydrate(queryClient)}>
-        <div className="flex justify-center items-center gap-8 mt-4">
+      {contacts.length > 0 && (
+        <div className="flex flex-row items-center justify-center gap-8 mt-4">
           {contacts.map((item) => (
             <AvatarCost key={item.id} name={item.name} />
           ))}
         </div>
+      )}
+
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <CostsStats />
 
         <div className="mt-8">
           <CostsTable />

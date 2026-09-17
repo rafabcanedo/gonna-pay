@@ -34,6 +34,37 @@ func NewContactResponseList(contacts []*domains.Contact) []ContactResponse {
 	return out
 }
 
+type ContactStatsResponse struct {
+	ByCategory map[string]int64 `json:"byCategory"`
+}
+
+type ContactsListResponse struct {
+	Data       []ContactResponse    `json:"data"`
+	Page       int                  `json:"page"`
+	Limit      int                  `json:"limit"`
+	Total      int64                `json:"total"`
+	TotalPages int                  `json:"totalPages"`
+	Stats      ContactStatsResponse `json:"stats"`
+}
+
+func NewContactsListResponse(contacts []ContactResponse, page, limit int, total int64, stats *domains.ContactStats) ContactsListResponse {
+	totalPages := int(total) / limit
+	if int(total)%limit != 0 {
+		totalPages++
+	}
+
+	return ContactsListResponse{
+		Data:       contacts,
+		Page:       page,
+		Limit:      limit,
+		Total:      total,
+		TotalPages: totalPages,
+		Stats: ContactStatsResponse{
+			ByCategory: stats.ByCategory,
+		},
+	}
+}
+
 type ContactFrequencyResponse struct {
 	ContactID   string `json:"contactId"`
 	ContactName string `json:"contactName"`

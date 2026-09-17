@@ -32,17 +32,20 @@ import { BadgeType } from "@/utils/badge-types"
 import { TableEmptyState } from "@/components/table-empty-state"
 import { useContactsQuery } from "@/hooks/queries/use-contact-query"
 import { useDeleteContact } from "@/hooks/mutations/use-contact-mutations"
+import { TablePagination } from "@/components/table-pagination"
 import type { Contact } from "@/types"
 
 export const TableContact = () => {
   const router = useRouter()
-  const { data } = useContactsQuery()
+  const [page, setPage] = useState(1)
+  const { data } = useContactsQuery(page)
   const { mutate: deleteContact, isPending } = useDeleteContact()
 
   const [contactToDelete, setContactToDelete] = useState<Contact | null>(null)
 
-  const contacts = data ?? []
-  const total = data?.length ?? 0
+  const contacts = data?.data ?? []
+  const total = data?.total ?? 0
+  const totalPages = data?.totalPages ?? 1
 
   return (
     <>
@@ -105,6 +108,12 @@ export const TableContact = () => {
               </TableBody>
             </Table>
           </div>
+
+          {totalPages > 1 && (
+            <div className="px-6 pb-4">
+              <TablePagination page={page} totalPages={totalPages} onPageChange={setPage} />
+            </div>
+          )}
         </div>
       </div>
 

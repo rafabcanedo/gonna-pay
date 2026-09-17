@@ -13,9 +13,9 @@ import { TableEmptyState } from "@/components/table-empty-state";
 import { useCostsQuery } from "@/hooks/queries/use-cost-query";
 
 export const TablePayments = () => {
-  const { data: costs = [] } = useCostsQuery();
+  const { data: response } = useCostsQuery();
 
-  const soloPayments = costs.filter((cost) => cost.splitCount === 0);
+  const soloPayments = (response?.data ?? []).filter((cost) => cost.splitCount === 0);
 
   return (
     <div className="w-full flex justify-center mt-6 mb-6">

@@ -90,6 +90,7 @@ func TestFindAllContacts(t *testing.T) {
 		m2 := testutil.NewContactMock()
 		m2.Contact.ID = "contact-2"
 		mockService.EXPECT().FindAll(testutil.UserID, 1, 20).Return([]*domains.Contact{m1.Contact, m2.Contact}, int64(2), nil)
+		mockService.EXPECT().FindStats(testutil.UserID).Return(&domains.ContactStats{ByCategory: map[string]int64{}}, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -98,7 +99,7 @@ func TestFindAllContacts(t *testing.T) {
 		cc.FindAllContacts(ctx)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
-		var body response.PaginatedResponse[response.ContactResponse]
+		var body response.ContactsListResponse
 		json.Unmarshal(rec.Body.Bytes(), &body)
 		assert.Equal(t, int64(2), body.Total)
 		assert.Equal(t, 1, body.TotalPages)
@@ -111,6 +112,7 @@ func TestFindAllContacts(t *testing.T) {
 
 		m := testutil.NewContactMock()
 		mockService.EXPECT().FindAll(testutil.UserID, 2, 10).Return([]*domains.Contact{m.Contact}, int64(11), nil)
+		mockService.EXPECT().FindStats(testutil.UserID).Return(&domains.ContactStats{ByCategory: map[string]int64{}}, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -119,7 +121,7 @@ func TestFindAllContacts(t *testing.T) {
 		cc.FindAllContacts(ctx)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
-		var body response.PaginatedResponse[response.ContactResponse]
+		var body response.ContactsListResponse
 		json.Unmarshal(rec.Body.Bytes(), &body)
 		assert.Equal(t, 2, body.Page)
 		assert.Equal(t, 10, body.Limit)

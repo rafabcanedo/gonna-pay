@@ -61,7 +61,7 @@ func (cc *CostController) CreateCost(c *gin.Context) {
 // @Produce      json
 // @Param        page   query     int  false  "Número da página (padrão: 1)"
 // @Param        limit  query     int  false  "Itens por página (padrão: 20, máximo: 100)"
-// @Success      200  {object}  response.PaginatedResponse[response.CostResponse]
+// @Success      200  {object}  response.CostsListResponse
 // @Failure      401  {object}  rest_errors.RestErrors
 // @Failure      500  {object}  rest_errors.RestErrors
 // @Security     CookieAuth
@@ -90,9 +90,15 @@ func (cc *CostController) FindAllCosts(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response.NewPaginatedResponse(
+	stats, err := cc.service.FindStats(userID)
+	if err != nil {
+		httputil.RespondError(c, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, response.NewCostsListResponse(
 		response.NewCostResponseList(costs),
-		page, limit, total,
+		page, limit, total, stats,
 	))
 }
 

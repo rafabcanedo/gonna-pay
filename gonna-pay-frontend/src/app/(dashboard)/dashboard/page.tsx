@@ -12,12 +12,12 @@ import { apiCall } from "@/lib/api-client";
 import { buildSpendingData, buildCategoryData, buildTotals } from "./lib/utils";
 
 export default async function Dashboard() {
-  const costs = await apiCall<GetCostsResponse>('/costs')
-  const contacts = await apiCall<GetContactsResponse>('/contacts')
+  const costsResponse = await apiCall<GetCostsResponse>('/costs')
+  const contactsResponse = await apiCall<GetContactsResponse>('/contacts')
 
-  const spendingData = buildSpendingData(costs)
-  const categoryData = buildCategoryData(costs)
-  const { amount, income, spending } = buildTotals(costs)
+  const spendingData = buildSpendingData(costsResponse.data)
+  const categoryData = buildCategoryData(costsResponse.data)
+  const { amount, income, spending } = buildTotals(costsResponse.data)
 
   return (
     <div className="flex flex-col gap-8 py-8">
@@ -40,11 +40,11 @@ export default async function Dashboard() {
       </div>
 
       <div className="grid grid-cols-2 gap-8">
-        <RecentCosts costs={costs} total={costs.length} />
+        <RecentCosts costs={costsResponse.data} total={costsResponse.total} />
         <RemindersWidget />
       </div>
 
-      <RecentContacts contacts={contacts} total={contacts.length} />
+      <RecentContacts contacts={contactsResponse.data} total={contactsResponse.total} />
     </div>
   )
 }

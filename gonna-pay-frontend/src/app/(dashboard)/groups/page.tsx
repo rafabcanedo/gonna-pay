@@ -7,8 +7,8 @@ export default async function Groups() {
   const queryClient = new QueryClient()
 
   await queryClient.prefetchQuery({
-    queryKey: ['groups'],
-    queryFn: () => GroupService.getAll(),
+    queryKey: ['groups', { page: 1, limit: 20 }],
+    queryFn: () => GroupService.getAll(new URLSearchParams({ page: "1", limit: "20" })),
   })
 
   return (

@@ -14,10 +14,10 @@ import { useContactsQuery } from "@/hooks/queries/use-contact-query";
 import { useCostsWithSplitsQuery } from "@/hooks/queries/use-cost-query";
 
 export const TableCostSplits = () => {
-  const { data: contacts = [] } = useContactsQuery();
+  const { data: contactsResponse } = useContactsQuery();
   const { data: costsWithSplits = [] } = useCostsWithSplitsQuery();
 
-  const contactsMap = new Map(contacts.map((c) => [c.id, c]));
+  const contactsMap = new Map((contactsResponse?.data ?? []).map((c) => [c.id, c]));
 
   const rows = costsWithSplits.flatMap((cost) =>
     cost.splits.map((split) => ({

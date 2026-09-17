@@ -15,6 +15,7 @@ type CostService interface {
 	FindAll(userID string, page, limit int) ([]*domains.Cost, int64, error)
 	FindByID(id, userID string) (*domains.Cost, error)
 	Delete(id, userID string) error
+	FindStats(userID string) (*domains.CostStats, error)
 }
 
 type costService struct {
@@ -135,6 +136,16 @@ func (s *costService) FindAll(userID string, page, limit int) ([]*domains.Cost, 
 
 func (s *costService) FindByID(id, userID string) (*domains.Cost, error) {
 	return s.findAndAuthorize(id, userID)
+}
+
+func (s *costService) FindStats(userID string) (*domains.CostStats, error) {
+	stats, err := s.repo.FindStats(userID)
+	if err != nil {
+		logger.Error("error finding cost stats", err)
+		return nil, err
+	}
+
+	return stats, nil
 }
 
 func (s *costService) Delete(id, userID string) error {

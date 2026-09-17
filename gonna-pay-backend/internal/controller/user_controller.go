@@ -59,7 +59,7 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 // @Produce      json
 // @Param        page   query     int  false  "Número da página (padrão: 1)"
 // @Param        limit  query     int  false  "Itens por página (padrão: 20, máximo: 100)"
-// @Success      200  {object}  response.PaginatedResponse[response.UserResponse]
+// @Success      200  {object}  response.PaginatedUserResponse
 // @Failure      401  {object}  rest_errors.RestErrors
 // @Failure      500  {object}  rest_errors.RestErrors
 // @Security     CookieAuth

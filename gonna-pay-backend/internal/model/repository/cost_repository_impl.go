@@ -19,6 +19,7 @@ type CostRepository interface {
 	Delete(id string) error
 	GetGroupByID(groupID string) (*domains.Group, error)
 	GetGroupMembers(groupID string) ([]domains.Member, error)
+	FindStats(userID string) (*domains.CostStats, error)
 }
 
 type costRepository struct {
@@ -274,6 +275,64 @@ func (r *costRepository) FindByID(id string) (*domains.Cost, error) {
 		UpdatedAt:       updatedAt,
 		SplitCount:      len(splits),
 		Splits:          splits,
+	}, nil
+}
+
+func (r *costRepository) FindStats(userID string) (*domains.CostStats, error) {
+	var thisMonth, inSplits, solo float64
+
+	err := r.db.QueryRow(`
+		SELECT
+			COALESCE(SUM(total_value), 0),
+			COALESCE(SUM(CASE WHEN group_id IS NOT NULL THEN total_value ELSE 0 END), 0),
+			COALESCE(SUM(CASE WHEN group_id IS NULL THEN total_value ELSE 0 END), 0)
+		FROM cost_entities
+		WHERE user_id = $1
+		  AND DATE_TRUNC('month', created_at) = DATE_TRUNC('month', NOW())
+	`, userID).Scan(&thisMonth, &inSplits, &solo)
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.db.Query(`
+		SELECT category, COALESCE(SUM(total_value), 0)
+		FROM cost_entities
+		WHERE user_id = $1
+		  AND DATE_TRUNC('month', created_at) = DATE_TRUNC('month', NOW())
+		GROUP BY category
+	`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var rawBreakdown []domains.CostCategoryBreakdown
+	var grandTotal float64
+
+	for rows.Next() {
+		var b domains.CostCategoryBreakdown
+		if err := rows.Scan(&b.Category, &b.Total); err != nil {
+			return nil, err
+		}
+		grandTotal += b.Total
+		rawBreakdown = append(rawBreakdown, b)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	for i := range rawBreakdown {
+		if grandTotal > 0 {
+			rawBreakdown[i].Percentage = math.Round((rawBreakdown[i].Total/grandTotal)*100*100) / 100
+		}
+	}
+
+	return &domains.CostStats{
+		ThisMonth:  thisMonth,
+		InSplits:   inSplits,
+		Solo:       solo,
+		ByCategory: rawBreakdown,
 	}, nil
 }
 

@@ -19,6 +19,7 @@ type ContactRepository interface {
 	Delete(id string) error
 	ExistsByEmailAndOwner(email, ownerID string) (bool, error)
 	FindContactsByFrequency(userID string, limit int) ([]domains.ContactFrequency, error)
+	FindStats(ownerID string) (*domains.ContactStats, error)
 }
 
 type contactRepository struct {
@@ -135,6 +136,33 @@ func (r *contactRepository) ExistsByEmailAndOwner(email, ownerID string) (bool, 
 		return false, err
 	}
 	return count > 0, nil
+}
+
+func (r *contactRepository) FindStats(ownerID string) (*domains.ContactStats, error) {
+	rows, err := r.db.Query(
+		`SELECT category, COUNT(*) FROM contact_entities WHERE owner_id = $1 AND deleted_at IS NULL GROUP BY category`,
+		ownerID,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	byCategory := make(map[string]int64)
+	for rows.Next() {
+		var category string
+		var count int64
+		if err := rows.Scan(&category, &count); err != nil {
+			return nil, err
+		}
+		byCategory[category] = count
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return &domains.ContactStats{ByCategory: byCategory}, nil
 }
 
 func (r *contactRepository) FindContactsByFrequency(userID string, limit int) ([]domains.ContactFrequency, error) {

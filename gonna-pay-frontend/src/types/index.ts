@@ -20,7 +20,9 @@ export type Contact = {
   category: ContactCategory
 }
 
-export type GetContactsResponse = Contact[]
+export type GetContactsResponse = PaginatedResponse<Contact> & {
+  stats: ContactStats
+}
 
 export type ContactFrequency = {
   contactId: string
@@ -50,10 +52,7 @@ export type GroupDetail = Group & {
   members?: GroupMember[]
 }
 
-export type GetGroupsResponse = {
-  groups: GroupDetail[]
-  total: number
-}
+export type GetGroupsResponse = PaginatedResponse<GroupDetail>
 
 export type CreateGroupInput = {
   name: string
@@ -96,7 +95,34 @@ export type CostDetail = Cost & {
   splits: CostSplit[]
 }
 
-export type GetCostsResponse = Cost[]
+export type CostCategoryBreakdown = {
+  category: TransactionCategory
+  total: number
+  percentage: number
+}
+
+export type CostStats = {
+  thisMonth: number
+  inSplits: number
+  solo: number
+  byCategory: CostCategoryBreakdown[]
+}
+
+export type ContactStats = {
+  byCategory: Record<string, number>
+}
+
+export type PaginatedResponse<T> = {
+  data: T[]
+  page: number
+  limit: number
+  total: number
+  totalPages: number
+}
+
+export type GetCostsResponse = PaginatedResponse<Cost> & {
+  stats: CostStats
+}
 
 export type CreateCostInput = {
   groupId?: string
