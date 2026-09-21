@@ -51,9 +51,9 @@ func TestContactService_FindAll(t *testing.T) {
 		m1 := testutil.NewContactMock()
 		m2 := testutil.NewContactMock()
 		m2.Contact.ID = "contact-2"
-		mockRepo.EXPECT().FindAll(testutil.UserID, 20, 0).Return([]*domains.Contact{m1.Contact, m2.Contact}, int64(2), nil)
+		mockRepo.EXPECT().FindAll(testutil.UserID, 20, 0, domains.ContactFilters{}).Return([]*domains.Contact{m1.Contact, m2.Contact}, int64(2), nil)
 
-		result, total, err := svc.FindAll(testutil.UserID, 1, 20)
+		result, total, err := svc.FindAll(testutil.UserID, 1, 20, domains.ContactFilters{})
 
 		assert.NoError(t, err)
 		assert.Len(t, result, 2)

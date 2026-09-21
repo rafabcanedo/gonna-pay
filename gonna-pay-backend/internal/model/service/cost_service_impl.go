@@ -12,10 +12,10 @@ import (
 type CostService interface {
 	Create(cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error)
 	Update(id, userID string, cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error)
-	FindAll(userID string, page, limit int) ([]*domains.Cost, int64, error)
+	FindAll(userID string, page, limit int, filters domains.CostFilters) ([]*domains.Cost, int64, error)
 	FindByID(id, userID string) (*domains.Cost, error)
 	Delete(id, userID string) error
-	FindStats(userID string) (*domains.CostStats, error)
+	FindStats(userID string, filters domains.CostFilters) (*domains.CostStats, error)
 }
 
 type costService struct {
@@ -122,10 +122,10 @@ func (s *costService) Update(id, userID string, cost *domains.Cost, ownerPercent
 	return updated, nil
 }
 
-func (s *costService) FindAll(userID string, page, limit int) ([]*domains.Cost, int64, error) {
+func (s *costService) FindAll(userID string, page, limit int, filters domains.CostFilters) ([]*domains.Cost, int64, error) {
 	offset := (page - 1) * limit
 
-	costs, total, err := s.repo.FindAll(userID, limit, offset)
+	costs, total, err := s.repo.FindAll(userID, limit, offset, filters)
 	if err != nil {
 		logger.Error("error finding all costs", err)
 		return nil, 0, err
@@ -138,8 +138,8 @@ func (s *costService) FindByID(id, userID string) (*domains.Cost, error) {
 	return s.findAndAuthorize(id, userID)
 }
 
-func (s *costService) FindStats(userID string) (*domains.CostStats, error) {
-	stats, err := s.repo.FindStats(userID)
+func (s *costService) FindStats(userID string, filters domains.CostFilters) (*domains.CostStats, error) {
+	stats, err := s.repo.FindStats(userID, filters)
 	if err != nil {
 		logger.Error("error finding cost stats", err)
 		return nil, err

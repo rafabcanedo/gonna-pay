@@ -2,6 +2,8 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -12,7 +14,7 @@ import (
 
 type GroupRepository interface {
 	Create(group *domains.Group, memberIDs []string) (*domains.Group, error)
-	FindAll(ownerID string, limit, offset int) ([]*domains.Group, int64, error)
+	FindAll(ownerID string, limit, offset int, filters domains.GroupFilters) ([]*domains.Group, int64, error)
 	FindByID(id string) (*domains.Group, error)
 	Update(group *domains.Group) (*domains.Group, error)
 	Delete(id string) error
@@ -66,17 +68,43 @@ func (r *groupRepository) Create(group *domains.Group, memberIDs []string) (*dom
 	return domains.NewGroupWithID(e.ID.String(), group.OwnerID, group.Name, group.Category, now, now, nil), nil
 }
 
-func (r *groupRepository) FindAll(ownerID string, limit, offset int) ([]*domains.Group, int64, error) {
-	var total int64
+func (r *groupRepository) FindAll(ownerID string, limit, offset int, filters domains.GroupFilters) ([]*domains.Group, int64, error) {
+	conditions := []string{"owner_id = $1"}
+	args := []any{ownerID}
+	idx := 2
 
-	err := r.db.QueryRow(`SELECT COUNT(*) FROM group_entities WHERE owner_id = $1`, ownerID).Scan(&total)
+	if filters.Category != "" {
+		conditions = append(conditions, fmt.Sprintf("category = $%d", idx))
+		args = append(args, filters.Category)
+		idx++
+	}
+	if filters.Search != "" {
+		conditions = append(conditions, fmt.Sprintf("name ILIKE $%d", idx))
+		args = append(args, "%"+filters.Search+"%")
+		idx++
+	}
+
+	where := strings.Join(conditions, " AND ")
+
+	var total int64
+	err := r.db.QueryRow(
+		fmt.Sprintf(`SELECT COUNT(*) FROM group_entities WHERE %s`, where),
+		args...,
+	).Scan(&total)
 	if err != nil {
 		return nil, 0, err
 	}
 
+	queryArgs := append(args, limit, offset)
 	rows, err := r.db.Query(
-		`SELECT id, owner_id, name, category, created_at, updated_at FROM group_entities WHERE owner_id = $1 LIMIT $2 OFFSET $3`,
-		ownerID, limit, offset,
+		fmt.Sprintf(`
+			SELECT id, owner_id, name, category, created_at, updated_at
+			FROM group_entities
+			WHERE %s
+			ORDER BY created_at DESC
+			LIMIT $%d OFFSET $%d
+		`, where, idx, idx+1),
+		queryArgs...,
 	)
 	if err != nil {
 		return nil, 0, err

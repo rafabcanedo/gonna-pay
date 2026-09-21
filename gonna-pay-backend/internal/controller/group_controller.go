@@ -2,7 +2,6 @@ package controller
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/configuration/validation"
@@ -68,23 +67,14 @@ func (gc *GroupController) CreateGroup(c *gin.Context) {
 // @Router       /groups [get]
 func (gc *GroupController) FindAllGroups(c *gin.Context) {
 	ownerID := c.GetString("userID")
+	page, limit := httputil.ParsePagination(c)
 
-	page := 1
-	limit := 20
-
-	if p := c.Query("page"); p != "" {
-		if parsed, err := strconv.Atoi(p); err == nil && parsed > 0 {
-			page = parsed
-		}
+	filters := domains.GroupFilters{
+		Category: c.Query("category"),
+		Search:   c.Query("search"),
 	}
 
-	if l := c.Query("limit"); l != "" {
-		if parsed, err := strconv.Atoi(l); err == nil && parsed > 0 && parsed <= 100 {
-			limit = parsed
-		}
-	}
-
-	groups, total, err := gc.service.FindAll(ownerID, page, limit)
+	groups, total, err := gc.service.FindAll(ownerID, page, limit, filters)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return

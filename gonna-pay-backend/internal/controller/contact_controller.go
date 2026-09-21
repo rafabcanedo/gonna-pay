@@ -69,23 +69,14 @@ func (cc *ContactController) CreateContact(c *gin.Context) {
 // @Router       /contacts [get]
 func (cc *ContactController) FindAllContacts(c *gin.Context) {
 	ownerID := c.GetString("userID")
+	page, limit := httputil.ParsePagination(c)
 
-	page := 1
-	limit := 20
-
-	if p := c.Query("page"); p != "" {
-		if parsed, err := strconv.Atoi(p); err == nil && parsed > 0 {
-			page = parsed
-		}
+	filters := domains.ContactFilters{
+		Category: c.Query("category"),
+		Search:   c.Query("search"),
 	}
 
-	if l := c.Query("limit"); l != "" {
-		if parsed, err := strconv.Atoi(l); err == nil && parsed > 0 && parsed <= 100 {
-			limit = parsed
-		}
-	}
-
-	contacts, total, err := cc.service.FindAll(ownerID, page, limit)
+	contacts, total, err := cc.service.FindAll(ownerID, page, limit, filters)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return

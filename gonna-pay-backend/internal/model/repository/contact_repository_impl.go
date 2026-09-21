@@ -3,6 +3,8 @@ package repository
 import (
 	"database/sql"
 	"errors"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -13,7 +15,7 @@ import (
 
 type ContactRepository interface {
 	Create(contact *domains.Contact) (*domains.Contact, error)
-	FindAll(ownerID string, limit, offset int) ([]*domains.Contact, int64, error)
+	FindAll(ownerID string, limit, offset int, filters domains.ContactFilters) ([]*domains.Contact, int64, error)
 	FindByID(id string) (*domains.Contact, error)
 	Update(contact *domains.Contact) (*domains.Contact, error)
 	Delete(id string) error
@@ -47,21 +49,43 @@ func (r *contactRepository) Create(contact *domains.Contact) (*domains.Contact, 
 	return converter.ConvertContactEntityToDomain(*e), nil
 }
 
-func (r *contactRepository) FindAll(ownerID string, limit, offset int) ([]*domains.Contact, int64, error) {
-	var total int64
+func (r *contactRepository) FindAll(ownerID string, limit, offset int, filters domains.ContactFilters) ([]*domains.Contact, int64, error) {
+	conditions := []string{"owner_id = $1", "deleted_at IS NULL"}
+	args := []any{ownerID}
+	idx := 2
 
-	err := r.db.QueryRow(`SELECT COUNT(*) FROM contact_entities WHERE owner_id = $1 AND deleted_at IS NULL`, ownerID).Scan(&total)
+	if filters.Category != "" {
+		conditions = append(conditions, fmt.Sprintf("category = $%d", idx))
+		args = append(args, filters.Category)
+		idx++
+	}
+	if filters.Search != "" {
+		conditions = append(conditions, fmt.Sprintf("name ILIKE $%d", idx))
+		args = append(args, "%"+filters.Search+"%")
+		idx++
+	}
+
+	where := strings.Join(conditions, " AND ")
+
+	var total int64
+	err := r.db.QueryRow(
+		fmt.Sprintf(`SELECT COUNT(*) FROM contact_entities WHERE %s`, where),
+		args...,
+	).Scan(&total)
 	if err != nil {
 		return nil, 0, err
 	}
 
+	queryArgs := append(args, limit, offset)
 	rows, err := r.db.Query(
-		`SELECT id, owner_id, name, email, phone, category, created_at
-		 FROM contact_entities
-		 WHERE owner_id = $1 AND deleted_at IS NULL
-		 ORDER BY created_at DESC
-		 LIMIT $2 OFFSET $3`,
-		ownerID, limit, offset,
+		fmt.Sprintf(`
+			SELECT id, owner_id, name, email, phone, category, created_at
+			FROM contact_entities
+			WHERE %s
+			ORDER BY created_at DESC
+			LIMIT $%d OFFSET $%d
+		`, where, idx, idx+1),
+		queryArgs...,
 	)
 
 	if err != nil {

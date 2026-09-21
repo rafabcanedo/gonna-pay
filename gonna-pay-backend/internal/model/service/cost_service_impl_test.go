@@ -130,9 +130,9 @@ func TestCostService_FindAll(t *testing.T) {
 		m1 := testutil.NewCostMock()
 		m2 := testutil.NewCostMock()
 		m2.Cost.ID = "cost-2"
-		mockRepo.EXPECT().FindAll(testutil.UserID, 20, 0).Return([]*domains.Cost{m1.Cost, m2.Cost}, int64(2), nil)
+		mockRepo.EXPECT().FindAll(testutil.UserID, 20, 0, domains.CostFilters{}).Return([]*domains.Cost{m1.Cost, m2.Cost}, int64(2), nil)
 
-		result, total, err := svc.FindAll(testutil.UserID, 1, 20)
+		result, total, err := svc.FindAll(testutil.UserID, 1, 20, domains.CostFilters{})
 
 		assert.NoError(t, err)
 		assert.Len(t, result, 2)
@@ -144,9 +144,9 @@ func TestCostService_FindAll(t *testing.T) {
 		mockRepo := mocks.NewMockCostRepository(ctrl)
 		svc := service.NewCostService(mockRepo)
 
-		mockRepo.EXPECT().FindAll(testutil.UserID, 20, 0).Return(nil, int64(0), errors.New("db error"))
+		mockRepo.EXPECT().FindAll(testutil.UserID, 20, 0, domains.CostFilters{}).Return(nil, int64(0), errors.New("db error"))
 
-		_, _, err := svc.FindAll(testutil.UserID, 1, 20)
+		_, _, err := svc.FindAll(testutil.UserID, 1, 20, domains.CostFilters{})
 		assert.Error(t, err)
 	})
 }

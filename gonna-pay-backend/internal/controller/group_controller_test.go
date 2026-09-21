@@ -101,7 +101,7 @@ func TestFindAllGroups(t *testing.T) {
 		m1 := testutil.NewGroupMock()
 		m2 := testutil.NewGroupMock()
 		m2.Group.ID = "group-2"
-		mockService.EXPECT().FindAll(testutil.UserID, 1, 20).Return([]*domains.Group{m1.Group, m2.Group}, int64(2), nil)
+		mockService.EXPECT().FindAll(testutil.UserID, 1, 20, domains.GroupFilters{}).Return([]*domains.Group{m1.Group, m2.Group}, int64(2), nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -122,7 +122,7 @@ func TestFindAllGroups(t *testing.T) {
 		gc := controller.NewGroupController(mockService)
 
 		m := testutil.NewGroupMock()
-		mockService.EXPECT().FindAll(testutil.UserID, 2, 10).Return([]*domains.Group{m.Group}, int64(11), nil)
+		mockService.EXPECT().FindAll(testutil.UserID, 2, 10, domains.GroupFilters{}).Return([]*domains.Group{m.Group}, int64(11), nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -144,7 +144,7 @@ func TestFindAllGroups(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		mockService.EXPECT().FindAll(testutil.UserID, 1, 20).Return(nil, int64(0), domains.NewNotFoundError("not found"))
+		mockService.EXPECT().FindAll(testutil.UserID, 1, 20, domains.GroupFilters{}).Return(nil, int64(0), domains.NewNotFoundError("not found"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -153,6 +153,26 @@ func TestFindAllGroups(t *testing.T) {
 		gc.FindAllGroups(ctx)
 
 		assert.Equal(t, http.StatusNotFound, rec.Code)
+	})
+}
+
+func TestFindAllGroups_Filters(t *testing.T) {
+	t.Run("filters by search and category", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		mockService := mocks.NewMockGroupService(ctrl)
+		gc := controller.NewGroupController(mockService)
+
+		m := testutil.NewGroupMock()
+		expectedFilters := domains.GroupFilters{Search: "coffee", Category: "Others"}
+		mockService.EXPECT().FindAll(testutil.UserID, 1, 20, expectedFilters).Return([]*domains.Group{m.Group}, int64(1), nil)
+
+		ctx, rec := testutil.NewTestContext()
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakeGet(ctx, nil, url.Values{"search": {"coffee"}, "category": {"Others"}})
+
+		gc.FindAllGroups(ctx)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
 	})
 }
 

@@ -89,7 +89,7 @@ func TestFindAllContacts(t *testing.T) {
 		m1 := testutil.NewContactMock()
 		m2 := testutil.NewContactMock()
 		m2.Contact.ID = "contact-2"
-		mockService.EXPECT().FindAll(testutil.UserID, 1, 20).Return([]*domains.Contact{m1.Contact, m2.Contact}, int64(2), nil)
+		mockService.EXPECT().FindAll(testutil.UserID, 1, 20, domains.ContactFilters{}).Return([]*domains.Contact{m1.Contact, m2.Contact}, int64(2), nil)
 		mockService.EXPECT().FindStats(testutil.UserID).Return(&domains.ContactStats{ByCategory: map[string]int64{}}, nil)
 
 		ctx, rec := testutil.NewTestContext()
@@ -111,7 +111,7 @@ func TestFindAllContacts(t *testing.T) {
 		cc := controller.NewContactController(mockService)
 
 		m := testutil.NewContactMock()
-		mockService.EXPECT().FindAll(testutil.UserID, 2, 10).Return([]*domains.Contact{m.Contact}, int64(11), nil)
+		mockService.EXPECT().FindAll(testutil.UserID, 2, 10, domains.ContactFilters{}).Return([]*domains.Contact{m.Contact}, int64(11), nil)
 		mockService.EXPECT().FindStats(testutil.UserID).Return(&domains.ContactStats{ByCategory: map[string]int64{}}, nil)
 
 		ctx, rec := testutil.NewTestContext()
@@ -134,7 +134,7 @@ func TestFindAllContacts(t *testing.T) {
 		mockService := mocks.NewMockContactService(ctrl)
 		cc := controller.NewContactController(mockService)
 
-		mockService.EXPECT().FindAll(testutil.UserID, 1, 20).Return(nil, int64(0), errors.New("db error"))
+		mockService.EXPECT().FindAll(testutil.UserID, 1, 20, domains.ContactFilters{}).Return(nil, int64(0), errors.New("db error"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -143,6 +143,27 @@ func TestFindAllContacts(t *testing.T) {
 		cc.FindAllContacts(ctx)
 
 		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+	})
+}
+
+func TestFindAllContacts_Filters(t *testing.T) {
+	t.Run("filters by search and category", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		mockService := mocks.NewMockContactService(ctrl)
+		cc := controller.NewContactController(mockService)
+
+		m := testutil.NewContactMock()
+		expectedFilters := domains.ContactFilters{Search: "joao", Category: "Family"}
+		mockService.EXPECT().FindAll(testutil.UserID, 1, 20, expectedFilters).Return([]*domains.Contact{m.Contact}, int64(1), nil)
+		mockService.EXPECT().FindStats(testutil.UserID).Return(&domains.ContactStats{ByCategory: map[string]int64{}}, nil)
+
+		ctx, rec := testutil.NewTestContext()
+		testutil.SetAuthUser(ctx, testutil.UserID)
+		testutil.MakeGet(ctx, nil, url.Values{"search": {"joao"}, "category": {"Family"}})
+
+		cc.FindAllContacts(ctx)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
 	})
 }
 

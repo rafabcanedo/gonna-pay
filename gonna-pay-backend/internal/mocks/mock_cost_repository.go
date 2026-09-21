@@ -64,9 +64,9 @@ func (mr *MockCostRepositoryMockRecorder) Update(id, cost any) *gomock.Call {
 }
 
 // FindAll mocks base method.
-func (m *MockCostRepository) FindAll(userID string, limit, offset int) ([]*domains.Cost, int64, error) {
+func (m *MockCostRepository) FindAll(userID string, limit, offset int, filters domains.CostFilters) ([]*domains.Cost, int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindAll", userID, limit, offset)
+	ret := m.ctrl.Call(m, "FindAll", userID, limit, offset, filters)
 	ret0, _ := ret[0].([]*domains.Cost)
 	ret1, _ := ret[1].(int64)
 	ret2, _ := ret[2].(error)
@@ -74,9 +74,9 @@ func (m *MockCostRepository) FindAll(userID string, limit, offset int) ([]*domai
 }
 
 // FindAll indicates an expected call of FindAll.
-func (mr *MockCostRepositoryMockRecorder) FindAll(userID, limit, offset any) *gomock.Call {
+func (mr *MockCostRepositoryMockRecorder) FindAll(userID, limit, offset, filters any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockCostRepository)(nil).FindAll), userID, limit, offset)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockCostRepository)(nil).FindAll), userID, limit, offset, filters)
 }
 
 // FindByID mocks base method.
@@ -122,18 +122,18 @@ func (mr *MockCostRepositoryMockRecorder) GetGroupByID(groupID any) *gomock.Call
 }
 
 // FindStats mocks base method.
-func (m *MockCostRepository) FindStats(userID string) (*domains.CostStats, error) {
+func (m *MockCostRepository) FindStats(userID string, filters domains.CostFilters) (*domains.CostStats, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindStats", userID)
+	ret := m.ctrl.Call(m, "FindStats", userID, filters)
 	ret0, _ := ret[0].(*domains.CostStats)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindStats indicates an expected call of FindStats.
-func (mr *MockCostRepositoryMockRecorder) FindStats(userID any) *gomock.Call {
+func (mr *MockCostRepositoryMockRecorder) FindStats(userID, filters any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindStats", reflect.TypeOf((*MockCostRepository)(nil).FindStats), userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindStats", reflect.TypeOf((*MockCostRepository)(nil).FindStats), userID, filters)
 }
 
 // GetGroupMembers mocks base method.

@@ -4,7 +4,9 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"math"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -14,12 +16,12 @@ import (
 type CostRepository interface {
 	Create(cost *domains.Cost, members []domains.Member) (*domains.Cost, error)
 	Update(id string, cost *domains.Cost) (*domains.Cost, error)
-	FindAll(userID string, limit, offset int) ([]*domains.Cost, int64, error)
+	FindAll(userID string, limit, offset int, filters domains.CostFilters) ([]*domains.Cost, int64, error)
 	FindByID(id string) (*domains.Cost, error)
 	Delete(id string) error
 	GetGroupByID(groupID string) (*domains.Group, error)
 	GetGroupMembers(groupID string) ([]domains.Member, error)
-	FindStats(userID string) (*domains.CostStats, error)
+	FindStats(userID string, filters domains.CostFilters) (*domains.CostStats, error)
 }
 
 type costRepository struct {
@@ -133,24 +135,63 @@ func (r *costRepository) Update(id string, cost *domains.Cost) (*domains.Cost, e
 	}, nil
 }
 
-func (r *costRepository) FindAll(userID string, limit, offset int) ([]*domains.Cost, int64, error) {
-	var total int64
+func (r *costRepository) FindAll(userID string, limit, offset int, filters domains.CostFilters) ([]*domains.Cost, int64, error) {
+	conditions := []string{"c.user_id = $1"}
+	args := []interface{}{userID}
+	idx := 2
 
-	err := r.db.QueryRow(`SELECT COUNT(*) FROM cost_entities WHERE user_id = $1`, userID).Scan(&total)
+	if filters.Category != "" {
+		conditions = append(conditions, fmt.Sprintf("c.category = $%d", idx))
+		args = append(args, filters.Category)
+		idx++
+	}
+	if filters.Type == domains.CostTypeSolo {
+		conditions = append(conditions, "c.group_id IS NULL")
+	} else if filters.Type == domains.CostTypeGroup {
+		conditions = append(conditions, "c.group_id IS NOT NULL")
+	}
+	if filters.Period == domains.CostPeriodMonth {
+		conditions = append(conditions, "DATE_TRUNC('month', c.created_at) = DATE_TRUNC('month', NOW())")
+	} else if filters.Period == domains.CostPeriodWeek {
+		conditions = append(conditions, "c.created_at >= NOW() - INTERVAL '7 days'")
+	}
+	if filters.MinValue != nil {
+		conditions = append(conditions, fmt.Sprintf("c.total_value >= $%d", idx))
+		args = append(args, *filters.MinValue)
+		idx++
+	}
+	if filters.MaxValue != nil {
+		conditions = append(conditions, fmt.Sprintf("c.total_value <= $%d", idx))
+		args = append(args, *filters.MaxValue)
+		idx++
+	}
+
+	where := strings.Join(conditions, " AND ")
+
+	var total int64
+	err := r.db.QueryRow(
+		fmt.Sprintf(`SELECT COUNT(*) FROM cost_entities c WHERE %s`, where),
+		args...,
+	).Scan(&total)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	rows, err := r.db.Query(`
-		SELECT
-			c.id, c.user_id, c.group_id, c.cost_name, c.total_value, c.owner_percentage, c.category, c.created_at, c.updated_at,
-			g.name,
-			COALESCE(jsonb_array_length(c.splits), 0) AS split_count
-		FROM cost_entities c
-		LEFT JOIN group_entities g ON g.id = c.group_id
-		WHERE c.user_id = $1
-		LIMIT $2 OFFSET $3
-	`, userID, limit, offset)
+	queryArgs := append(args, limit, offset)
+	rows, err := r.db.Query(
+		fmt.Sprintf(`
+			SELECT
+				c.id, c.user_id, c.group_id, c.cost_name, c.total_value, c.owner_percentage, c.category, c.created_at, c.updated_at,
+				g.name,
+				COALESCE(jsonb_array_length(c.splits), 0) AS split_count
+			FROM cost_entities c
+			LEFT JOIN group_entities g ON g.id = c.group_id
+			WHERE %s
+			ORDER BY c.created_at DESC
+			LIMIT $%d OFFSET $%d
+		`, where, idx, idx+1),
+		queryArgs...,
+	)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -278,29 +319,60 @@ func (r *costRepository) FindByID(id string) (*domains.Cost, error) {
 	}, nil
 }
 
-func (r *costRepository) FindStats(userID string) (*domains.CostStats, error) {
+func (r *costRepository) FindStats(userID string, filters domains.CostFilters) (*domains.CostStats, error) {
+	conditions := []string{"user_id = $1"}
+	args := []interface{}{userID}
+	idx := 2
+
+	if filters.Category != "" {
+		conditions = append(conditions, fmt.Sprintf("category = $%d", idx))
+		args = append(args, filters.Category)
+		idx++
+	}
+	if filters.Type == domains.CostTypeSolo {
+		conditions = append(conditions, "group_id IS NULL")
+	} else if filters.Type == domains.CostTypeGroup {
+		conditions = append(conditions, "group_id IS NOT NULL")
+	}
+	if filters.Period == domains.CostPeriodMonth {
+		conditions = append(conditions, "DATE_TRUNC('month', created_at) = DATE_TRUNC('month', NOW())")
+	} else if filters.Period == domains.CostPeriodWeek {
+		conditions = append(conditions, "created_at >= NOW() - INTERVAL '7 days'")
+	}
+	if filters.MinValue != nil {
+		conditions = append(conditions, fmt.Sprintf("total_value >= $%d", idx))
+		args = append(args, *filters.MinValue)
+		idx++
+	}
+	if filters.MaxValue != nil {
+		conditions = append(conditions, fmt.Sprintf("total_value <= $%d", idx))
+		args = append(args, *filters.MaxValue)
+		idx++
+	}
+
+	_ = idx
+	where := strings.Join(conditions, " AND ")
+
 	var thisMonth, inSplits, solo float64
 
-	err := r.db.QueryRow(`
+	err := r.db.QueryRow(fmt.Sprintf(`
 		SELECT
 			COALESCE(SUM(total_value), 0),
 			COALESCE(SUM(CASE WHEN group_id IS NOT NULL THEN total_value ELSE 0 END), 0),
 			COALESCE(SUM(CASE WHEN group_id IS NULL THEN total_value ELSE 0 END), 0)
 		FROM cost_entities
-		WHERE user_id = $1
-		  AND DATE_TRUNC('month', created_at) = DATE_TRUNC('month', NOW())
-	`, userID).Scan(&thisMonth, &inSplits, &solo)
+		WHERE %s
+	`, where), args...).Scan(&thisMonth, &inSplits, &solo)
 	if err != nil {
 		return nil, err
 	}
 
-	rows, err := r.db.Query(`
+	rows, err := r.db.Query(fmt.Sprintf(`
 		SELECT category, COALESCE(SUM(total_value), 0)
 		FROM cost_entities
-		WHERE user_id = $1
-		  AND DATE_TRUNC('month', created_at) = DATE_TRUNC('month', NOW())
+		WHERE %s
 		GROUP BY category
-	`, userID)
+	`, where), args...)
 	if err != nil {
 		return nil, err
 	}

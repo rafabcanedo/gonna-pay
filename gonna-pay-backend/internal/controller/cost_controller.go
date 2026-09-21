@@ -13,6 +13,7 @@ import (
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/view/response"
 )
 
+
 type CostController struct {
 	service service.CostService
 }
@@ -68,29 +69,31 @@ func (cc *CostController) CreateCost(c *gin.Context) {
 // @Router       /costs [get]
 func (cc *CostController) FindAllCosts(c *gin.Context) {
 	userID := c.GetString("userID")
+	page, limit := httputil.ParsePagination(c)
 
-	page := 1
-	limit := 20
-
-	if p := c.Query("page"); p != "" {
-		if parsed, err := strconv.Atoi(p); err == nil && parsed > 0 {
-			page = parsed
+	filters := domains.CostFilters{
+		Category: c.Query("category"),
+		Period:   domains.CostPeriod(c.Query("period")),
+		Type:     domains.CostType(c.Query("type")),
+	}
+	if v := c.Query("minValue"); v != "" {
+		if parsed, err := strconv.ParseFloat(v, 64); err == nil {
+			filters.MinValue = &parsed
+		}
+	}
+	if v := c.Query("maxValue"); v != "" {
+		if parsed, err := strconv.ParseFloat(v, 64); err == nil {
+			filters.MaxValue = &parsed
 		}
 	}
 
-	if l := c.Query("limit"); l != "" {
-		if parsed, err := strconv.Atoi(l); err == nil && parsed > 0 && parsed <= 100 {
-			limit = parsed
-		}
-	}
-
-	costs, total, err := cc.service.FindAll(userID, page, limit)
+	costs, total, err := cc.service.FindAll(userID, page, limit, filters)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return
 	}
 
-	stats, err := cc.service.FindStats(userID)
+	stats, err := cc.service.FindStats(userID, filters)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return
