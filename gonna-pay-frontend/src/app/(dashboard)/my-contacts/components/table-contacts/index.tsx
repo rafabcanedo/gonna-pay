@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { MoreHorizontal } from "lucide-react"
 import {
@@ -30,15 +30,28 @@ import {
 import { Button } from "@/components/ui/button"
 import { BadgeType } from "@/utils/badge-types"
 import { TableEmptyState } from "@/components/table-empty-state"
-import { useContactsQuery } from "@/hooks/queries/use-contact-query"
+import { useContactsQuery, type ContactQueryFilters } from "@/hooks/queries/use-contact-query"
 import { useDeleteContact } from "@/hooks/mutations/use-contact-mutations"
 import { TablePagination } from "@/components/table-pagination"
+import { useDebounce } from "@/hooks/use-debounce"
+import { ContactsFilter } from "./components/contacts-filter"
 import type { Contact } from "@/types"
 
 export const TableContact = () => {
   const router = useRouter()
   const [page, setPage] = useState(1)
-  const { data } = useContactsQuery(page)
+  const [category, setCategory] = useState('')
+  const [search, setSearch] = useState('')
+  const debouncedSearch = useDebounce(search)
+
+  const filters: ContactQueryFilters = {
+    ...(category ? { category } : {}),
+    ...(debouncedSearch ? { search: debouncedSearch } : {}),
+  }
+
+  useEffect(() => { setPage(1) }, [category, debouncedSearch])
+
+  const { data } = useContactsQuery(page, 20, filters)
   const { mutate: deleteContact, isPending } = useDeleteContact()
 
   const [contactToDelete, setContactToDelete] = useState<Contact | null>(null)
@@ -53,7 +66,15 @@ export const TableContact = () => {
         <div className="w-full max-w-7xl rounded-xl border bg-white shadow-sm">
           <div className="flex items-center justify-between px-6 pt-4 pb-2">
             <h2 className="text-lg">Contacts</h2>
-            <span className="text-xs">{total} contacts</span>
+            <div className="flex items-center gap-2">
+              <ContactsFilter
+                category={category}
+                search={search}
+                onCategoryChange={setCategory}
+                onSearchChange={setSearch}
+              />
+              <span className="text-xs">{total} contacts</span>
+            </div>
           </div>
 
           <div className="px-2 pb-2">

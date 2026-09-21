@@ -5,16 +5,26 @@ import { GroupService } from '@/services/group.service'
 import type { GetGroupsResponse, GroupDetail } from '@/types'
 import { ApiError } from '@/lib/errors/api.error'
 
-export function useGroupsQuery(page = 1, limit = 20) {
+export type GroupQueryFilters = {
+  category?: string
+  search?: string
+}
+
+export function useGroupsQuery(page = 1, limit = 20, filters?: GroupQueryFilters) {
   return useQuery<GetGroupsResponse, ApiError>({
-    queryKey: ['groups', { page, limit }],
-    queryFn: () => GroupService.getAll(new URLSearchParams({ page: String(page), limit: String(limit) })),
+    queryKey: ['groups', { page, limit, ...filters }],
+    queryFn: () => {
+      const params = new URLSearchParams({ page: String(page), limit: String(limit) })
+      if (filters?.category) params.set('category', filters.category)
+      if (filters?.search) params.set('search', filters.search)
+      return GroupService.getAll(params)
+    },
     staleTime: 1000 * 60 * 5,
   })
 }
 
-export function useGroupsWithMembersQuery(page = 1, limit = 20) {
-  const { data: listData, ...listQuery } = useGroupsQuery(page, limit)
+export function useGroupsWithMembersQuery(page = 1, limit = 20, filters?: GroupQueryFilters) {
+  const { data: listData, ...listQuery } = useGroupsQuery(page, limit, filters)
   const groups = listData?.data ?? []
 
   const detailQueries = useQueries({
