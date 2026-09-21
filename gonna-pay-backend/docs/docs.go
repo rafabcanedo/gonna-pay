@@ -556,6 +556,23 @@ const docTemplate = `{
                         "description": "Itens por página (padrão: 20, máximo: 100)",
                         "name": "limit",
                         "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "Family",
+                            "Friend",
+                            "Work"
+                        ],
+                        "type": "string",
+                        "description": "Filtrar por categoria",
+                        "name": "category",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Buscar por nome",
+                        "name": "search",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -908,6 +925,51 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "Itens por página (padrão: 20, máximo: 100)",
                         "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "Dinner",
+                            "Lunch",
+                            "Entertainment",
+                            "Travel",
+                            "Others"
+                        ],
+                        "type": "string",
+                        "description": "Filtrar por categoria",
+                        "name": "category",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "month",
+                            "7days"
+                        ],
+                        "type": "string",
+                        "description": "Filtrar por período",
+                        "name": "period",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "solo",
+                            "group"
+                        ],
+                        "type": "string",
+                        "description": "Filtrar por tipo",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Valor mínimo",
+                        "name": "minValue",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Valor máximo",
+                        "name": "maxValue",
                         "in": "query"
                     }
                 ],
@@ -1359,6 +1421,25 @@ const docTemplate = `{
                         "type": "integer",
                         "description": "Itens por página (padrão: 20, máximo: 100)",
                         "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "Dinner",
+                            "Lunch",
+                            "Entertainment",
+                            "Travel",
+                            "Others"
+                        ],
+                        "type": "string",
+                        "description": "Filtrar por categoria",
+                        "name": "category",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Buscar por nome",
+                        "name": "search",
                         "in": "query"
                     }
                 ],

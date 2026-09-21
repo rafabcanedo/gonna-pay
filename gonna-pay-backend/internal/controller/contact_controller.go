@@ -60,8 +60,10 @@ func (cc *ContactController) CreateContact(c *gin.Context) {
 // @Description  Retorna todos os contatos do usuário autenticado
 // @Tags         contacts
 // @Produce      json
-// @Param        page   query     int  false  "Número da página (padrão: 1)"
-// @Param        limit  query     int  false  "Itens por página (padrão: 20, máximo: 100)"
+// @Param        page      query     int     false  "Número da página (padrão: 1)"
+// @Param        limit     query     int     false  "Itens por página (padrão: 20, máximo: 100)"
+// @Param        category  query     string  false  "Filtrar por categoria"  Enums(Family, Friend, Work)
+// @Param        search    query     string  false  "Buscar por nome"
 // @Success      200  {object}  response.ContactsListResponse
 // @Failure      401  {object}  rest_errors.RestErrors
 // @Failure      500  {object}  rest_errors.RestErrors

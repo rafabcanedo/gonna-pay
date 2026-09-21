@@ -58,8 +58,10 @@ func (gc *GroupController) CreateGroup(c *gin.Context) {
 // @Description  Retorna todos os grupos do usuário autenticado com paginação
 // @Tags         groups
 // @Produce      json
-// @Param        page   query     int  false  "Número da página (padrão: 1)"
-// @Param        limit  query     int  false  "Itens por página (padrão: 20, máximo: 100)"
+// @Param        page      query     int     false  "Número da página (padrão: 1)"
+// @Param        limit     query     int     false  "Itens por página (padrão: 20, máximo: 100)"
+// @Param        category  query     string  false  "Filtrar por categoria"  Enums(Dinner, Lunch, Entertainment, Travel, Others)
+// @Param        search    query     string  false  "Buscar por nome"
 // @Success      200  {object}  response.PaginatedGroupResponse
 // @Failure      401  {object}  rest_errors.RestErrors
 // @Failure      500  {object}  rest_errors.RestErrors

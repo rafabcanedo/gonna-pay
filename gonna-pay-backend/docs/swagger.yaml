@@ -763,6 +763,18 @@ paths:
         in: query
         name: limit
         type: integer
+      - description: Filtrar por categoria
+        enum:
+        - Family
+        - Friend
+        - Work
+        in: query
+        name: category
+        type: string
+      - description: Buscar por nome
+        in: query
+        name: search
+        type: string
       produces:
       - application/json
       responses:
@@ -993,6 +1005,38 @@ paths:
         in: query
         name: limit
         type: integer
+      - description: Filtrar por categoria
+        enum:
+        - Dinner
+        - Lunch
+        - Entertainment
+        - Travel
+        - Others
+        in: query
+        name: category
+        type: string
+      - description: Filtrar por período
+        enum:
+        - month
+        - 7days
+        in: query
+        name: period
+        type: string
+      - description: Filtrar por tipo
+        enum:
+        - solo
+        - group
+        in: query
+        name: type
+        type: string
+      - description: Valor mínimo
+        in: query
+        name: minValue
+        type: number
+      - description: Valor máximo
+        in: query
+        name: maxValue
+        type: number
       produces:
       - application/json
       responses:
@@ -1285,6 +1329,20 @@ paths:
         in: query
         name: limit
         type: integer
+      - description: Filtrar por categoria
+        enum:
+        - Dinner
+        - Lunch
+        - Entertainment
+        - Travel
+        - Others
+        in: query
+        name: category
+        type: string
+      - description: Buscar por nome
+        in: query
+        name: search
+        type: string
       produces:
       - application/json
       responses:

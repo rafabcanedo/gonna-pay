@@ -60,8 +60,13 @@ func (cc *CostController) CreateCost(c *gin.Context) {
 // @Description  Retorna todos os custos do usuário autenticado (sem detalhes dos splits)
 // @Tags         costs
 // @Produce      json
-// @Param        page   query     int  false  "Número da página (padrão: 1)"
-// @Param        limit  query     int  false  "Itens por página (padrão: 20, máximo: 100)"
+// @Param        page      query     int     false  "Número da página (padrão: 1)"
+// @Param        limit     query     int     false  "Itens por página (padrão: 20, máximo: 100)"
+// @Param        category  query     string  false  "Filtrar por categoria"  Enums(Dinner, Lunch, Entertainment, Travel, Others)
+// @Param        period    query     string  false  "Filtrar por período"    Enums(month, 7days)
+// @Param        type      query     string  false  "Filtrar por tipo"       Enums(solo, group)
+// @Param        minValue  query     number  false  "Valor mínimo"
+// @Param        maxValue  query     number  false  "Valor máximo"
 // @Success      200  {object}  response.CostsListResponse
 // @Failure      401  {object}  rest_errors.RestErrors
 // @Failure      500  {object}  rest_errors.RestErrors
