@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { IPropsCategoryCards } from './interfaces'
-import { CONTACT_CATEGORIES } from './constants'
+import { CONTACT_CATEGORIES } from '@/app/(dashboard)/my-contacts/constants'
 
 export function CategoryCards({ stats }: IPropsCategoryCards) {
   return (

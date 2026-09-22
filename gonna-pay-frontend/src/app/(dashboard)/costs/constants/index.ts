@@ -9,18 +9,18 @@ export const costCategoryOptions = [
 ]
 
 export const COST_CATEGORY_OPTIONS = [
-  { label: 'All', value: '' },
+  { label: 'All', value: 'all' },
   ...costCategoryOptions,
 ]
 
 export const PERIOD_OPTIONS = [
-  { label: 'All', value: '' },
+  { label: 'All', value: 'all' },
   { label: 'This month', value: 'month' },
   { label: 'Last 7 days', value: '7days' },
 ]
 
 export const TYPE_OPTIONS = [
-  { label: 'All', value: '' },
+  { label: 'All', value: 'all' },
   { label: 'Solo', value: 'solo' },
   { label: 'Group', value: 'group' },
 ]

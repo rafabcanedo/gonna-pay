@@ -1,7 +1,7 @@
 import { SlidersHorizontal } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
+import { FilterSelect } from '@/components/filter-select'
 import { COST_CATEGORY_OPTIONS, PERIOD_OPTIONS, TYPE_OPTIONS, MAX_VALUE } from '@/app/(dashboard)/costs/constants'
 import type { IPropsCostsFilter } from './types'
 
@@ -23,38 +23,9 @@ export function CostsFilter({ category, period, type, valueRange, onCategoryChan
       </PopoverTrigger>
 
       <PopoverContent align="end" className="w-72 flex flex-col gap-4 p-4">
-        <Select value={category} onValueChange={onCategoryChange}>
-          <SelectTrigger className="h-8 text-xs">
-            <SelectValue placeholder="Category" />
-          </SelectTrigger>
-          <SelectContent>
-            {COST_CATEGORY_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={period} onValueChange={onPeriodChange}>
-          <SelectTrigger className="h-8 text-xs">
-            <SelectValue placeholder="Period" />
-          </SelectTrigger>
-          <SelectContent>
-            {PERIOD_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={type} onValueChange={onTypeChange}>
-          <SelectTrigger className="h-8 text-xs">
-            <SelectValue placeholder="Type" />
-          </SelectTrigger>
-          <SelectContent>
-            {TYPE_OPTIONS.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <FilterSelect value={category} onChange={onCategoryChange} options={COST_CATEGORY_OPTIONS} placeholder="Category" />
+        <FilterSelect value={period} onChange={onPeriodChange} options={PERIOD_OPTIONS} placeholder="Period" />
+        <FilterSelect value={type} onChange={onTypeChange} options={TYPE_OPTIONS} placeholder="Type" />
 
         <div className="flex flex-col gap-2">
           <span className="text-xs text-zinc-500">
