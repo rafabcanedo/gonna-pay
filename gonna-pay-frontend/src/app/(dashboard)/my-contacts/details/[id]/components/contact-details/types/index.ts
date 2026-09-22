@@ -1,8 +1,4 @@
-import type { ContactCategory } from '@/types'
+import type * as yup from 'yup'
+import type { editContactSchema } from '@/validations/schemas'
 
-export type EditContactForm = {
-  name?: string
-  email?: string
-  phone?: string
-  category?: ContactCategory
-}
+export type EditContactForm = yup.InferType<typeof editContactSchema>

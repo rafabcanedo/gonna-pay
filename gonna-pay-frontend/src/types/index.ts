@@ -133,9 +133,9 @@ export type CreateCostInput = {
 }
 
 export type UpdateCostInput = {
-  costName: string
-  category: TransactionCategory
-  totalValue: number
+  costName?: string
+  totalValue?: number
+  category?: TransactionCategory
   ownerPercentage?: number
 }
 

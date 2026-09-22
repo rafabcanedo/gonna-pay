@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useGroupsWithMembersQuery, type GroupQueryFilters } from '@/hooks/queries/use-group-query'
+import { useGroupsWithMembersQuery } from '@/hooks/queries/use-group-query'
+import type { GroupQueryFilters } from '@/hooks/queries/types'
 import { useDebounce } from '@/hooks/use-debounce'
 import { TablePagination } from '@/components/table-pagination'
 import { GroupCards } from '../group-cards'

@@ -9,7 +9,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Button } from '@/components/ui/button'
 import { HookFormTextInput } from '@/components/hook-form-text-input'
 import { HookFormSelect } from '@/components/hook-form-select'
-import { addCostSchema } from '@/validations/schemas'
+import { editCostSchema } from '@/validations/schemas'
 import { useCostQuery } from '@/hooks/queries/use-cost-query'
 import { useUpdateCost } from '@/hooks/mutations/use-cost-mutations'
 import { costCategoryOptions } from '@/app/(dashboard)/costs/constants'
@@ -23,7 +23,7 @@ export const CostDetails = ({ costId }: IPropsCostDetails) => {
   const { mutateAsync: updateCost, isPending } = useUpdateCost()
 
   const methods = useForm<CostDetailsForm>({
-    resolver: yupResolver(addCostSchema),
+    resolver: yupResolver<CostDetailsForm, object, CostDetailsForm>(editCostSchema),
     defaultValues: { costName: '', totalValue: '', category: '' as TransactionCategory, ownerPercentage: '' },
     mode: 'onTouched',
   })
@@ -46,9 +46,9 @@ export const CostDetails = ({ costId }: IPropsCostDetails) => {
     await updateCost({
       id: costId,
       data: {
-        costName: data.costName,
-        totalValue: Number(data.totalValue),
-        category: data.category,
+        ...(data.costName ? { costName: data.costName } : {}),
+        ...(data.totalValue ? { totalValue: Number(data.totalValue) } : {}),
+        ...(data.category ? { category: data.category } : {}),
         ...(data.ownerPercentage ? { ownerPercentage: Number(data.ownerPercentage) } : {}),
       },
     })

@@ -4,11 +4,20 @@ import { useQuery, useQueries } from "@tanstack/react-query";
 import { CostService } from "@/services/cost.service";
 import type { GetCostsResponse, CostDetail } from "@/types";
 import { ApiError } from "@/lib/errors/api.error";
+import type { CostQueryFilters } from './types'
 
-export function useCostsQuery(page = 1, limit = 20) {
+export function useCostsQuery(page = 1, limit = 20, filters?: CostQueryFilters) {
   return useQuery<GetCostsResponse, ApiError>({
-    queryKey: ["costs", { page, limit }],
-    queryFn: () => CostService.getAll(new URLSearchParams({ page: String(page), limit: String(limit) })),
+    queryKey: ["costs", { page, limit, ...filters }],
+    queryFn: () => {
+      const params = new URLSearchParams({ page: String(page), limit: String(limit) })
+      if (filters?.category) params.set('category', filters.category)
+      if (filters?.period) params.set('period', filters.period)
+      if (filters?.type) params.set('type', filters.type)
+      if (filters?.minValue !== undefined) params.set('minValue', String(filters.minValue))
+      if (filters?.maxValue !== undefined) params.set('maxValue', String(filters.maxValue))
+      return CostService.getAll(params)
+    },
     staleTime: 1000 * 60 * 5,
   });
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { MoreHorizontal } from 'lucide-react'
 import {
@@ -33,12 +33,30 @@ import { TableEmptyState } from '@/components/table-empty-state'
 import { useCostsQuery } from '@/hooks/queries/use-cost-query'
 import { useDeleteCost } from '@/hooks/mutations/use-cost-mutations'
 import { TablePagination } from '@/components/table-pagination'
+import { MAX_VALUE } from '@/app/(dashboard)/costs/constants'
+import { CostsFilter } from './components/costs-filter'
 import type { Cost } from '@/types'
+import type { CostQueryFilters } from '@/hooks/queries/types'
 
 export const CostsTable = () => {
   const router = useRouter()
   const [page, setPage] = useState(1)
-  const { data } = useCostsQuery(page)
+  const [category, setCategory] = useState('')
+  const [period, setPeriod] = useState('')
+  const [type, setType] = useState('')
+  const [valueRange, setValueRange] = useState<[number, number]>([0, MAX_VALUE])
+
+  const filters: CostQueryFilters = {
+    ...(category ? { category } : {}),
+    ...(period ? { period } : {}),
+    ...(type ? { type } : {}),
+    ...(valueRange[0] !== 0 ? { minValue: valueRange[0] } : {}),
+    ...(valueRange[1] !== MAX_VALUE ? { maxValue: valueRange[1] } : {}),
+  }
+
+  useEffect(() => { setPage(1) }, [category, period, type, valueRange])
+
+  const { data } = useCostsQuery(page, 20, filters)
   const { mutate: deleteCost, isPending } = useDeleteCost()
 
   const [costToDelete, setCostToDelete] = useState<Cost | null>(null)
@@ -53,7 +71,19 @@ export const CostsTable = () => {
         <div className="w-full max-w-7xl rounded-xl border bg-white shadow-sm">
           <div className="flex items-center justify-between px-6 pt-4 pb-2">
             <h2 className="text-lg">Costs</h2>
-            <span className="text-xs">{total} costs</span>
+            <div className="flex items-center gap-2">
+              <CostsFilter
+                category={category}
+                period={period}
+                type={type}
+                valueRange={valueRange}
+                onCategoryChange={setCategory}
+                onPeriodChange={setPeriod}
+                onTypeChange={setType}
+                onValueRangeChange={setValueRange}
+              />
+              <span className="text-xs">{total} costs</span>
+            </div>
           </div>
 
           <div className="px-2 pb-2">

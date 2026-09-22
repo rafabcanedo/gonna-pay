@@ -66,6 +66,23 @@ export const addCostSchema = yup.object({
     .test("is-percent", "Invalid percentage. Must be between 0 and 100", (val) => {
       if (!val) return true;
       const num = Number(val);
-      return !isNaN(num) && num >= 0 && num <= 100;
+      return !isNaN(num) && num > 0 && num < 100;
+    }),
+});
+
+export const editCostSchema = yup.object({
+  costName: trimmed(nameField(2)).optional(),
+  totalValue: trimmed(valueField()).optional(),
+  category: yup
+    .mixed<TransactionCategory>()
+    .oneOf(Object.values(TransactionCategory), "Invalid category")
+    .optional(),
+  ownerPercentage: yup
+    .string()
+    .optional()
+    .test("is-percent", "Invalid percentage. Must be between 0 and 100", (val) => {
+      if (!val) return true;
+      const num = Number(val);
+      return !isNaN(num) && num > 0 && num < 100;
     }),
 });

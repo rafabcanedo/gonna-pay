@@ -23,7 +23,7 @@ export const ContactDetails = ({ contactId }: IPropsContactDetails) => {
   const { mutateAsync: updateContact, isPending } = useUpdateContact()
 
   const methods = useForm<EditContactForm>({
-    resolver: yupResolver(editContactSchema),
+    resolver: yupResolver<EditContactForm, object, EditContactForm>(editContactSchema),
     defaultValues: { name: '', email: '', phone: '', category: undefined },
     mode: 'onChange',
   })

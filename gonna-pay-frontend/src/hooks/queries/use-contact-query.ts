@@ -4,11 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { ContactService } from '@/services/contact.service'
 import type { Contact, GetContactsResponse, GetContactFrequencyResponse } from '@/types'
 import { ApiError } from '@/lib/errors/api.error'
-
-export type ContactQueryFilters = {
-  category?: string
-  search?: string
-}
+import type { ContactQueryFilters } from './types'
 
 export function useContactsQuery(page = 1, limit = 20, filters?: ContactQueryFilters) {
   return useQuery<GetContactsResponse, ApiError>({

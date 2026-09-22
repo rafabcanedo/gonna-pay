@@ -1,8 +1,4 @@
-import type { TransactionCategory } from '@/types'
+import type * as yup from 'yup'
+import type { editCostSchema } from '@/validations/schemas'
 
-export type CostDetailsForm = {
-  costName: string
-  totalValue: string
-  category: TransactionCategory
-  ownerPercentage: string
-}
+export type CostDetailsForm = yup.InferType<typeof editCostSchema>

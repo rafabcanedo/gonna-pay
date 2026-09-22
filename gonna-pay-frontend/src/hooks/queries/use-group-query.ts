@@ -4,11 +4,7 @@ import { useQueries, useQuery } from '@tanstack/react-query'
 import { GroupService } from '@/services/group.service'
 import type { GetGroupsResponse, GroupDetail } from '@/types'
 import { ApiError } from '@/lib/errors/api.error'
-
-export type GroupQueryFilters = {
-  category?: string
-  search?: string
-}
+import type { GroupQueryFilters } from './types'
 
 export function useGroupsQuery(page = 1, limit = 20, filters?: GroupQueryFilters) {
   return useQuery<GetGroupsResponse, ApiError>({
