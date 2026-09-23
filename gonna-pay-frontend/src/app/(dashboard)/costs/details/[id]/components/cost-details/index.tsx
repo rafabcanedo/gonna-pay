@@ -12,7 +12,7 @@ import { HookFormSelect } from '@/components/hook-form-select'
 import { editCostSchema } from '@/validations/schemas'
 import { useCostQuery } from '@/hooks/queries/use-cost-query'
 import { useUpdateCost } from '@/hooks/mutations/use-cost-mutations'
-import { costCategoryOptions } from '@/app/(dashboard)/costs/constants'
+import { COST_CATEGORY_FORM_OPTIONS } from '@/app/(dashboard)/costs/constants'
 import { TransactionCategory } from '@/types'
 import type { IPropsCostDetails } from './interfaces'
 import type { CostDetailsForm } from './types'
@@ -80,7 +80,7 @@ export const CostDetails = ({ costId }: IPropsCostDetails) => {
                 label="Category"
                 placeholder="Select a category"
                 groupLabel="Categories"
-                options={costCategoryOptions}
+                options={COST_CATEGORY_FORM_OPTIONS}
               />
               <HookFormTextInput title="Your percentage (optional)" name="ownerPercentage" label="50" type="number" />
             </CardContent>

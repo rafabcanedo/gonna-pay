@@ -19,7 +19,7 @@ import { ICreateCostForm } from "./types";
 import { useRouter } from "next/navigation";
 import { useCreateCost } from "@/hooks/mutations/use-cost-mutations";
 import { useGroupsQuery } from "@/hooks/queries/use-group-query";
-import { costCategoryOptions } from "@/app/(dashboard)/costs/constants";
+import { COST_CATEGORY_FORM_OPTIONS } from "@/app/(dashboard)/costs/constants";
 
 export default function CreateCostForm() {
   const router = useRouter();
@@ -88,7 +88,7 @@ export default function CreateCostForm() {
                 label="Category"
                 placeholder="Select a category"
                 groupLabel="Categories"
-                options={costCategoryOptions}
+                options={COST_CATEGORY_FORM_OPTIONS}
               />
 
               <HookFormTextInput

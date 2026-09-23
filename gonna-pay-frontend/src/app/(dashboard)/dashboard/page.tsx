@@ -7,13 +7,12 @@ import { RecentCosts } from "./components/recent-costs";
 import { RemindersWidget } from "./components/reminders-widget";
 import { SpendingChart } from "./components/spending-chart";
 import { CategoryChart } from "./components/category-chart";
-import { GetContactsResponse, GetCostsResponse } from "@/types";
-import { apiCall } from "@/lib/api-client";
+import { CostService, ContactService } from "@/services";
 import { buildSpendingData, buildCategoryData, buildTotals } from "./lib/utils";
 
 export default async function Dashboard() {
-  const costsResponse = await apiCall<GetCostsResponse>('/costs')
-  const contactsResponse = await apiCall<GetContactsResponse>('/contacts')
+  const costsResponse = await CostService.getAll()
+  const contactsResponse = await ContactService.getAll()
 
   const spendingData = buildSpendingData(costsResponse.data)
   const categoryData = buildCategoryData(costsResponse.data)

@@ -3,9 +3,12 @@ import { API_BASE_URL } from '../constants'
 
 export async function GET(request: NextRequest) {
   try {
+    const searchParams = request.nextUrl.searchParams
+    const params = new URLSearchParams(searchParams)
+
     const accessToken = request.cookies.get('access_token')?.value
 
-    const res = await fetch(`${API_BASE_URL}/groups`, {
+    const res = await fetch(`${API_BASE_URL}/groups?${params}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

@@ -4,6 +4,7 @@ import { useQuery, useQueries } from "@tanstack/react-query";
 import { CostService } from "@/services/cost.service";
 import type { GetCostsResponse, CostDetail } from "@/types";
 import { ApiError } from "@/lib/errors/api.error";
+import { QUERY_STALE_TIME } from "@/lib/constants";
 import type { CostQueryFilters } from './types'
 
 export function useCostsQuery(page = 1, limit = 20, filters?: CostQueryFilters) {
@@ -18,7 +19,7 @@ export function useCostsQuery(page = 1, limit = 20, filters?: CostQueryFilters) 
       if (filters?.maxValue !== undefined) params.set('maxValue', String(filters.maxValue))
       return CostService.getAll(params)
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: QUERY_STALE_TIME,
   });
 }
 
@@ -30,7 +31,7 @@ export function useCostsWithSplitsQuery() {
     queries: costs.map((cost) => ({
       queryKey: ["costs", cost.id],
       queryFn: () => CostService.getById(cost.id),
-      staleTime: 1000 * 60 * 5,
+      staleTime: QUERY_STALE_TIME,
     })),
   })
 
@@ -45,7 +46,7 @@ export function useCostQuery(id: string) {
   return useQuery<CostDetail, ApiError>({
     queryKey: ['costs', id],
     queryFn: () => CostService.getById(id),
-    staleTime: 1000 * 60 * 5,
+    staleTime: QUERY_STALE_TIME,
     enabled: !!id,
   })
 }

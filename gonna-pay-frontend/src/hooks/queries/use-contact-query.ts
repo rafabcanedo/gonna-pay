@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { ContactService } from '@/services/contact.service'
 import type { Contact, GetContactsResponse, GetContactFrequencyResponse } from '@/types'
 import { ApiError } from '@/lib/errors/api.error'
+import { QUERY_STALE_TIME } from '@/lib/constants'
 import type { ContactQueryFilters } from './types'
 
 export function useContactsQuery(page = 1, limit = 20, filters?: ContactQueryFilters) {
@@ -15,7 +16,7 @@ export function useContactsQuery(page = 1, limit = 20, filters?: ContactQueryFil
       if (filters?.search) params.set('search', filters.search)
       return ContactService.getAll(params)
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: QUERY_STALE_TIME,
   })
 }
 
@@ -23,7 +24,7 @@ export function useContactQuery(id: string) {
   return useQuery<Contact, ApiError>({
     queryKey: ['contacts', id],
     queryFn: () => ContactService.getById(id),
-    staleTime: 1000 * 60 * 5,
+    staleTime: QUERY_STALE_TIME,
     enabled: !!id,
   })
 }
@@ -32,6 +33,6 @@ export function useContactFrequencyQuery(limit = 5) {
   return useQuery<GetContactFrequencyResponse, ApiError>({
     queryKey: ['contacts', 'frequency', limit],
     queryFn: () => ContactService.getFrequency(limit),
-    staleTime: 1000 * 60 * 5,
+    staleTime: QUERY_STALE_TIME,
   })
 }

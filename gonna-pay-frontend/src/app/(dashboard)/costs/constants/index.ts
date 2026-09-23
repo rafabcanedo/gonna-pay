@@ -1,6 +1,6 @@
 import { TransactionCategory } from '@/types'
 
-export const costCategoryOptions = [
+export const COST_CATEGORY_FORM_OPTIONS = [
   { label: 'Dinner', value: TransactionCategory.DINNER },
   { label: 'Lunch', value: TransactionCategory.LUNCH },
   { label: 'Entertainment', value: TransactionCategory.ENTERTAINMENT },
@@ -10,7 +10,7 @@ export const costCategoryOptions = [
 
 export const COST_CATEGORY_OPTIONS = [
   { label: 'All', value: 'all' },
-  ...costCategoryOptions,
+  ...COST_CATEGORY_FORM_OPTIONS,
 ]
 
 export const PERIOD_OPTIONS = [

@@ -4,6 +4,7 @@ import { useQueries, useQuery } from '@tanstack/react-query'
 import { GroupService } from '@/services/group.service'
 import type { GetGroupsResponse, GroupDetail } from '@/types'
 import { ApiError } from '@/lib/errors/api.error'
+import { QUERY_STALE_TIME } from '@/lib/constants'
 import type { GroupQueryFilters } from './types'
 
 export function useGroupsQuery(page = 1, limit = 20, filters?: GroupQueryFilters) {
@@ -15,7 +16,7 @@ export function useGroupsQuery(page = 1, limit = 20, filters?: GroupQueryFilters
       if (filters?.search) params.set('search', filters.search)
       return GroupService.getAll(params)
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: QUERY_STALE_TIME,
   })
 }
 
@@ -27,7 +28,7 @@ export function useGroupsWithMembersQuery(page = 1, limit = 20, filters?: GroupQ
     queries: groups.map((group) => ({
       queryKey: ['groups', group.id] as const,
       queryFn: () => GroupService.getById(group.id),
-      staleTime: 1000 * 60 * 5,
+      staleTime: QUERY_STALE_TIME,
     })),
   })
 
@@ -39,7 +40,13 @@ export function useGroupsWithMembersQuery(page = 1, limit = 20, filters?: GroupQ
   return {
     ...listQuery,
     data: listData
-      ? { groups: groupsWithMembers, total: listData.total, totalPages: listData.totalPages }
+      ? {
+          data: groupsWithMembers,
+          page: listData.page,
+          limit: listData.limit,
+          total: listData.total,
+          totalPages: listData.totalPages,
+        }
       : undefined,
   }
 }
@@ -48,7 +55,7 @@ export function useGroupQuery(id: string) {
   return useQuery<GroupDetail, ApiError>({
     queryKey: ['groups', id],
     queryFn: () => GroupService.getById(id),
-    staleTime: 1000 * 60 * 5,
+    staleTime: QUERY_STALE_TIME,
     enabled: !!id,
   })
 }

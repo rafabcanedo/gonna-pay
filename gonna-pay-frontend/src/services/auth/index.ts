@@ -5,19 +5,10 @@ export type { ISignInRequest, ISignUpRequest, IAuthResponse, IUserData, IUpdateP
 
 export const authService = {
   async signIn(data: ISignInRequest): Promise<IAuthResponse> {
-    const res = await fetch("/api/auth/signin", {
+    return apiCall<IAuthResponse>("/auth/signin", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-
-    const result = await res.json();
-
-    if (!res.ok) {
-      throw result;
-    }
-
-    return result as IAuthResponse;
   },
 
   async signUp(data: ISignUpRequest): Promise<{ message: string }> {

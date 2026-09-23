@@ -22,7 +22,7 @@ export const TableGroup = () => {
   useEffect(() => { setPage(1) }, [category, debouncedSearch])
 
   const { data } = useGroupsWithMembersQuery(page, 20, filters)
-  const groups = data?.groups ?? []
+  const groups = data?.data ?? []
   const total = data?.total ?? 0
   const totalPages = data?.totalPages ?? 1
 
