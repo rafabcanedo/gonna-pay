@@ -4,6 +4,7 @@
 package mocks
 
 import (
+	context "context"
 	reflect "reflect"
 	time "time"
 
@@ -35,58 +36,58 @@ func (m *MockAuthRepository) EXPECT() *MockAuthRepositoryMockRecorder {
 }
 
 // Save mocks base method.
-func (m *MockAuthRepository) Save(userID string, tokenHash string, expiresAt time.Time) error {
+func (m *MockAuthRepository) Save(ctx context.Context, userID string, tokenHash string, expiresAt time.Time) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Save", userID, tokenHash, expiresAt)
+	ret := m.ctrl.Call(m, "Save", ctx, userID, tokenHash, expiresAt)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Save indicates an expected call of Save.
-func (mr *MockAuthRepositoryMockRecorder) Save(userID, tokenHash, expiresAt any) *gomock.Call {
+func (mr *MockAuthRepositoryMockRecorder) Save(ctx, userID, tokenHash, expiresAt any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockAuthRepository)(nil).Save), userID, tokenHash, expiresAt)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockAuthRepository)(nil).Save), ctx, userID, tokenHash, expiresAt)
 }
 
 // FindByHash mocks base method.
-func (m *MockAuthRepository) FindByHash(tokenHash string) (*entity.RefreshTokenEntity, error) {
+func (m *MockAuthRepository) FindByHash(ctx context.Context, tokenHash string) (*entity.RefreshTokenEntity, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByHash", tokenHash)
+	ret := m.ctrl.Call(m, "FindByHash", ctx, tokenHash)
 	ret0, _ := ret[0].(*entity.RefreshTokenEntity)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindByHash indicates an expected call of FindByHash.
-func (mr *MockAuthRepositoryMockRecorder) FindByHash(tokenHash any) *gomock.Call {
+func (mr *MockAuthRepositoryMockRecorder) FindByHash(ctx, tokenHash any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByHash", reflect.TypeOf((*MockAuthRepository)(nil).FindByHash), tokenHash)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByHash", reflect.TypeOf((*MockAuthRepository)(nil).FindByHash), ctx, tokenHash)
 }
 
 // DeleteByHash mocks base method.
-func (m *MockAuthRepository) DeleteByHash(tokenHash string) error {
+func (m *MockAuthRepository) DeleteByHash(ctx context.Context, tokenHash string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteByHash", tokenHash)
+	ret := m.ctrl.Call(m, "DeleteByHash", ctx, tokenHash)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // DeleteByHash indicates an expected call of DeleteByHash.
-func (mr *MockAuthRepositoryMockRecorder) DeleteByHash(tokenHash any) *gomock.Call {
+func (mr *MockAuthRepositoryMockRecorder) DeleteByHash(ctx, tokenHash any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteByHash", reflect.TypeOf((*MockAuthRepository)(nil).DeleteByHash), tokenHash)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteByHash", reflect.TypeOf((*MockAuthRepository)(nil).DeleteByHash), ctx, tokenHash)
 }
 
 // DeleteByUserID mocks base method.
-func (m *MockAuthRepository) DeleteByUserID(userID string) error {
+func (m *MockAuthRepository) DeleteByUserID(ctx context.Context, userID string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteByUserID", userID)
+	ret := m.ctrl.Call(m, "DeleteByUserID", ctx, userID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // DeleteByUserID indicates an expected call of DeleteByUserID.
-func (mr *MockAuthRepositoryMockRecorder) DeleteByUserID(userID any) *gomock.Call {
+func (mr *MockAuthRepositoryMockRecorder) DeleteByUserID(ctx, userID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteByUserID", reflect.TypeOf((*MockAuthRepository)(nil).DeleteByUserID), userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteByUserID", reflect.TypeOf((*MockAuthRepository)(nil).DeleteByUserID), ctx, userID)
 }

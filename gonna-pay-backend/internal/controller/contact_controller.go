@@ -47,7 +47,7 @@ func (cc *ContactController) CreateContact(c *gin.Context) {
 
 	contact := domains.NewContact(ownerID, req.Name, req.Email, req.Phone, req.Category)
 
-	created, err := cc.service.Create(contact)
+	created, err := cc.service.Create(c.Request.Context(), contact)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return
@@ -78,13 +78,15 @@ func (cc *ContactController) FindAllContacts(c *gin.Context) {
 		Search:   c.Query("search"),
 	}
 
-	contacts, total, err := cc.service.FindAll(ownerID, page, limit, filters)
+	ctx := c.Request.Context()
+
+	contacts, total, err := cc.service.FindAll(ctx, ownerID, page, limit, filters)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return
 	}
 
-	stats, err := cc.service.FindStats(ownerID)
+	stats, err := cc.service.FindStats(ctx, ownerID)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return
@@ -112,7 +114,7 @@ func (cc *ContactController) FindContactByID(c *gin.Context) {
 	id := c.Param("id")
 	ownerID := c.GetString("userID")
 
-	contact, err := cc.service.FindByID(id, ownerID)
+	contact, err := cc.service.FindByID(c.Request.Context(), id, ownerID)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return
@@ -150,7 +152,7 @@ func (cc *ContactController) UpdateContact(c *gin.Context) {
 
 	contact := domains.NewContactWithID(id, ownerID, req.Name, req.Email, req.Phone, req.Category, time.Time{})
 
-	updated, err := cc.service.Update(contact)
+	updated, err := cc.service.Update(c.Request.Context(), contact)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return
@@ -175,7 +177,7 @@ func (cc *ContactController) DeleteContact(c *gin.Context) {
 	id := c.Param("id")
 	ownerID := c.GetString("userID")
 
-	if err := cc.service.Delete(id, ownerID); err != nil {
+	if err := cc.service.Delete(c.Request.Context(), id, ownerID); err != nil {
 		httputil.RespondError(c, err)
 		return
 	}
@@ -203,7 +205,7 @@ func (cc *ContactController) FindContactsByFrequency(c *gin.Context) {
 		}
 	}
 
-	contacts, err := cc.service.FindContactsByFrequency(userID, limit)
+	contacts, err := cc.service.FindContactsByFrequency(c.Request.Context(), userID, limit)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return

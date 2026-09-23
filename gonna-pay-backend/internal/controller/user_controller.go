@@ -44,7 +44,7 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 
 	user := domains.NewUser(req.Name, req.Email, req.Password, req.Phone)
 
-	created, err := uc.service.Create(user)
+	created, err := uc.service.Create(c.Request.Context(), user)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return
@@ -80,7 +80,7 @@ func (uc *UserController) FindAllUsers(c *gin.Context) {
 		}
 	}
 
-	users, total, err := uc.service.FindAll(page, limit)
+	users, total, err := uc.service.FindAll(c.Request.Context(), page, limit)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return
@@ -106,7 +106,7 @@ func (uc *UserController) FindAllUsers(c *gin.Context) {
 func (uc *UserController) FindUserByID(c *gin.Context) {
 	id := c.Param("id")
 
-	user, err := uc.service.FindByID(id)
+	user, err := uc.service.FindByID(c.Request.Context(), id)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return
@@ -147,7 +147,7 @@ func (uc *UserController) UpdateUser(c *gin.Context) {
 
 	user := domains.NewUserWithID(id, req.Name, req.Email, req.Password, req.Phone)
 
-	updated, err := uc.service.Update(user)
+	updated, err := uc.service.Update(c.Request.Context(), user)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return
@@ -174,7 +174,7 @@ func (uc *UserController) DeleteUser(c *gin.Context) {
 		return
 	}
 
-	if err := uc.service.Delete(id); err != nil {
+	if err := uc.service.Delete(c.Request.Context(), id); err != nil {
 		httputil.RespondError(c, err)
 		return
 	}

@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -14,14 +15,12 @@ import (
 )
 
 type CostRepository interface {
-	Create(cost *domains.Cost) (*domains.Cost, error)
-	Update(id string, cost *domains.Cost) (*domains.Cost, error)
-	FindAll(userID string, limit, offset int, filters domains.CostFilters) ([]*domains.Cost, int64, error)
-	FindByID(id string) (*domains.Cost, error)
-	Delete(id string) error
-	GetGroupByID(groupID string) (*domains.Group, error)
-	GetGroupMembers(groupID string) ([]domains.Member, error)
-	FindStats(userID string, filters domains.CostFilters) (*domains.CostStats, error)
+	Create(ctx context.Context, cost *domains.Cost) (*domains.Cost, error)
+	Update(ctx context.Context, id string, cost *domains.Cost) (*domains.Cost, error)
+	FindAll(ctx context.Context, userID string, limit, offset int, filters domains.CostFilters) ([]*domains.Cost, int64, error)
+	FindByID(ctx context.Context, id string) (*domains.Cost, error)
+	Delete(ctx context.Context, id string) error
+	FindStats(ctx context.Context, userID string, filters domains.CostFilters) (*domains.CostStats, error)
 }
 
 type costRepository struct {
@@ -125,7 +124,7 @@ func buildCostConditions(col, userID string, filters domains.CostFilters) ([]str
 	return conditions, args, idx
 }
 
-func (r *costRepository) Create(cost *domains.Cost) (*domains.Cost, error) {
+func (r *costRepository) Create(ctx context.Context, cost *domains.Cost) (*domains.Cost, error) {
 	costID := uuid.New()
 	now := time.Now()
 
@@ -147,7 +146,7 @@ func (r *costRepository) Create(cost *domains.Cost) (*domains.Cost, error) {
 		}
 	}
 
-	_, err := r.db.Exec(
+	_, err := r.db.ExecContext(ctx,
 		`INSERT INTO cost_entities (id, user_id, group_id, cost_name, total_value, owner_percentage, category, splits, created_at, updated_at)
 		 VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9, $10)`,
 		costID, cost.UserID, groupID, cost.CostName,
@@ -172,7 +171,7 @@ func (r *costRepository) Create(cost *domains.Cost) (*domains.Cost, error) {
 	), nil
 }
 
-func (r *costRepository) Update(id string, cost *domains.Cost) (*domains.Cost, error) {
+func (r *costRepository) Update(ctx context.Context, id string, cost *domains.Cost) (*domains.Cost, error) {
 	now := time.Now()
 
 	var splitsJSON []byte
@@ -184,7 +183,7 @@ func (r *costRepository) Update(id string, cost *domains.Cost) (*domains.Cost, e
 		}
 	}
 
-	_, err := r.db.Exec(
+	_, err := r.db.ExecContext(ctx,
 		`UPDATE cost_entities SET cost_name=$1, total_value=$2, owner_percentage=$3, category=$4, splits=$5::jsonb, updated_at=$6 WHERE id=$7`,
 		cost.CostName, cost.TotalValue, cost.OwnerPercentage, cost.Category, splitsJSON, now, id,
 	)
@@ -208,12 +207,12 @@ func (r *costRepository) Update(id string, cost *domains.Cost) (*domains.Cost, e
 	}, nil
 }
 
-func (r *costRepository) FindAll(userID string, limit, offset int, filters domains.CostFilters) ([]*domains.Cost, int64, error) {
+func (r *costRepository) FindAll(ctx context.Context, userID string, limit, offset int, filters domains.CostFilters) ([]*domains.Cost, int64, error) {
 	conditions, args, idx := buildCostConditions("c.", userID, filters)
 	where := strings.Join(conditions, " AND ")
 
 	var total int64
-	err := r.db.QueryRow(
+	err := r.db.QueryRowContext(ctx,
 		fmt.Sprintf(`SELECT COUNT(*) FROM cost_entities c WHERE %s`, where),
 		args...,
 	).Scan(&total)
@@ -222,7 +221,7 @@ func (r *costRepository) FindAll(userID string, limit, offset int, filters domai
 	}
 
 	queryArgs := append(args, limit, offset)
-	rows, err := r.db.Query(
+	rows, err := r.db.QueryContext(ctx,
 		fmt.Sprintf(`
 			SELECT
 				c.id, c.user_id, c.group_id, c.cost_name, c.total_value, c.owner_percentage, c.category, c.created_at, c.updated_at,
@@ -266,9 +265,9 @@ func (r *costRepository) FindAll(userID string, limit, offset int, filters domai
 	return costs, total, nil
 }
 
-func (r *costRepository) FindByID(id string) (*domains.Cost, error) {
+func (r *costRepository) FindByID(ctx context.Context, id string) (*domains.Cost, error) {
 	var row costRow
-	err := r.db.QueryRow(`
+	err := r.db.QueryRowContext(ctx, `
 		SELECT
 			c.id, c.user_id, c.group_id, c.cost_name, c.total_value, c.owner_percentage, c.category, c.created_at, c.updated_at,
 			g.name, c.splits
@@ -290,13 +289,13 @@ func (r *costRepository) FindByID(id string) (*domains.Cost, error) {
 	return costRowToDomain(row)
 }
 
-func (r *costRepository) FindStats(userID string, filters domains.CostFilters) (*domains.CostStats, error) {
+func (r *costRepository) FindStats(ctx context.Context, userID string, filters domains.CostFilters) (*domains.CostStats, error) {
 	conditions, args, _ := buildCostConditions("", userID, filters)
 	where := strings.Join(conditions, " AND ")
 
 	var thisMonth, inSplits, solo float64
 
-	err := r.db.QueryRow(fmt.Sprintf(`
+	err := r.db.QueryRowContext(ctx, fmt.Sprintf(`
 		SELECT
 			COALESCE(SUM(total_value), 0),
 			COALESCE(SUM(CASE WHEN group_id IS NOT NULL THEN total_value ELSE 0 END), 0),
@@ -308,7 +307,7 @@ func (r *costRepository) FindStats(userID string, filters domains.CostFilters) (
 		return nil, err
 	}
 
-	rows, err := r.db.Query(fmt.Sprintf(`
+	rows, err := r.db.QueryContext(ctx, fmt.Sprintf(`
 		SELECT category, COALESCE(SUM(total_value), 0)
 		FROM cost_entities
 		WHERE %s
@@ -349,50 +348,7 @@ func (r *costRepository) FindStats(userID string, filters domains.CostFilters) (
 	}, nil
 }
 
-func (r *costRepository) Delete(id string) error {
-	_, err := r.db.Exec(`DELETE FROM cost_entities WHERE id = $1`, id)
+func (r *costRepository) Delete(ctx context.Context, id string) error {
+	_, err := r.db.ExecContext(ctx, `DELETE FROM cost_entities WHERE id = $1`, id)
 	return err
-}
-
-func (r *costRepository) GetGroupByID(groupID string) (*domains.Group, error) {
-	var id, ownerID uuid.UUID
-	err := r.db.QueryRow(
-		`SELECT id, owner_id FROM group_entities WHERE id = $1`,
-		groupID,
-	).Scan(&id, &ownerID)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, domains.NewNotFoundError("group not found")
-		}
-		return nil, err
-	}
-	return &domains.Group{ID: id.String(), OwnerID: ownerID.String()}, nil
-}
-
-func (r *costRepository) GetGroupMembers(groupID string) ([]domains.Member, error) {
-	rows, err := r.db.Query(`
-		SELECT gm.contact_id, c.name
-		FROM group_member_entities gm
-		JOIN contact_entities c ON c.id = gm.contact_id AND c.deleted_at IS NULL
-		WHERE gm.group_id = $1
-	`, groupID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var members []domains.Member
-	for rows.Next() {
-		var m domains.Member
-		if err := rows.Scan(&m.ID, &m.Name); err != nil {
-			return nil, err
-		}
-		members = append(members, m)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-
-	return members, nil
 }

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/configuration/logger"
@@ -9,13 +10,13 @@ import (
 )
 
 type ContactService interface {
-	Create(contact *domains.Contact) (*domains.Contact, error)
-	FindAll(ownerID string, page, limit int, filters domains.ContactFilters) ([]*domains.Contact, int64, error)
-	FindByID(id, ownerID string) (*domains.Contact, error)
-	Update(contact *domains.Contact) (*domains.Contact, error)
-	Delete(id, ownerID string) error
-	FindContactsByFrequency(userID string, limit int) ([]domains.ContactFrequency, error)
-	FindStats(ownerID string) (*domains.ContactStats, error)
+	Create(ctx context.Context, contact *domains.Contact) (*domains.Contact, error)
+	FindAll(ctx context.Context, ownerID string, page, limit int, filters domains.ContactFilters) ([]*domains.Contact, int64, error)
+	FindByID(ctx context.Context, id, ownerID string) (*domains.Contact, error)
+	Update(ctx context.Context, contact *domains.Contact) (*domains.Contact, error)
+	Delete(ctx context.Context, id, ownerID string) error
+	FindContactsByFrequency(ctx context.Context, userID string, limit int) ([]domains.ContactFrequency, error)
+	FindStats(ctx context.Context, ownerID string) (*domains.ContactStats, error)
 }
 
 type contactService struct {
@@ -26,8 +27,8 @@ func NewContactService(repo repository.ContactRepository) ContactService {
 	return &contactService{repo: repo}
 }
 
-func (s *contactService) Create(contact *domains.Contact) (*domains.Contact, error) {
-	exists, err := s.repo.ExistsByEmailAndOwner(contact.Email, contact.OwnerID)
+func (s *contactService) Create(ctx context.Context, contact *domains.Contact) (*domains.Contact, error) {
+	exists, err := s.repo.ExistsByEmailAndOwner(ctx, contact.Email, contact.OwnerID)
 	if err != nil {
 		logger.Error("error checking contact uniqueness", err)
 		return nil, err
@@ -36,7 +37,7 @@ func (s *contactService) Create(contact *domains.Contact) (*domains.Contact, err
 		return nil, domains.NewConflictError("contact with this email already exists")
 	}
 
-	created, err := s.repo.Create(contact)
+	created, err := s.repo.Create(ctx, contact)
 	if err != nil {
 		logger.Error("error creating contact", err)
 		return nil, err
@@ -45,10 +46,10 @@ func (s *contactService) Create(contact *domains.Contact) (*domains.Contact, err
 	return created, nil
 }
 
-func (s *contactService) FindAll(ownerID string, page, limit int, filters domains.ContactFilters) ([]*domains.Contact, int64, error) {
+func (s *contactService) FindAll(ctx context.Context, ownerID string, page, limit int, filters domains.ContactFilters) ([]*domains.Contact, int64, error) {
 	offset := (page - 1) * limit
 
-	contacts, total, err := s.repo.FindAll(ownerID, limit, offset, filters)
+	contacts, total, err := s.repo.FindAll(ctx, ownerID, limit, offset, filters)
 	if err != nil {
 		logger.Error("error finding all contacts", err)
 		return nil, 0, err
@@ -57,8 +58,8 @@ func (s *contactService) FindAll(ownerID string, page, limit int, filters domain
 	return contacts, total, nil
 }
 
-func (s *contactService) findAndAuthorize(id, ownerID string) (*domains.Contact, error) {
-	contact, err := s.repo.FindByID(id)
+func (s *contactService) findAndAuthorize(ctx context.Context, id, ownerID string) (*domains.Contact, error) {
+	contact, err := s.repo.FindByID(ctx, id)
 	if err != nil {
 		if !errors.Is(err, domains.ErrNotFound) {
 			logger.Error("error finding contact", err)
@@ -73,12 +74,12 @@ func (s *contactService) findAndAuthorize(id, ownerID string) (*domains.Contact,
 	return contact, nil
 }
 
-func (s *contactService) FindByID(id, ownerID string) (*domains.Contact, error) {
-	return s.findAndAuthorize(id, ownerID)
+func (s *contactService) FindByID(ctx context.Context, id, ownerID string) (*domains.Contact, error) {
+	return s.findAndAuthorize(ctx, id, ownerID)
 }
 
-func (s *contactService) Update(contact *domains.Contact) (*domains.Contact, error) {
-	existing, err := s.findAndAuthorize(contact.ID, contact.OwnerID)
+func (s *contactService) Update(ctx context.Context, contact *domains.Contact) (*domains.Contact, error) {
+	existing, err := s.findAndAuthorize(ctx, contact.ID, contact.OwnerID)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +97,7 @@ func (s *contactService) Update(contact *domains.Contact) (*domains.Contact, err
 		existing.Category = contact.Category
 	}
 
-	updated, err := s.repo.Update(existing)
+	updated, err := s.repo.Update(ctx, existing)
 	if err != nil {
 		logger.Error("error updating contact", err)
 		return nil, err
@@ -105,12 +106,12 @@ func (s *contactService) Update(contact *domains.Contact) (*domains.Contact, err
 	return updated, nil
 }
 
-func (s *contactService) Delete(id, ownerID string) error {
-	if _, err := s.findAndAuthorize(id, ownerID); err != nil {
+func (s *contactService) Delete(ctx context.Context, id, ownerID string) error {
+	if _, err := s.findAndAuthorize(ctx, id, ownerID); err != nil {
 		return err
 	}
 
-	if err := s.repo.Delete(id); err != nil {
+	if err := s.repo.Delete(ctx, id); err != nil {
 		logger.Error("error deleting contact", err)
 		return err
 	}
@@ -118,8 +119,8 @@ func (s *contactService) Delete(id, ownerID string) error {
 	return nil
 }
 
-func (s *contactService) FindStats(ownerID string) (*domains.ContactStats, error) {
-	stats, err := s.repo.FindStats(ownerID)
+func (s *contactService) FindStats(ctx context.Context, ownerID string) (*domains.ContactStats, error) {
+	stats, err := s.repo.FindStats(ctx, ownerID)
 	if err != nil {
 		logger.Error("error finding contact stats", err)
 		return nil, err
@@ -128,12 +129,12 @@ func (s *contactService) FindStats(ownerID string) (*domains.ContactStats, error
 	return stats, nil
 }
 
-func (s *contactService) FindContactsByFrequency(userID string, limit int) ([]domains.ContactFrequency, error) {
+func (s *contactService) FindContactsByFrequency(ctx context.Context, userID string, limit int) ([]domains.ContactFrequency, error) {
 	if limit <= 0 {
 		limit = 5
 	}
 
-	contacts, err := s.repo.FindContactsByFrequency(userID, limit)
+	contacts, err := s.repo.FindContactsByFrequency(ctx, userID, limit)
 	if err != nil {
 		logger.Error("error finding top contacts", err)
 		return nil, err

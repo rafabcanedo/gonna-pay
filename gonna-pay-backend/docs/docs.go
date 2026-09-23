@@ -181,6 +181,18 @@ const docTemplate = `{
                             "$ref": "#/definitions/rest_errors.RestErrors"
                         }
                     },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/rest_errors.RestErrors"
+                        }
+                    },
+                    "409": {
+                        "description": "Email já em uso",
+                        "schema": {
+                            "$ref": "#/definitions/rest_errors.RestErrors"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {

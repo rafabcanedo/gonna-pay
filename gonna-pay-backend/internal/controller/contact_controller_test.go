@@ -24,7 +24,7 @@ func TestCreateContact(t *testing.T) {
 		cc := controller.NewContactController(mockService)
 
 		m := testutil.NewContactMock()
-		mockService.EXPECT().Create(gomock.Any()).Return(m.Contact, nil)
+		mockService.EXPECT().Create(gomock.Any(), gomock.Any()).Return(m.Contact, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -89,8 +89,8 @@ func TestFindAllContacts(t *testing.T) {
 		m1 := testutil.NewContactMock()
 		m2 := testutil.NewContactMock()
 		m2.Contact.ID = "contact-2"
-		mockService.EXPECT().FindAll(testutil.UserID, 1, 20, domains.ContactFilters{}).Return([]*domains.Contact{m1.Contact, m2.Contact}, int64(2), nil)
-		mockService.EXPECT().FindStats(testutil.UserID).Return(&domains.ContactStats{ByCategory: map[string]int64{}}, nil)
+		mockService.EXPECT().FindAll(gomock.Any(), testutil.UserID, 1, 20, domains.ContactFilters{}).Return([]*domains.Contact{m1.Contact, m2.Contact}, int64(2), nil)
+		mockService.EXPECT().FindStats(gomock.Any(), testutil.UserID).Return(&domains.ContactStats{ByCategory: map[string]int64{}}, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -111,8 +111,8 @@ func TestFindAllContacts(t *testing.T) {
 		cc := controller.NewContactController(mockService)
 
 		m := testutil.NewContactMock()
-		mockService.EXPECT().FindAll(testutil.UserID, 2, 10, domains.ContactFilters{}).Return([]*domains.Contact{m.Contact}, int64(11), nil)
-		mockService.EXPECT().FindStats(testutil.UserID).Return(&domains.ContactStats{ByCategory: map[string]int64{}}, nil)
+		mockService.EXPECT().FindAll(gomock.Any(), testutil.UserID, 2, 10, domains.ContactFilters{}).Return([]*domains.Contact{m.Contact}, int64(11), nil)
+		mockService.EXPECT().FindStats(gomock.Any(), testutil.UserID).Return(&domains.ContactStats{ByCategory: map[string]int64{}}, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -134,7 +134,7 @@ func TestFindAllContacts(t *testing.T) {
 		mockService := mocks.NewMockContactService(ctrl)
 		cc := controller.NewContactController(mockService)
 
-		mockService.EXPECT().FindAll(testutil.UserID, 1, 20, domains.ContactFilters{}).Return(nil, int64(0), errors.New("db error"))
+		mockService.EXPECT().FindAll(gomock.Any(), testutil.UserID, 1, 20, domains.ContactFilters{}).Return(nil, int64(0), errors.New("db error"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -154,8 +154,8 @@ func TestFindAllContacts_Filters(t *testing.T) {
 
 		m := testutil.NewContactMock()
 		expectedFilters := domains.ContactFilters{Search: "joao", Category: "Family"}
-		mockService.EXPECT().FindAll(testutil.UserID, 1, 20, expectedFilters).Return([]*domains.Contact{m.Contact}, int64(1), nil)
-		mockService.EXPECT().FindStats(testutil.UserID).Return(&domains.ContactStats{ByCategory: map[string]int64{}}, nil)
+		mockService.EXPECT().FindAll(gomock.Any(), testutil.UserID, 1, 20, expectedFilters).Return([]*domains.Contact{m.Contact}, int64(1), nil)
+		mockService.EXPECT().FindStats(gomock.Any(), testutil.UserID).Return(&domains.ContactStats{ByCategory: map[string]int64{}}, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -174,7 +174,7 @@ func TestFindContactByID(t *testing.T) {
 		cc := controller.NewContactController(mockService)
 
 		m := testutil.NewContactMock()
-		mockService.EXPECT().FindByID(m.ID, testutil.UserID).Return(m.Contact, nil)
+		mockService.EXPECT().FindByID(gomock.Any(), m.ID, testutil.UserID).Return(m.Contact, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -193,7 +193,7 @@ func TestFindContactByID(t *testing.T) {
 		mockService := mocks.NewMockContactService(ctrl)
 		cc := controller.NewContactController(mockService)
 
-		mockService.EXPECT().FindByID(testutil.ContactID, testutil.UserID).Return(nil, domains.NewNotFoundError("contact not found"))
+		mockService.EXPECT().FindByID(gomock.Any(), testutil.ContactID, testutil.UserID).Return(nil, domains.NewNotFoundError("contact not found"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -209,7 +209,7 @@ func TestFindContactByID(t *testing.T) {
 		mockService := mocks.NewMockContactService(ctrl)
 		cc := controller.NewContactController(mockService)
 
-		mockService.EXPECT().FindByID(testutil.ContactID, testutil.UserID2).Return(nil, domains.NewForbiddenError("access denied"))
+		mockService.EXPECT().FindByID(gomock.Any(), testutil.ContactID, testutil.UserID2).Return(nil, domains.NewForbiddenError("access denied"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID2)
@@ -229,7 +229,7 @@ func TestUpdateContact(t *testing.T) {
 
 		m := testutil.NewContactMock()
 		m.Contact.Name = testutil.ContactUpdatedName
-		mockService.EXPECT().Update(gomock.Any()).Return(m.Contact, nil)
+		mockService.EXPECT().Update(gomock.Any(), gomock.Any()).Return(m.Contact, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -266,7 +266,7 @@ func TestUpdateContact(t *testing.T) {
 		mockService := mocks.NewMockContactService(ctrl)
 		cc := controller.NewContactController(mockService)
 
-		mockService.EXPECT().Update(gomock.Any()).Return(nil, domains.NewNotFoundError("contact not found"))
+		mockService.EXPECT().Update(gomock.Any(), gomock.Any()).Return(nil, domains.NewNotFoundError("contact not found"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -284,7 +284,7 @@ func TestUpdateContact(t *testing.T) {
 		mockService := mocks.NewMockContactService(ctrl)
 		cc := controller.NewContactController(mockService)
 
-		mockService.EXPECT().Update(gomock.Any()).Return(nil, domains.NewForbiddenError("access denied"))
+		mockService.EXPECT().Update(gomock.Any(), gomock.Any()).Return(nil, domains.NewForbiddenError("access denied"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID2)
@@ -307,7 +307,7 @@ func TestFindContactsByFrequency(t *testing.T) {
 		expected := []domains.ContactFrequency{
 			{ContactID: testutil.ContactID, ContactName: testutil.ContactName, SharedCosts: 3},
 		}
-		mockService.EXPECT().FindContactsByFrequency(testutil.UserID, 5).Return(expected, nil)
+		mockService.EXPECT().FindContactsByFrequency(gomock.Any(), testutil.UserID, 5).Return(expected, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -328,7 +328,7 @@ func TestFindContactsByFrequency(t *testing.T) {
 		mockService := mocks.NewMockContactService(ctrl)
 		cc := controller.NewContactController(mockService)
 
-		mockService.EXPECT().FindContactsByFrequency(testutil.UserID, 5).Return([]domains.ContactFrequency{}, nil)
+		mockService.EXPECT().FindContactsByFrequency(gomock.Any(), testutil.UserID, 5).Return([]domains.ContactFrequency{}, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -344,7 +344,7 @@ func TestFindContactsByFrequency(t *testing.T) {
 		mockService := mocks.NewMockContactService(ctrl)
 		cc := controller.NewContactController(mockService)
 
-		mockService.EXPECT().FindContactsByFrequency(testutil.UserID, 5).Return(nil, errors.New("db error"))
+		mockService.EXPECT().FindContactsByFrequency(gomock.Any(), testutil.UserID, 5).Return(nil, errors.New("db error"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -362,7 +362,7 @@ func TestDeleteContact(t *testing.T) {
 		mockService := mocks.NewMockContactService(ctrl)
 		cc := controller.NewContactController(mockService)
 
-		mockService.EXPECT().Delete(testutil.ContactID, testutil.UserID).Return(nil)
+		mockService.EXPECT().Delete(gomock.Any(), testutil.ContactID, testutil.UserID).Return(nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -378,7 +378,7 @@ func TestDeleteContact(t *testing.T) {
 		mockService := mocks.NewMockContactService(ctrl)
 		cc := controller.NewContactController(mockService)
 
-		mockService.EXPECT().Delete(testutil.ContactID, testutil.UserID).Return(domains.NewNotFoundError("contact not found"))
+		mockService.EXPECT().Delete(gomock.Any(), testutil.ContactID, testutil.UserID).Return(domains.NewNotFoundError("contact not found"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)

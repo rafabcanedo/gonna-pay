@@ -4,6 +4,7 @@
 package mocks
 
 import (
+	context "context"
 	reflect "reflect"
 
 	domains "github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/model/domains"
@@ -34,39 +35,39 @@ func (m *MockCostService) EXPECT() *MockCostServiceMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockCostService) Create(cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error) {
+func (m *MockCostService) Create(ctx context.Context, cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", cost, ownerPercentage)
+	ret := m.ctrl.Call(m, "Create", ctx, cost, ownerPercentage)
 	ret0, _ := ret[0].(*domains.Cost)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockCostServiceMockRecorder) Create(cost, ownerPercentage any) *gomock.Call {
+func (mr *MockCostServiceMockRecorder) Create(ctx, cost, ownerPercentage any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockCostService)(nil).Create), cost, ownerPercentage)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockCostService)(nil).Create), ctx, cost, ownerPercentage)
 }
 
 // Update mocks base method.
-func (m *MockCostService) Update(id, userID string, cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error) {
+func (m *MockCostService) Update(ctx context.Context, id, userID string, cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", id, userID, cost, ownerPercentage)
+	ret := m.ctrl.Call(m, "Update", ctx, id, userID, cost, ownerPercentage)
 	ret0, _ := ret[0].(*domains.Cost)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Update indicates an expected call of Update.
-func (mr *MockCostServiceMockRecorder) Update(id, userID, cost, ownerPercentage any) *gomock.Call {
+func (mr *MockCostServiceMockRecorder) Update(ctx, id, userID, cost, ownerPercentage any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockCostService)(nil).Update), id, userID, cost, ownerPercentage)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockCostService)(nil).Update), ctx, id, userID, cost, ownerPercentage)
 }
 
 // FindAll mocks base method.
-func (m *MockCostService) FindAll(userID string, page, limit int, filters domains.CostFilters) ([]*domains.Cost, int64, error) {
+func (m *MockCostService) FindAll(ctx context.Context, userID string, page, limit int, filters domains.CostFilters) ([]*domains.Cost, int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindAll", userID, page, limit, filters)
+	ret := m.ctrl.Call(m, "FindAll", ctx, userID, page, limit, filters)
 	ret0, _ := ret[0].([]*domains.Cost)
 	ret1, _ := ret[1].(int64)
 	ret2, _ := ret[2].(error)
@@ -74,51 +75,51 @@ func (m *MockCostService) FindAll(userID string, page, limit int, filters domain
 }
 
 // FindAll indicates an expected call of FindAll.
-func (mr *MockCostServiceMockRecorder) FindAll(userID, page, limit, filters any) *gomock.Call {
+func (mr *MockCostServiceMockRecorder) FindAll(ctx, userID, page, limit, filters any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockCostService)(nil).FindAll), userID, page, limit, filters)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockCostService)(nil).FindAll), ctx, userID, page, limit, filters)
 }
 
 // FindByID mocks base method.
-func (m *MockCostService) FindByID(id, userID string) (*domains.Cost, error) {
+func (m *MockCostService) FindByID(ctx context.Context, id, userID string) (*domains.Cost, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByID", id, userID)
+	ret := m.ctrl.Call(m, "FindByID", ctx, id, userID)
 	ret0, _ := ret[0].(*domains.Cost)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindByID indicates an expected call of FindByID.
-func (mr *MockCostServiceMockRecorder) FindByID(id, userID any) *gomock.Call {
+func (mr *MockCostServiceMockRecorder) FindByID(ctx, id, userID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockCostService)(nil).FindByID), id, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockCostService)(nil).FindByID), ctx, id, userID)
 }
 
 // FindStats mocks base method.
-func (m *MockCostService) FindStats(userID string, filters domains.CostFilters) (*domains.CostStats, error) {
+func (m *MockCostService) FindStats(ctx context.Context, userID string, filters domains.CostFilters) (*domains.CostStats, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindStats", userID, filters)
+	ret := m.ctrl.Call(m, "FindStats", ctx, userID, filters)
 	ret0, _ := ret[0].(*domains.CostStats)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindStats indicates an expected call of FindStats.
-func (mr *MockCostServiceMockRecorder) FindStats(userID, filters any) *gomock.Call {
+func (mr *MockCostServiceMockRecorder) FindStats(ctx, userID, filters any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindStats", reflect.TypeOf((*MockCostService)(nil).FindStats), userID, filters)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindStats", reflect.TypeOf((*MockCostService)(nil).FindStats), ctx, userID, filters)
 }
 
 // Delete mocks base method.
-func (m *MockCostService) Delete(id, userID string) error {
+func (m *MockCostService) Delete(ctx context.Context, id, userID string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", id, userID)
+	ret := m.ctrl.Call(m, "Delete", ctx, id, userID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete.
-func (mr *MockCostServiceMockRecorder) Delete(id, userID any) *gomock.Call {
+func (mr *MockCostServiceMockRecorder) Delete(ctx, id, userID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockCostService)(nil).Delete), id, userID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockCostService)(nil).Delete), ctx, id, userID)
 }

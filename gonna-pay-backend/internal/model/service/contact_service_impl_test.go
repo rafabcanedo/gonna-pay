@@ -1,6 +1,7 @@
 package service_test
 
 import (
+	"context"
 	"errors"
 	"testing"
 	"time"
@@ -20,10 +21,10 @@ func TestContactService_Create(t *testing.T) {
 		svc := service.NewContactService(mockRepo)
 
 		m := testutil.NewContactMock()
-		mockRepo.EXPECT().ExistsByEmailAndOwner(m.Email, m.OwnerID).Return(false, nil)
-		mockRepo.EXPECT().Create(gomock.Any()).Return(m.Contact, nil)
+		mockRepo.EXPECT().ExistsByEmailAndOwner(gomock.Any(), m.Email, m.OwnerID).Return(false, nil)
+		mockRepo.EXPECT().Create(gomock.Any(), gomock.Any()).Return(m.Contact, nil)
 
-		result, err := svc.Create(domains.NewContact(m.OwnerID, m.Name, m.Email, m.Phone, m.Category))
+		result, err := svc.Create(context.Background(), domains.NewContact(m.OwnerID, m.Name, m.Email, m.Phone, m.Category))
 
 		assert.NoError(t, err)
 		assert.Equal(t, m.ID, result.ID)
@@ -34,10 +35,10 @@ func TestContactService_Create(t *testing.T) {
 		mockRepo := mocks.NewMockContactRepository(ctrl)
 		svc := service.NewContactService(mockRepo)
 
-		mockRepo.EXPECT().ExistsByEmailAndOwner(testutil.ContactEmail, testutil.UserID).Return(false, nil)
-		mockRepo.EXPECT().Create(gomock.Any()).Return(nil, errors.New("db error"))
+		mockRepo.EXPECT().ExistsByEmailAndOwner(gomock.Any(), testutil.ContactEmail, testutil.UserID).Return(false, nil)
+		mockRepo.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil, errors.New("db error"))
 
-		_, err := svc.Create(domains.NewContact(testutil.UserID, testutil.ContactName, testutil.ContactEmail, testutil.ContactPhone, testutil.ContactCategory))
+		_, err := svc.Create(context.Background(), domains.NewContact(testutil.UserID, testutil.ContactName, testutil.ContactEmail, testutil.ContactPhone, testutil.ContactCategory))
 		assert.Error(t, err)
 	})
 }
@@ -51,9 +52,9 @@ func TestContactService_FindAll(t *testing.T) {
 		m1 := testutil.NewContactMock()
 		m2 := testutil.NewContactMock()
 		m2.Contact.ID = "contact-2"
-		mockRepo.EXPECT().FindAll(testutil.UserID, 20, 0, domains.ContactFilters{}).Return([]*domains.Contact{m1.Contact, m2.Contact}, int64(2), nil)
+		mockRepo.EXPECT().FindAll(gomock.Any(), testutil.UserID, 20, 0, domains.ContactFilters{}).Return([]*domains.Contact{m1.Contact, m2.Contact}, int64(2), nil)
 
-		result, total, err := svc.FindAll(testutil.UserID, 1, 20, domains.ContactFilters{})
+		result, total, err := svc.FindAll(context.Background(), testutil.UserID, 1, 20, domains.ContactFilters{})
 
 		assert.NoError(t, err)
 		assert.Len(t, result, 2)
@@ -68,9 +69,9 @@ func TestContactService_FindByID(t *testing.T) {
 		svc := service.NewContactService(mockRepo)
 
 		m := testutil.NewContactMock()
-		mockRepo.EXPECT().FindByID(m.ID).Return(m.Contact, nil)
+		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.Contact, nil)
 
-		result, err := svc.FindByID(m.ID, testutil.UserID)
+		result, err := svc.FindByID(context.Background(), m.ID, testutil.UserID)
 
 		assert.NoError(t, err)
 		assert.Equal(t, m.ID, result.ID)
@@ -81,9 +82,9 @@ func TestContactService_FindByID(t *testing.T) {
 		mockRepo := mocks.NewMockContactRepository(ctrl)
 		svc := service.NewContactService(mockRepo)
 
-		mockRepo.EXPECT().FindByID(testutil.ContactID).Return(nil, domains.NewNotFoundError("contact not found"))
+		mockRepo.EXPECT().FindByID(gomock.Any(), testutil.ContactID).Return(nil, domains.NewNotFoundError("contact not found"))
 
-		_, err := svc.FindByID(testutil.ContactID, testutil.UserID)
+		_, err := svc.FindByID(context.Background(), testutil.ContactID, testutil.UserID)
 
 		assert.ErrorIs(t, err, domains.ErrNotFound)
 	})
@@ -94,9 +95,9 @@ func TestContactService_FindByID(t *testing.T) {
 		svc := service.NewContactService(mockRepo)
 
 		m := testutil.NewContactMock()
-		mockRepo.EXPECT().FindByID(m.ID).Return(m.Contact, nil)
+		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.Contact, nil)
 
-		_, err := svc.FindByID(m.ID, testutil.UserID2)
+		_, err := svc.FindByID(context.Background(), m.ID, testutil.UserID2)
 
 		assert.ErrorIs(t, err, domains.ErrForbidden)
 	})
@@ -111,8 +112,8 @@ func TestContactService_Update(t *testing.T) {
 		m := testutil.NewContactMock()
 		incoming := domains.NewContactWithID(m.ID, m.OwnerID, testutil.ContactUpdatedName, "nova@email.com", "11888888888", "Work", time.Time{})
 
-		mockRepo.EXPECT().FindByID(m.ID).Return(m.Contact, nil)
-		mockRepo.EXPECT().Update(gomock.Any()).DoAndReturn(func(c *domains.Contact) (*domains.Contact, error) {
+		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.Contact, nil)
+		mockRepo.EXPECT().Update(gomock.Any(), gomock.Any()).DoAndReturn(func(_ context.Context, c *domains.Contact) (*domains.Contact, error) {
 			assert.Equal(t, testutil.ContactUpdatedName, c.Name)
 			assert.Equal(t, "nova@email.com", c.Email)
 			assert.Equal(t, "11888888888", c.Phone)
@@ -120,7 +121,7 @@ func TestContactService_Update(t *testing.T) {
 			return c, nil
 		})
 
-		result, err := svc.Update(incoming)
+		result, err := svc.Update(context.Background(), incoming)
 
 		assert.NoError(t, err)
 		assert.Equal(t, testutil.ContactUpdatedName, result.Name)
@@ -134,8 +135,8 @@ func TestContactService_Update(t *testing.T) {
 		m := testutil.NewContactMock()
 		incoming := domains.NewContactWithID(m.ID, m.OwnerID, testutil.ContactUpdatedName, "", "", "", time.Time{})
 
-		mockRepo.EXPECT().FindByID(m.ID).Return(m.Contact, nil)
-		mockRepo.EXPECT().Update(gomock.Any()).DoAndReturn(func(c *domains.Contact) (*domains.Contact, error) {
+		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.Contact, nil)
+		mockRepo.EXPECT().Update(gomock.Any(), gomock.Any()).DoAndReturn(func(_ context.Context, c *domains.Contact) (*domains.Contact, error) {
 			assert.Equal(t, testutil.ContactUpdatedName, c.Name)
 			assert.Equal(t, m.Email, c.Email)
 			assert.Equal(t, m.Phone, c.Phone)
@@ -143,7 +144,7 @@ func TestContactService_Update(t *testing.T) {
 			return c, nil
 		})
 
-		_, err := svc.Update(incoming)
+		_, err := svc.Update(context.Background(), incoming)
 		assert.NoError(t, err)
 	})
 
@@ -155,10 +156,10 @@ func TestContactService_Update(t *testing.T) {
 		m := testutil.NewContactMock()
 		incoming := domains.NewContactWithID(m.ID, m.OwnerID, testutil.ContactUpdatedName, "", "", "", time.Time{})
 
-		mockRepo.EXPECT().FindByID(m.ID).Return(m.Contact, nil)
-		mockRepo.EXPECT().Update(gomock.Any()).Return(nil, errors.New("db error"))
+		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.Contact, nil)
+		mockRepo.EXPECT().Update(gomock.Any(), gomock.Any()).Return(nil, errors.New("db error"))
 
-		_, err := svc.Update(incoming)
+		_, err := svc.Update(context.Background(), incoming)
 		assert.Error(t, err)
 	})
 
@@ -167,10 +168,10 @@ func TestContactService_Update(t *testing.T) {
 		mockRepo := mocks.NewMockContactRepository(ctrl)
 		svc := service.NewContactService(mockRepo)
 
-		mockRepo.EXPECT().FindByID(testutil.ContactID).Return(nil, domains.NewNotFoundError("not found"))
+		mockRepo.EXPECT().FindByID(gomock.Any(), testutil.ContactID).Return(nil, domains.NewNotFoundError("not found"))
 
 		incoming := testutil.NewContactFixture()
-		_, err := svc.Update(incoming)
+		_, err := svc.Update(context.Background(), incoming)
 
 		assert.ErrorIs(t, err, domains.ErrNotFound)
 	})
@@ -184,9 +185,9 @@ func TestContactService_Update(t *testing.T) {
 		incoming := testutil.NewContactFixture()
 		incoming.OwnerID = testutil.UserID2
 
-		mockRepo.EXPECT().FindByID(m.ID).Return(m.Contact, nil)
+		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.Contact, nil)
 
-		_, err := svc.Update(incoming)
+		_, err := svc.Update(context.Background(), incoming)
 
 		assert.ErrorIs(t, err, domains.ErrForbidden)
 	})
@@ -201,9 +202,9 @@ func TestContactService_FindContactsByFrequency(t *testing.T) {
 		expected := []domains.ContactFrequency{
 			{ContactID: testutil.ContactID, ContactName: testutil.ContactName, SharedCosts: 3},
 		}
-		mockRepo.EXPECT().FindContactsByFrequency(testutil.UserID, 5).Return(expected, nil)
+		mockRepo.EXPECT().FindContactsByFrequency(gomock.Any(), testutil.UserID, 5).Return(expected, nil)
 
-		result, err := svc.FindContactsByFrequency(testutil.UserID, 5)
+		result, err := svc.FindContactsByFrequency(context.Background(), testutil.UserID, 5)
 
 		assert.NoError(t, err)
 		assert.Len(t, result, 1)
@@ -216,9 +217,9 @@ func TestContactService_FindContactsByFrequency(t *testing.T) {
 		mockRepo := mocks.NewMockContactRepository(ctrl)
 		svc := service.NewContactService(mockRepo)
 
-		mockRepo.EXPECT().FindContactsByFrequency(testutil.UserID, 5).Return([]domains.ContactFrequency{}, nil)
+		mockRepo.EXPECT().FindContactsByFrequency(gomock.Any(), testutil.UserID, 5).Return([]domains.ContactFrequency{}, nil)
 
-		_, err := svc.FindContactsByFrequency(testutil.UserID, 0)
+		_, err := svc.FindContactsByFrequency(context.Background(), testutil.UserID, 0)
 		assert.NoError(t, err)
 	})
 
@@ -227,9 +228,9 @@ func TestContactService_FindContactsByFrequency(t *testing.T) {
 		mockRepo := mocks.NewMockContactRepository(ctrl)
 		svc := service.NewContactService(mockRepo)
 
-		mockRepo.EXPECT().FindContactsByFrequency(testutil.UserID, 5).Return(nil, errors.New("db error"))
+		mockRepo.EXPECT().FindContactsByFrequency(gomock.Any(), testutil.UserID, 5).Return(nil, errors.New("db error"))
 
-		_, err := svc.FindContactsByFrequency(testutil.UserID, 5)
+		_, err := svc.FindContactsByFrequency(context.Background(), testutil.UserID, 5)
 		assert.Error(t, err)
 	})
 }
@@ -241,10 +242,10 @@ func TestContactService_Delete(t *testing.T) {
 		svc := service.NewContactService(mockRepo)
 
 		m := testutil.NewContactMock()
-		mockRepo.EXPECT().FindByID(m.ID).Return(m.Contact, nil)
-		mockRepo.EXPECT().Delete(m.ID).Return(nil)
+		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.Contact, nil)
+		mockRepo.EXPECT().Delete(gomock.Any(), m.ID).Return(nil)
 
-		err := svc.Delete(m.ID, testutil.UserID)
+		err := svc.Delete(context.Background(), m.ID, testutil.UserID)
 		assert.NoError(t, err)
 	})
 
@@ -253,9 +254,9 @@ func TestContactService_Delete(t *testing.T) {
 		mockRepo := mocks.NewMockContactRepository(ctrl)
 		svc := service.NewContactService(mockRepo)
 
-		mockRepo.EXPECT().FindByID(testutil.ContactID).Return(nil, domains.NewNotFoundError("not found"))
+		mockRepo.EXPECT().FindByID(gomock.Any(), testutil.ContactID).Return(nil, domains.NewNotFoundError("not found"))
 
-		err := svc.Delete(testutil.ContactID, testutil.UserID)
+		err := svc.Delete(context.Background(), testutil.ContactID, testutil.UserID)
 
 		assert.ErrorIs(t, err, domains.ErrNotFound)
 	})
@@ -266,9 +267,9 @@ func TestContactService_Delete(t *testing.T) {
 		svc := service.NewContactService(mockRepo)
 
 		m := testutil.NewContactMock()
-		mockRepo.EXPECT().FindByID(m.ID).Return(m.Contact, nil)
+		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.Contact, nil)
 
-		err := svc.Delete(m.ID, testutil.UserID2)
+		err := svc.Delete(context.Background(), m.ID, testutil.UserID2)
 
 		assert.ErrorIs(t, err, domains.ErrForbidden)
 	})

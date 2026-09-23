@@ -47,7 +47,7 @@ func (cc *CostController) CreateCost(c *gin.Context) {
 
 	cost := domains.NewCost(userID, req.GroupID, req.CostName, req.Category, req.TotalValue, 0)
 
-	created, err := cc.service.Create(cost, req.OwnerPercentage)
+	created, err := cc.service.Create(c.Request.Context(), cost, req.OwnerPercentage)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return
@@ -92,13 +92,15 @@ func (cc *CostController) FindAllCosts(c *gin.Context) {
 		}
 	}
 
-	costs, total, err := cc.service.FindAll(userID, page, limit, filters)
+	ctx := c.Request.Context()
+
+	costs, total, err := cc.service.FindAll(ctx, userID, page, limit, filters)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return
 	}
 
-	stats, err := cc.service.FindStats(userID, filters)
+	stats, err := cc.service.FindStats(ctx, userID, filters)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return
@@ -126,7 +128,7 @@ func (cc *CostController) FindCostByID(c *gin.Context) {
 	id := c.Param("id")
 	userID := c.GetString("userID")
 
-	cost, err := cc.service.FindByID(id, userID)
+	cost, err := cc.service.FindByID(c.Request.Context(), id, userID)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return
@@ -163,7 +165,7 @@ func (cc *CostController) UpdateCost(c *gin.Context) {
 
 	cost := domains.NewCost(userID, "", req.CostName, req.Category, req.TotalValue, 0)
 
-	updated, err := cc.service.Update(id, userID, cost, req.OwnerPercentage)
+	updated, err := cc.service.Update(c.Request.Context(), id, userID, cost, req.OwnerPercentage)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return
@@ -188,7 +190,7 @@ func (cc *CostController) DeleteCost(c *gin.Context) {
 	id := c.Param("id")
 	userID := c.GetString("userID")
 
-	if err := cc.service.Delete(id, userID); err != nil {
+	if err := cc.service.Delete(c.Request.Context(), id, userID); err != nil {
 		httputil.RespondError(c, err)
 		return
 	}

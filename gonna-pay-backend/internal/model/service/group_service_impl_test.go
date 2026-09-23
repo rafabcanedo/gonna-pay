@@ -1,6 +1,7 @@
 package service_test
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -20,9 +21,9 @@ func TestGroupService_Create(t *testing.T) {
 
 		m := testutil.NewGroupMock()
 		group := domains.NewGroup(m.OwnerID, m.Name, m.Category)
-		mockRepo.EXPECT().Create(group, []string{}).Return(m.Group, nil)
+		mockRepo.EXPECT().Create(gomock.Any(), group, []string{}).Return(m.Group, nil)
 
-		result, err := svc.Create(group, []string{})
+		result, err := svc.Create(context.Background(), group, []string{})
 
 		assert.NoError(t, err)
 		assert.Equal(t, m.ID, result.ID)
@@ -37,11 +38,11 @@ func TestGroupService_Create(t *testing.T) {
 		group := domains.NewGroup(m.OwnerID, m.Name, m.Category)
 		memberIDs := []string{testutil.ContactID, "contact-2"}
 
-		mockRepo.EXPECT().IsContactOwnedBy(testutil.ContactID, m.OwnerID).Return(true, nil)
-		mockRepo.EXPECT().IsContactOwnedBy("contact-2", m.OwnerID).Return(true, nil)
-		mockRepo.EXPECT().Create(group, memberIDs).Return(m.Group, nil)
+		mockRepo.EXPECT().IsContactOwnedBy(gomock.Any(), testutil.ContactID, m.OwnerID).Return(true, nil)
+		mockRepo.EXPECT().IsContactOwnedBy(gomock.Any(), "contact-2", m.OwnerID).Return(true, nil)
+		mockRepo.EXPECT().Create(gomock.Any(), group, memberIDs).Return(m.Group, nil)
 
-		result, err := svc.Create(group, memberIDs)
+		result, err := svc.Create(context.Background(), group, memberIDs)
 
 		assert.NoError(t, err)
 		assert.Equal(t, m.ID, result.ID)
@@ -54,9 +55,9 @@ func TestGroupService_Create(t *testing.T) {
 
 		m := testutil.NewGroupMock()
 		group := domains.NewGroup(m.OwnerID, m.Name, m.Category)
-		mockRepo.EXPECT().IsContactOwnedBy(testutil.ContactID, m.OwnerID).Return(false, nil)
+		mockRepo.EXPECT().IsContactOwnedBy(gomock.Any(), testutil.ContactID, m.OwnerID).Return(false, nil)
 
-		_, err := svc.Create(group, []string{testutil.ContactID})
+		_, err := svc.Create(context.Background(), group, []string{testutil.ContactID})
 
 		assert.ErrorIs(t, err, domains.ErrForbidden)
 	})
@@ -68,9 +69,9 @@ func TestGroupService_Create(t *testing.T) {
 
 		m := testutil.NewGroupMock()
 		group := domains.NewGroup(m.OwnerID, m.Name, m.Category)
-		mockRepo.EXPECT().IsContactOwnedBy(testutil.ContactID, m.OwnerID).Return(false, errors.New("db error"))
+		mockRepo.EXPECT().IsContactOwnedBy(gomock.Any(), testutil.ContactID, m.OwnerID).Return(false, errors.New("db error"))
 
-		_, err := svc.Create(group, []string{testutil.ContactID})
+		_, err := svc.Create(context.Background(), group, []string{testutil.ContactID})
 
 		assert.Error(t, err)
 	})
@@ -85,9 +86,9 @@ func TestGroupService_FindAll(t *testing.T) {
 		m1 := testutil.NewGroupMock()
 		m2 := testutil.NewGroupMock()
 		m2.Group.ID = "group-2"
-		mockRepo.EXPECT().FindAll(testutil.UserID, 20, 0, domains.GroupFilters{}).Return([]*domains.Group{m1.Group, m2.Group}, int64(2), nil)
+		mockRepo.EXPECT().FindAll(gomock.Any(), testutil.UserID, 20, 0, domains.GroupFilters{}).Return([]*domains.Group{m1.Group, m2.Group}, int64(2), nil)
 
-		result, total, err := svc.FindAll(testutil.UserID, 1, 20, domains.GroupFilters{})
+		result, total, err := svc.FindAll(context.Background(), testutil.UserID, 1, 20, domains.GroupFilters{})
 
 		assert.NoError(t, err)
 		assert.Len(t, result, 2)
@@ -99,9 +100,9 @@ func TestGroupService_FindAll(t *testing.T) {
 		mockRepo := mocks.NewMockGroupRepository(ctrl)
 		svc := service.NewGroupService(mockRepo)
 
-		mockRepo.EXPECT().FindAll(testutil.UserID, 20, 0, domains.GroupFilters{}).Return(nil, int64(0), errors.New("db error"))
+		mockRepo.EXPECT().FindAll(gomock.Any(), testutil.UserID, 20, 0, domains.GroupFilters{}).Return(nil, int64(0), errors.New("db error"))
 
-		_, _, err := svc.FindAll(testutil.UserID, 1, 20, domains.GroupFilters{})
+		_, _, err := svc.FindAll(context.Background(), testutil.UserID, 1, 20, domains.GroupFilters{})
 		assert.Error(t, err)
 	})
 }
@@ -113,9 +114,9 @@ func TestGroupService_FindByID(t *testing.T) {
 		svc := service.NewGroupService(mockRepo)
 
 		m := testutil.NewGroupMock()
-		mockRepo.EXPECT().FindByID(m.ID).Return(m.Group, nil)
+		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.Group, nil)
 
-		result, err := svc.FindByID(m.ID, testutil.UserID)
+		result, err := svc.FindByID(context.Background(), m.ID, testutil.UserID)
 
 		assert.NoError(t, err)
 		assert.Equal(t, m.ID, result.ID)
@@ -126,9 +127,9 @@ func TestGroupService_FindByID(t *testing.T) {
 		mockRepo := mocks.NewMockGroupRepository(ctrl)
 		svc := service.NewGroupService(mockRepo)
 
-		mockRepo.EXPECT().FindByID(testutil.GroupID).Return(nil, domains.NewNotFoundError("group not found"))
+		mockRepo.EXPECT().FindByID(gomock.Any(), testutil.GroupID).Return(nil, domains.NewNotFoundError("group not found"))
 
-		_, err := svc.FindByID(testutil.GroupID, testutil.UserID)
+		_, err := svc.FindByID(context.Background(), testutil.GroupID, testutil.UserID)
 
 		assert.ErrorIs(t, err, domains.ErrNotFound)
 	})
@@ -139,9 +140,9 @@ func TestGroupService_FindByID(t *testing.T) {
 		svc := service.NewGroupService(mockRepo)
 
 		m := testutil.NewGroupMock()
-		mockRepo.EXPECT().FindByID(m.ID).Return(m.Group, nil)
+		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.Group, nil)
 
-		_, err := svc.FindByID(m.ID, testutil.UserID2)
+		_, err := svc.FindByID(context.Background(), m.ID, testutil.UserID2)
 
 		assert.ErrorIs(t, err, domains.ErrForbidden)
 	})
@@ -158,14 +159,14 @@ func TestGroupService_Update(t *testing.T) {
 		incoming.Name = "Viagem Europa"
 		incoming.Category = ""
 
-		mockRepo.EXPECT().FindByID(m.ID).Return(m.Group, nil)
-		mockRepo.EXPECT().Update(gomock.Any()).DoAndReturn(func(g *domains.Group) (*domains.Group, error) {
+		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.Group, nil)
+		mockRepo.EXPECT().Update(gomock.Any(), gomock.Any()).DoAndReturn(func(_ context.Context, g *domains.Group) (*domains.Group, error) {
 			assert.Equal(t, "Viagem Europa", g.Name)
 			assert.Equal(t, m.Category, g.Category)
 			return g, nil
 		})
 
-		result, err := svc.Update(incoming, testutil.UserID)
+		result, err := svc.Update(context.Background(), incoming, testutil.UserID)
 
 		assert.NoError(t, err)
 		assert.Equal(t, "Viagem Europa", result.Name)
@@ -181,14 +182,14 @@ func TestGroupService_Update(t *testing.T) {
 		incoming.Name = ""
 		incoming.Category = "Dinner"
 
-		mockRepo.EXPECT().FindByID(m.ID).Return(m.Group, nil)
-		mockRepo.EXPECT().Update(gomock.Any()).DoAndReturn(func(g *domains.Group) (*domains.Group, error) {
+		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.Group, nil)
+		mockRepo.EXPECT().Update(gomock.Any(), gomock.Any()).DoAndReturn(func(_ context.Context, g *domains.Group) (*domains.Group, error) {
 			assert.Equal(t, m.Name, g.Name)
 			assert.Equal(t, "Dinner", g.Category)
 			return g, nil
 		})
 
-		result, err := svc.Update(incoming, testutil.UserID)
+		result, err := svc.Update(context.Background(), incoming, testutil.UserID)
 
 		assert.NoError(t, err)
 		assert.Equal(t, "Dinner", result.Category)
@@ -199,9 +200,9 @@ func TestGroupService_Update(t *testing.T) {
 		mockRepo := mocks.NewMockGroupRepository(ctrl)
 		svc := service.NewGroupService(mockRepo)
 
-		mockRepo.EXPECT().FindByID(testutil.GroupID).Return(nil, domains.NewNotFoundError("group not found"))
+		mockRepo.EXPECT().FindByID(gomock.Any(), testutil.GroupID).Return(nil, domains.NewNotFoundError("group not found"))
 
-		_, err := svc.Update(testutil.NewGroupFixture(), testutil.UserID)
+		_, err := svc.Update(context.Background(), testutil.NewGroupFixture(), testutil.UserID)
 
 		assert.ErrorIs(t, err, domains.ErrNotFound)
 	})
@@ -212,9 +213,9 @@ func TestGroupService_Update(t *testing.T) {
 		svc := service.NewGroupService(mockRepo)
 
 		m := testutil.NewGroupMock()
-		mockRepo.EXPECT().FindByID(m.ID).Return(m.Group, nil)
+		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.Group, nil)
 
-		_, err := svc.Update(testutil.NewGroupFixture(), testutil.UserID2)
+		_, err := svc.Update(context.Background(), testutil.NewGroupFixture(), testutil.UserID2)
 
 		assert.ErrorIs(t, err, domains.ErrForbidden)
 	})
@@ -227,10 +228,10 @@ func TestGroupService_Delete(t *testing.T) {
 		svc := service.NewGroupService(mockRepo)
 
 		m := testutil.NewGroupMock()
-		mockRepo.EXPECT().FindByID(m.ID).Return(m.Group, nil)
-		mockRepo.EXPECT().Delete(m.ID).Return(nil)
+		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.Group, nil)
+		mockRepo.EXPECT().Delete(gomock.Any(), m.ID).Return(nil)
 
-		err := svc.Delete(m.ID, testutil.UserID)
+		err := svc.Delete(context.Background(), m.ID, testutil.UserID)
 		assert.NoError(t, err)
 	})
 
@@ -239,9 +240,9 @@ func TestGroupService_Delete(t *testing.T) {
 		mockRepo := mocks.NewMockGroupRepository(ctrl)
 		svc := service.NewGroupService(mockRepo)
 
-		mockRepo.EXPECT().FindByID(testutil.GroupID).Return(nil, domains.NewNotFoundError("group not found"))
+		mockRepo.EXPECT().FindByID(gomock.Any(), testutil.GroupID).Return(nil, domains.NewNotFoundError("group not found"))
 
-		err := svc.Delete(testutil.GroupID, testutil.UserID)
+		err := svc.Delete(context.Background(), testutil.GroupID, testutil.UserID)
 
 		assert.ErrorIs(t, err, domains.ErrNotFound)
 	})
@@ -252,9 +253,9 @@ func TestGroupService_Delete(t *testing.T) {
 		svc := service.NewGroupService(mockRepo)
 
 		m := testutil.NewGroupMock()
-		mockRepo.EXPECT().FindByID(m.ID).Return(m.Group, nil)
+		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.Group, nil)
 
-		err := svc.Delete(m.ID, testutil.UserID2)
+		err := svc.Delete(context.Background(), m.ID, testutil.UserID2)
 
 		assert.ErrorIs(t, err, domains.ErrForbidden)
 	})
@@ -267,12 +268,12 @@ func TestGroupService_AddMember(t *testing.T) {
 		svc := service.NewGroupService(mockRepo)
 
 		m := testutil.NewGroupMock()
-		mockRepo.EXPECT().FindByID(m.ID).Return(m.Group, nil)
-		mockRepo.EXPECT().IsContactOwnedBy(testutil.ContactID, testutil.UserID).Return(true, nil)
-		mockRepo.EXPECT().MemberExists(m.ID, testutil.ContactID).Return(false, nil)
-		mockRepo.EXPECT().AddMember(m.ID, testutil.ContactID).Return(nil)
+		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.Group, nil)
+		mockRepo.EXPECT().IsContactOwnedBy(gomock.Any(), testutil.ContactID, testutil.UserID).Return(true, nil)
+		mockRepo.EXPECT().MemberExists(gomock.Any(), m.ID, testutil.ContactID).Return(false, nil)
+		mockRepo.EXPECT().AddMember(gomock.Any(), m.ID, testutil.ContactID).Return(nil)
 
-		err := svc.AddMember(m.ID, testutil.ContactID, testutil.UserID)
+		err := svc.AddMember(context.Background(), m.ID, testutil.ContactID, testutil.UserID)
 		assert.NoError(t, err)
 	})
 
@@ -281,9 +282,9 @@ func TestGroupService_AddMember(t *testing.T) {
 		mockRepo := mocks.NewMockGroupRepository(ctrl)
 		svc := service.NewGroupService(mockRepo)
 
-		mockRepo.EXPECT().FindByID(testutil.GroupID).Return(nil, domains.NewNotFoundError("group not found"))
+		mockRepo.EXPECT().FindByID(gomock.Any(), testutil.GroupID).Return(nil, domains.NewNotFoundError("group not found"))
 
-		err := svc.AddMember(testutil.GroupID, testutil.ContactID, testutil.UserID)
+		err := svc.AddMember(context.Background(), testutil.GroupID, testutil.ContactID, testutil.UserID)
 
 		assert.ErrorIs(t, err, domains.ErrNotFound)
 	})
@@ -294,9 +295,9 @@ func TestGroupService_AddMember(t *testing.T) {
 		svc := service.NewGroupService(mockRepo)
 
 		m := testutil.NewGroupMock()
-		mockRepo.EXPECT().FindByID(m.ID).Return(m.Group, nil)
+		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.Group, nil)
 
-		err := svc.AddMember(m.ID, testutil.ContactID, testutil.UserID2)
+		err := svc.AddMember(context.Background(), m.ID, testutil.ContactID, testutil.UserID2)
 
 		assert.ErrorIs(t, err, domains.ErrForbidden)
 	})
@@ -307,10 +308,10 @@ func TestGroupService_AddMember(t *testing.T) {
 		svc := service.NewGroupService(mockRepo)
 
 		m := testutil.NewGroupMock()
-		mockRepo.EXPECT().FindByID(m.ID).Return(m.Group, nil)
-		mockRepo.EXPECT().IsContactOwnedBy(testutil.ContactID, testutil.UserID).Return(false, nil)
+		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.Group, nil)
+		mockRepo.EXPECT().IsContactOwnedBy(gomock.Any(), testutil.ContactID, testutil.UserID).Return(false, nil)
 
-		err := svc.AddMember(m.ID, testutil.ContactID, testutil.UserID)
+		err := svc.AddMember(context.Background(), m.ID, testutil.ContactID, testutil.UserID)
 
 		assert.ErrorIs(t, err, domains.ErrForbidden)
 	})
@@ -321,11 +322,11 @@ func TestGroupService_AddMember(t *testing.T) {
 		svc := service.NewGroupService(mockRepo)
 
 		m := testutil.NewGroupMock()
-		mockRepo.EXPECT().FindByID(m.ID).Return(m.Group, nil)
-		mockRepo.EXPECT().IsContactOwnedBy(testutil.ContactID, testutil.UserID).Return(true, nil)
-		mockRepo.EXPECT().MemberExists(m.ID, testutil.ContactID).Return(true, nil)
+		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.Group, nil)
+		mockRepo.EXPECT().IsContactOwnedBy(gomock.Any(), testutil.ContactID, testutil.UserID).Return(true, nil)
+		mockRepo.EXPECT().MemberExists(gomock.Any(), m.ID, testutil.ContactID).Return(true, nil)
 
-		err := svc.AddMember(m.ID, testutil.ContactID, testutil.UserID)
+		err := svc.AddMember(context.Background(), m.ID, testutil.ContactID, testutil.UserID)
 
 		assert.ErrorIs(t, err, domains.ErrConflict)
 	})
@@ -338,11 +339,11 @@ func TestGroupService_RemoveMember(t *testing.T) {
 		svc := service.NewGroupService(mockRepo)
 
 		m := testutil.NewGroupMock()
-		mockRepo.EXPECT().FindByID(m.ID).Return(m.Group, nil)
-		mockRepo.EXPECT().MemberExists(m.ID, testutil.ContactID).Return(true, nil)
-		mockRepo.EXPECT().RemoveMember(m.ID, testutil.ContactID).Return(nil)
+		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.Group, nil)
+		mockRepo.EXPECT().MemberExists(gomock.Any(), m.ID, testutil.ContactID).Return(true, nil)
+		mockRepo.EXPECT().RemoveMember(gomock.Any(), m.ID, testutil.ContactID).Return(nil)
 
-		err := svc.RemoveMember(m.ID, testutil.ContactID, testutil.UserID)
+		err := svc.RemoveMember(context.Background(), m.ID, testutil.ContactID, testutil.UserID)
 		assert.NoError(t, err)
 	})
 
@@ -351,9 +352,9 @@ func TestGroupService_RemoveMember(t *testing.T) {
 		mockRepo := mocks.NewMockGroupRepository(ctrl)
 		svc := service.NewGroupService(mockRepo)
 
-		mockRepo.EXPECT().FindByID(testutil.GroupID).Return(nil, domains.NewNotFoundError("group not found"))
+		mockRepo.EXPECT().FindByID(gomock.Any(), testutil.GroupID).Return(nil, domains.NewNotFoundError("group not found"))
 
-		err := svc.RemoveMember(testutil.GroupID, testutil.ContactID, testutil.UserID)
+		err := svc.RemoveMember(context.Background(), testutil.GroupID, testutil.ContactID, testutil.UserID)
 
 		assert.ErrorIs(t, err, domains.ErrNotFound)
 	})
@@ -364,9 +365,9 @@ func TestGroupService_RemoveMember(t *testing.T) {
 		svc := service.NewGroupService(mockRepo)
 
 		m := testutil.NewGroupMock()
-		mockRepo.EXPECT().FindByID(m.ID).Return(m.Group, nil)
+		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.Group, nil)
 
-		err := svc.RemoveMember(m.ID, testutil.ContactID, testutil.UserID2)
+		err := svc.RemoveMember(context.Background(), m.ID, testutil.ContactID, testutil.UserID2)
 
 		assert.ErrorIs(t, err, domains.ErrForbidden)
 	})
@@ -377,10 +378,10 @@ func TestGroupService_RemoveMember(t *testing.T) {
 		svc := service.NewGroupService(mockRepo)
 
 		m := testutil.NewGroupMock()
-		mockRepo.EXPECT().FindByID(m.ID).Return(m.Group, nil)
-		mockRepo.EXPECT().MemberExists(m.ID, testutil.ContactID).Return(false, nil)
+		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.Group, nil)
+		mockRepo.EXPECT().MemberExists(gomock.Any(), m.ID, testutil.ContactID).Return(false, nil)
 
-		err := svc.RemoveMember(m.ID, testutil.ContactID, testutil.UserID)
+		err := svc.RemoveMember(context.Background(), m.ID, testutil.ContactID, testutil.UserID)
 
 		assert.ErrorIs(t, err, domains.ErrNotFound)
 	})

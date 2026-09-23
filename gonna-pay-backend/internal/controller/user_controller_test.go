@@ -23,7 +23,7 @@ func TestCreateUser(t *testing.T) {
 		uc := controller.NewUserController(mockService)
 
 		m := testutil.NewUserMock()
-		mockService.EXPECT().Create(gomock.Any()).Return(m.User, nil)
+		mockService.EXPECT().Create(gomock.Any(), gomock.Any()).Return(m.User, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.MakePost(ctx, nil, map[string]any{
@@ -80,7 +80,7 @@ func TestCreateUser(t *testing.T) {
 		mockService := mocks.NewMockUserService(ctrl)
 		uc := controller.NewUserController(mockService)
 
-		mockService.EXPECT().Create(gomock.Any()).Return(nil, domains.NewConflictError("email already in use"))
+		mockService.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil, domains.NewConflictError("email already in use"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.MakePost(ctx, nil, map[string]any{
@@ -105,7 +105,7 @@ func TestFindAllUsers(t *testing.T) {
 		m1 := testutil.NewUserMock()
 		m2 := testutil.NewUserMock()
 		m2.User.ID = testutil.UserID2
-		mockService.EXPECT().FindAll(1, 20).Return([]*domains.User{m1.User, m2.User}, int64(2), nil)
+		mockService.EXPECT().FindAll(gomock.Any(), 1, 20).Return([]*domains.User{m1.User, m2.User}, int64(2), nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.MakeGet(ctx, nil, nil)
@@ -125,7 +125,7 @@ func TestFindAllUsers(t *testing.T) {
 		uc := controller.NewUserController(mockService)
 
 		m := testutil.NewUserMock()
-		mockService.EXPECT().FindAll(2, 10).Return([]*domains.User{m.User}, int64(11), nil)
+		mockService.EXPECT().FindAll(gomock.Any(), 2, 10).Return([]*domains.User{m.User}, int64(11), nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.MakeGet(ctx, nil, url.Values{"page": {"2"}, "limit": {"10"}})
@@ -146,7 +146,7 @@ func TestFindAllUsers(t *testing.T) {
 		mockService := mocks.NewMockUserService(ctrl)
 		uc := controller.NewUserController(mockService)
 
-		mockService.EXPECT().FindAll(1, 20).Return(nil, int64(0), domains.NewNotFoundError("not found"))
+		mockService.EXPECT().FindAll(gomock.Any(), 1, 20).Return(nil, int64(0), domains.NewNotFoundError("not found"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.MakeGet(ctx, nil, nil)
@@ -164,7 +164,7 @@ func TestFindUserByID(t *testing.T) {
 		uc := controller.NewUserController(mockService)
 
 		m := testutil.NewUserMock()
-		mockService.EXPECT().FindByID(m.ID).Return(m.User, nil)
+		mockService.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.User, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.MakeGet(ctx, gin.Params{{Key: "id", Value: m.ID}}, nil)
@@ -182,7 +182,7 @@ func TestFindUserByID(t *testing.T) {
 		mockService := mocks.NewMockUserService(ctrl)
 		uc := controller.NewUserController(mockService)
 
-		mockService.EXPECT().FindByID(testutil.UserID).Return(nil, domains.NewNotFoundError("user not found"))
+		mockService.EXPECT().FindByID(gomock.Any(), testutil.UserID).Return(nil, domains.NewNotFoundError("user not found"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.MakeGet(ctx, gin.Params{{Key: "id", Value: testutil.UserID}}, nil)
@@ -201,7 +201,7 @@ func TestUpdateUser(t *testing.T) {
 
 		m := testutil.NewUserMock()
 		m.User.Name = testutil.UserUpdatedName
-		mockService.EXPECT().Update(gomock.Any()).Return(m.User, nil)
+		mockService.EXPECT().Update(gomock.Any(), gomock.Any()).Return(m.User, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, m.ID)
@@ -240,7 +240,7 @@ func TestDeleteUser(t *testing.T) {
 		mockService := mocks.NewMockUserService(ctrl)
 		uc := controller.NewUserController(mockService)
 
-		mockService.EXPECT().Delete(testutil.UserID).Return(nil)
+		mockService.EXPECT().Delete(gomock.Any(), testutil.UserID).Return(nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -256,7 +256,7 @@ func TestDeleteUser(t *testing.T) {
 		mockService := mocks.NewMockUserService(ctrl)
 		uc := controller.NewUserController(mockService)
 
-		mockService.EXPECT().Delete(testutil.UserID).Return(domains.NewNotFoundError("user not found"))
+		mockService.EXPECT().Delete(gomock.Any(), testutil.UserID).Return(domains.NewNotFoundError("user not found"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)

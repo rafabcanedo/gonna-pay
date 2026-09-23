@@ -45,7 +45,9 @@ func (ac *AuthController) Login(c *gin.Context) {
 		return
 	}
 
-	user, err := ac.userService.FindByEmail(req.Email)
+	ctx := c.Request.Context()
+
+	user, err := ac.userService.FindByEmail(ctx, req.Email)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, rest_errors.NewUnauthorizedRequestError("invalid credentials"))
 		return
@@ -73,7 +75,7 @@ func (ac *AuthController) Login(c *gin.Context) {
 	tokenHash := auth.HashToken(refreshToken)
 	expiresAt := time.Now().Add(48 * time.Hour)
 
-	if err := ac.authRepo.Save(user.ID, tokenHash, expiresAt); err != nil {
+	if err := ac.authRepo.Save(ctx, user.ID, tokenHash, expiresAt); err != nil {
 		logger.Error("error saving refresh token", err)
 		c.JSON(http.StatusInternalServerError, rest_errors.NewInternalServerError("error processing login"))
 		return
@@ -103,23 +105,24 @@ func (ac *AuthController) Refresh(c *gin.Context) {
 		return
 	}
 
+	ctx := c.Request.Context()
 	tokenHash := auth.HashToken(refreshToken)
 
-	stored, err := ac.authRepo.FindByHash(tokenHash)
+	stored, err := ac.authRepo.FindByHash(ctx, tokenHash)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, rest_errors.NewUnauthorizedRequestError("invalid refresh token"))
 		return
 	}
 
 	if time.Now().After(stored.ExpiresAt) {
-		ac.authRepo.DeleteByHash(tokenHash)
+		ac.authRepo.DeleteByHash(ctx, tokenHash)
 		c.JSON(http.StatusUnauthorized, rest_errors.NewUnauthorizedRequestError("refresh token expired"))
 		return
 	}
 
-	ac.authRepo.DeleteByHash(tokenHash)
+	ac.authRepo.DeleteByHash(ctx, tokenHash)
 
-	user, err := ac.userService.FindByID(stored.UserID.String())
+	user, err := ac.userService.FindByID(ctx, stored.UserID.String())
 	if err != nil {
 		httputil.RespondError(c, err)
 		return
@@ -142,7 +145,7 @@ func (ac *AuthController) Refresh(c *gin.Context) {
 	newTokenHash := auth.HashToken(newRefreshToken)
 	newExpiresAt := time.Now().Add(48 * time.Hour)
 
-	if err := ac.authRepo.Save(user.ID, newTokenHash, newExpiresAt); err != nil {
+	if err := ac.authRepo.Save(ctx, user.ID, newTokenHash, newExpiresAt); err != nil {
 		logger.Error("error saving new refresh token", err)
 		c.JSON(http.StatusInternalServerError, rest_errors.NewInternalServerError("error processing refresh"))
 		return
@@ -164,7 +167,7 @@ func (ac *AuthController) Logout(c *gin.Context) {
 	refreshToken, err := c.Cookie("refresh_token")
 	if err == nil {
 		tokenHash := auth.HashToken(refreshToken)
-		ac.authRepo.DeleteByHash(tokenHash)
+		ac.authRepo.DeleteByHash(c.Request.Context(), tokenHash)
 	}
 
 	c.SetCookie("access_token", "", -1, "/", "", false, true)
@@ -182,6 +185,8 @@ func (ac *AuthController) Logout(c *gin.Context) {
 // @Success      200   {object}  map[string]interface{}  "message e user"
 // @Failure      400   {object}  rest_errors.RestErrors
 // @Failure      401   {object}  rest_errors.RestErrors
+// @Failure      404   {object}  rest_errors.RestErrors
+// @Failure      409   {object}  rest_errors.RestErrors  "Email já em uso"
 // @Failure      500   {object}  rest_errors.RestErrors
 // @Security     CookieAuth
 // @Router       /auth/profile [put]
@@ -199,7 +204,9 @@ func (ac *AuthController) UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	current, err := ac.userService.FindByID(userID)
+	ctx := c.Request.Context()
+
+	current, err := ac.userService.FindByID(ctx, userID)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return
@@ -215,7 +222,7 @@ func (ac *AuthController) UpdateProfile(c *gin.Context) {
 		current.Phone = req.Phone
 	}
 
-	updated, err := ac.userService.Update(current)
+	updated, err := ac.userService.Update(ctx, current)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return
@@ -244,7 +251,7 @@ func (ac *AuthController) GetProfile(c *gin.Context) {
 		return
 	}
 
-	user, err := ac.userService.FindByID(userID)
+	user, err := ac.userService.FindByID(c.Request.Context(), userID)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return
@@ -270,7 +277,7 @@ func (ac *AuthController) DeleteProfile(c *gin.Context) {
 		return
 	}
 
-	if err := ac.userService.Delete(userID); err != nil {
+	if err := ac.userService.Delete(c.Request.Context(), userID); err != nil {
 		httputil.RespondError(c, err)
 		return
 	}

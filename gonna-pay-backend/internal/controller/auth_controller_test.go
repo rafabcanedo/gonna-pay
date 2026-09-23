@@ -57,8 +57,8 @@ func TestLogin(t *testing.T) {
 		user := testutil.NewUserFixture()
 		user.Password, _ = hashPassword("senha123")
 
-		mockUserService.EXPECT().FindByEmail("rafael@email.com").Return(user, nil)
-		mockAuthRepo.EXPECT().Save(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+		mockUserService.EXPECT().FindByEmail(gomock.Any(), "rafael@email.com").Return(user, nil)
+		mockAuthRepo.EXPECT().Save(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.MakePost(ctx, nil, map[string]any{
@@ -101,7 +101,7 @@ func TestLogin(t *testing.T) {
 		mockAuthRepo := mocks.NewMockAuthRepository(ctrl)
 		ac := controller.NewAuthController(mockUserService, mockAuthRepo)
 
-		mockUserService.EXPECT().FindByEmail("rafael@email.com").Return(nil, domains.NewNotFoundError("not found"))
+		mockUserService.EXPECT().FindByEmail(gomock.Any(), "rafael@email.com").Return(nil, domains.NewNotFoundError("not found"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.MakePost(ctx, nil, map[string]any{
@@ -122,7 +122,7 @@ func TestLogin(t *testing.T) {
 
 		user := testutil.NewUserFixture()
 		user.Password, _ = hashPassword("senha-correta")
-		mockUserService.EXPECT().FindByEmail("rafael@email.com").Return(user, nil)
+		mockUserService.EXPECT().FindByEmail(gomock.Any(), "rafael@email.com").Return(user, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.MakePost(ctx, nil, map[string]any{
@@ -157,7 +157,7 @@ func TestRefresh(t *testing.T) {
 		mockAuthRepo := mocks.NewMockAuthRepository(ctrl)
 		ac := controller.NewAuthController(mockUserService, mockAuthRepo)
 
-		mockAuthRepo.EXPECT().FindByHash(gomock.Any()).Return(nil, domains.NewNotFoundError("not found"))
+		mockAuthRepo.EXPECT().FindByHash(gomock.Any(), gomock.Any()).Return(nil, domains.NewNotFoundError("not found"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.MakePost(ctx, nil, nil)
@@ -180,8 +180,8 @@ func TestRefresh(t *testing.T) {
 			TokenHash: "somehash",
 			ExpiresAt: time.Now().Add(-1 * time.Hour),
 		}
-		mockAuthRepo.EXPECT().FindByHash(gomock.Any()).Return(expiredToken, nil)
-		mockAuthRepo.EXPECT().DeleteByHash(gomock.Any()).Return(nil)
+		mockAuthRepo.EXPECT().FindByHash(gomock.Any(), gomock.Any()).Return(expiredToken, nil)
+		mockAuthRepo.EXPECT().DeleteByHash(gomock.Any(), gomock.Any()).Return(nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.MakePost(ctx, nil, nil)
@@ -200,7 +200,7 @@ func TestLogout(t *testing.T) {
 		mockAuthRepo := mocks.NewMockAuthRepository(ctrl)
 		ac := controller.NewAuthController(mockUserService, mockAuthRepo)
 
-		mockAuthRepo.EXPECT().DeleteByHash(gomock.Any()).Return(nil)
+		mockAuthRepo.EXPECT().DeleteByHash(gomock.Any(), gomock.Any()).Return(nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.MakePost(ctx, nil, nil)
@@ -237,7 +237,7 @@ func TestGetProfile(t *testing.T) {
 		ac := controller.NewAuthController(mockUserService, mockAuthRepo)
 
 		user := testutil.NewUserFixture()
-		mockUserService.EXPECT().FindByID("user-1").Return(user, nil)
+		mockUserService.EXPECT().FindByID(gomock.Any(), "user-1").Return(user, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, "user-1")
@@ -273,7 +273,7 @@ func TestDeleteProfile(t *testing.T) {
 		mockAuthRepo := mocks.NewMockAuthRepository(ctrl)
 		ac := controller.NewAuthController(mockUserService, mockAuthRepo)
 
-		mockUserService.EXPECT().Delete("user-1").Return(nil)
+		mockUserService.EXPECT().Delete(gomock.Any(), "user-1").Return(nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, "user-1")

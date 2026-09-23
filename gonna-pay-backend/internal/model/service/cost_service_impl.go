@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"math"
 
@@ -10,27 +11,28 @@ import (
 )
 
 type CostService interface {
-	Create(cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error)
-	Update(id, userID string, cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error)
-	FindAll(userID string, page, limit int, filters domains.CostFilters) ([]*domains.Cost, int64, error)
-	FindByID(id, userID string) (*domains.Cost, error)
-	Delete(id, userID string) error
-	FindStats(userID string, filters domains.CostFilters) (*domains.CostStats, error)
+	Create(ctx context.Context, cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error)
+	Update(ctx context.Context, id, userID string, cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error)
+	FindAll(ctx context.Context, userID string, page, limit int, filters domains.CostFilters) ([]*domains.Cost, int64, error)
+	FindByID(ctx context.Context, id, userID string) (*domains.Cost, error)
+	Delete(ctx context.Context, id, userID string) error
+	FindStats(ctx context.Context, userID string, filters domains.CostFilters) (*domains.CostStats, error)
 }
 
 type costService struct {
-	repo repository.CostRepository
+	repo      repository.CostRepository
+	groupRepo repository.GroupRepository
 }
 
-func NewCostService(repo repository.CostRepository) CostService {
-	return &costService{repo: repo}
+func NewCostService(repo repository.CostRepository, groupRepo repository.GroupRepository) CostService {
+	return &costService{repo: repo, groupRepo: groupRepo}
 }
 
-func (s *costService) Create(cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error) {
+func (s *costService) Create(ctx context.Context, cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error) {
 	var members []domains.Member
 
 	if cost.GroupID != "" {
-		group, err := s.repo.GetGroupByID(cost.GroupID)
+		group, err := s.groupRepo.FindByID(ctx, cost.GroupID)
 		if err != nil {
 			if !errors.Is(err, domains.ErrNotFound) {
 				logger.Error("error fetching group for cost creation", err)
@@ -41,7 +43,7 @@ func (s *costService) Create(cost *domains.Cost, ownerPercentage *float64) (*dom
 			return nil, domains.NewForbiddenError("access denied")
 		}
 
-		groupMembers, err := s.repo.GetGroupMembers(cost.GroupID)
+		groupMembers, err := s.groupRepo.GetMembers(ctx, cost.GroupID)
 		if err != nil {
 			logger.Error("error fetching group members for cost creation", err)
 			return nil, err
@@ -74,7 +76,7 @@ func (s *costService) Create(cost *domains.Cost, ownerPercentage *float64) (*dom
 		cost.OwnerPercentage = 100
 	}
 
-	created, err := s.repo.Create(cost)
+	created, err := s.repo.Create(ctx, cost)
 	if err != nil {
 		logger.Error("error creating cost", err)
 		return nil, err
@@ -83,8 +85,8 @@ func (s *costService) Create(cost *domains.Cost, ownerPercentage *float64) (*dom
 	return created, nil
 }
 
-func (s *costService) findAndAuthorize(id, userID string) (*domains.Cost, error) {
-	cost, err := s.repo.FindByID(id)
+func (s *costService) findAndAuthorize(ctx context.Context, id, userID string) (*domains.Cost, error) {
+	cost, err := s.repo.FindByID(ctx, id)
 	if err != nil {
 		if !errors.Is(err, domains.ErrNotFound) {
 			logger.Error("error finding cost", err)
@@ -99,8 +101,8 @@ func (s *costService) findAndAuthorize(id, userID string) (*domains.Cost, error)
 	return cost, nil
 }
 
-func (s *costService) Update(id, userID string, cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error) {
-	existing, err := s.findAndAuthorize(id, userID)
+func (s *costService) Update(ctx context.Context, id, userID string, cost *domains.Cost, ownerPercentage *float64) (*domains.Cost, error) {
+	existing, err := s.findAndAuthorize(ctx, id, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -135,7 +137,7 @@ func (s *costService) Update(id, userID string, cost *domains.Cost, ownerPercent
 		existing.OwnerPercentage = 100
 	}
 
-	updated, err := s.repo.Update(id, existing)
+	updated, err := s.repo.Update(ctx, id, existing)
 	if err != nil {
 		logger.Error("error updating cost", err)
 		return nil, err
@@ -144,10 +146,10 @@ func (s *costService) Update(id, userID string, cost *domains.Cost, ownerPercent
 	return updated, nil
 }
 
-func (s *costService) FindAll(userID string, page, limit int, filters domains.CostFilters) ([]*domains.Cost, int64, error) {
+func (s *costService) FindAll(ctx context.Context, userID string, page, limit int, filters domains.CostFilters) ([]*domains.Cost, int64, error) {
 	offset := (page - 1) * limit
 
-	costs, total, err := s.repo.FindAll(userID, limit, offset, filters)
+	costs, total, err := s.repo.FindAll(ctx, userID, limit, offset, filters)
 	if err != nil {
 		logger.Error("error finding all costs", err)
 		return nil, 0, err
@@ -156,12 +158,12 @@ func (s *costService) FindAll(userID string, page, limit int, filters domains.Co
 	return costs, total, nil
 }
 
-func (s *costService) FindByID(id, userID string) (*domains.Cost, error) {
-	return s.findAndAuthorize(id, userID)
+func (s *costService) FindByID(ctx context.Context, id, userID string) (*domains.Cost, error) {
+	return s.findAndAuthorize(ctx, id, userID)
 }
 
-func (s *costService) FindStats(userID string, filters domains.CostFilters) (*domains.CostStats, error) {
-	stats, err := s.repo.FindStats(userID, filters)
+func (s *costService) FindStats(ctx context.Context, userID string, filters domains.CostFilters) (*domains.CostStats, error) {
+	stats, err := s.repo.FindStats(ctx, userID, filters)
 	if err != nil {
 		logger.Error("error finding cost stats", err)
 		return nil, err
@@ -170,12 +172,12 @@ func (s *costService) FindStats(userID string, filters domains.CostFilters) (*do
 	return stats, nil
 }
 
-func (s *costService) Delete(id, userID string) error {
-	if _, err := s.findAndAuthorize(id, userID); err != nil {
+func (s *costService) Delete(ctx context.Context, id, userID string) error {
+	if _, err := s.findAndAuthorize(ctx, id, userID); err != nil {
 		return err
 	}
 
-	if err := s.repo.Delete(id); err != nil {
+	if err := s.repo.Delete(ctx, id); err != nil {
 		logger.Error("error deleting cost", err)
 		return err
 	}

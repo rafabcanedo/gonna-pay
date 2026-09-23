@@ -45,7 +45,7 @@ func (gc *GroupController) CreateGroup(c *gin.Context) {
 
 	group := domains.NewGroup(ownerID, req.Name, req.Category)
 
-	created, err := gc.service.Create(group, req.MemberIDs)
+	created, err := gc.service.Create(c.Request.Context(), group, req.MemberIDs)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return
@@ -76,7 +76,7 @@ func (gc *GroupController) FindAllGroups(c *gin.Context) {
 		Search:   c.Query("search"),
 	}
 
-	groups, total, err := gc.service.FindAll(ownerID, page, limit, filters)
+	groups, total, err := gc.service.FindAll(c.Request.Context(), ownerID, page, limit, filters)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return
@@ -104,7 +104,7 @@ func (gc *GroupController) FindGroupByID(c *gin.Context) {
 	id := c.Param("id")
 	ownerID := c.GetString("userID")
 
-	group, err := gc.service.FindByID(id, ownerID)
+	group, err := gc.service.FindByID(c.Request.Context(), id, ownerID)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return
@@ -142,7 +142,7 @@ func (gc *GroupController) UpdateGroup(c *gin.Context) {
 
 	group := domains.NewGroupForUpdate(id, ownerID, req.Name, req.Category)
 
-	updated, err := gc.service.Update(group, ownerID)
+	updated, err := gc.service.Update(c.Request.Context(), group, ownerID)
 	if err != nil {
 		httputil.RespondError(c, err)
 		return
@@ -167,7 +167,7 @@ func (gc *GroupController) DeleteGroup(c *gin.Context) {
 	id := c.Param("id")
 	ownerID := c.GetString("userID")
 
-	if err := gc.service.Delete(id, ownerID); err != nil {
+	if err := gc.service.Delete(c.Request.Context(), id, ownerID); err != nil {
 		httputil.RespondError(c, err)
 		return
 	}
@@ -194,7 +194,7 @@ func (gc *GroupController) AddMember(c *gin.Context) {
 	contactID := c.Param("contactId")
 	ownerID := c.GetString("userID")
 
-	if err := gc.service.AddMember(groupID, contactID, ownerID); err != nil {
+	if err := gc.service.AddMember(c.Request.Context(), groupID, contactID, ownerID); err != nil {
 		httputil.RespondError(c, err)
 		return
 	}
@@ -220,7 +220,7 @@ func (gc *GroupController) RemoveMember(c *gin.Context) {
 	contactID := c.Param("contactId")
 	ownerID := c.GetString("userID")
 
-	if err := gc.service.RemoveMember(groupID, contactID, ownerID); err != nil {
+	if err := gc.service.RemoveMember(c.Request.Context(), groupID, contactID, ownerID); err != nil {
 		httputil.RespondError(c, err)
 		return
 	}

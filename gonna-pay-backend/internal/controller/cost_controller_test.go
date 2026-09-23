@@ -23,7 +23,7 @@ func TestCreateCost(t *testing.T) {
 		cc := controller.NewCostController(mockService)
 
 		m := testutil.NewCostMock()
-		mockService.EXPECT().Create(gomock.Any(), gomock.Any()).Return(m.Cost, nil)
+		mockService.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Return(m.Cost, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -106,8 +106,8 @@ func TestFindAllCosts(t *testing.T) {
 		m1 := testutil.NewCostMock()
 		m2 := testutil.NewCostMock()
 		m2.Cost.ID = "cost-2"
-		mockService.EXPECT().FindAll(testutil.UserID, 1, 20, domains.CostFilters{}).Return([]*domains.Cost{m1.Cost, m2.Cost}, int64(2), nil)
-		mockService.EXPECT().FindStats(testutil.UserID, domains.CostFilters{}).Return(&domains.CostStats{ByCategory: []domains.CostCategoryBreakdown{}}, nil)
+		mockService.EXPECT().FindAll(gomock.Any(), testutil.UserID, 1, 20, domains.CostFilters{}).Return([]*domains.Cost{m1.Cost, m2.Cost}, int64(2), nil)
+		mockService.EXPECT().FindStats(gomock.Any(), testutil.UserID, domains.CostFilters{}).Return(&domains.CostStats{ByCategory: []domains.CostCategoryBreakdown{}}, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -128,8 +128,8 @@ func TestFindAllCosts(t *testing.T) {
 		cc := controller.NewCostController(mockService)
 
 		m := testutil.NewCostMock()
-		mockService.EXPECT().FindAll(testutil.UserID, 2, 10, domains.CostFilters{}).Return([]*domains.Cost{m.Cost}, int64(11), nil)
-		mockService.EXPECT().FindStats(testutil.UserID, domains.CostFilters{}).Return(&domains.CostStats{ByCategory: []domains.CostCategoryBreakdown{}}, nil)
+		mockService.EXPECT().FindAll(gomock.Any(), testutil.UserID, 2, 10, domains.CostFilters{}).Return([]*domains.Cost{m.Cost}, int64(11), nil)
+		mockService.EXPECT().FindStats(gomock.Any(), testutil.UserID, domains.CostFilters{}).Return(&domains.CostStats{ByCategory: []domains.CostCategoryBreakdown{}}, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -151,7 +151,7 @@ func TestFindAllCosts(t *testing.T) {
 		mockService := mocks.NewMockCostService(ctrl)
 		cc := controller.NewCostController(mockService)
 
-		mockService.EXPECT().FindAll(testutil.UserID, 1, 20, domains.CostFilters{}).Return(nil, int64(0), domains.NewNotFoundError("not found"))
+		mockService.EXPECT().FindAll(gomock.Any(), testutil.UserID, 1, 20, domains.CostFilters{}).Return(nil, int64(0), domains.NewNotFoundError("not found"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -171,8 +171,8 @@ func TestFindAllCosts_Filters(t *testing.T) {
 
 		m := testutil.NewCostMock()
 		expectedFilters := domains.CostFilters{Category: "Dinner"}
-		mockService.EXPECT().FindAll(testutil.UserID, 1, 20, expectedFilters).Return([]*domains.Cost{m.Cost}, int64(1), nil)
-		mockService.EXPECT().FindStats(testutil.UserID, expectedFilters).Return(&domains.CostStats{ByCategory: []domains.CostCategoryBreakdown{}}, nil)
+		mockService.EXPECT().FindAll(gomock.Any(), testutil.UserID, 1, 20, expectedFilters).Return([]*domains.Cost{m.Cost}, int64(1), nil)
+		mockService.EXPECT().FindStats(gomock.Any(), testutil.UserID, expectedFilters).Return(&domains.CostStats{ByCategory: []domains.CostCategoryBreakdown{}}, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -193,8 +193,8 @@ func TestFindAllCosts_Filters(t *testing.T) {
 			Period: domains.CostPeriodMonth,
 			Type:   domains.CostTypeSolo,
 		}
-		mockService.EXPECT().FindAll(testutil.UserID, 1, 20, expectedFilters).Return([]*domains.Cost{m.Cost}, int64(1), nil)
-		mockService.EXPECT().FindStats(testutil.UserID, expectedFilters).Return(&domains.CostStats{ByCategory: []domains.CostCategoryBreakdown{}}, nil)
+		mockService.EXPECT().FindAll(gomock.Any(), testutil.UserID, 1, 20, expectedFilters).Return([]*domains.Cost{m.Cost}, int64(1), nil)
+		mockService.EXPECT().FindStats(gomock.Any(), testutil.UserID, expectedFilters).Return(&domains.CostStats{ByCategory: []domains.CostCategoryBreakdown{}}, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -213,7 +213,7 @@ func TestFindCostByID(t *testing.T) {
 		cc := controller.NewCostController(mockService)
 
 		m := testutil.NewCostMock()
-		mockService.EXPECT().FindByID(m.ID, testutil.UserID).Return(m.Cost, nil)
+		mockService.EXPECT().FindByID(gomock.Any(), m.ID, testutil.UserID).Return(m.Cost, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -232,7 +232,7 @@ func TestFindCostByID(t *testing.T) {
 		mockService := mocks.NewMockCostService(ctrl)
 		cc := controller.NewCostController(mockService)
 
-		mockService.EXPECT().FindByID(testutil.CostID, testutil.UserID).Return(nil, domains.NewNotFoundError("cost not found"))
+		mockService.EXPECT().FindByID(gomock.Any(), testutil.CostID, testutil.UserID).Return(nil, domains.NewNotFoundError("cost not found"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -248,7 +248,7 @@ func TestFindCostByID(t *testing.T) {
 		mockService := mocks.NewMockCostService(ctrl)
 		cc := controller.NewCostController(mockService)
 
-		mockService.EXPECT().FindByID(testutil.CostID, testutil.UserID2).Return(nil, domains.NewForbiddenError("access denied"))
+		mockService.EXPECT().FindByID(gomock.Any(), testutil.CostID, testutil.UserID2).Return(nil, domains.NewForbiddenError("access denied"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID2)
@@ -267,7 +267,7 @@ func TestUpdateCost(t *testing.T) {
 		cc := controller.NewCostController(mockService)
 
 		m := testutil.NewCostMock()
-		mockService.EXPECT().Update(m.ID, testutil.UserID, gomock.Any(), gomock.Any()).Return(m.Cost, nil)
+		mockService.EXPECT().Update(gomock.Any(), m.ID, testutil.UserID, gomock.Any(), gomock.Any()).Return(m.Cost, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -288,7 +288,7 @@ func TestUpdateCost(t *testing.T) {
 		cc := controller.NewCostController(mockService)
 
 		m := testutil.NewCostMock()
-		mockService.EXPECT().Update(m.ID, testutil.UserID, gomock.Any(), gomock.Any()).Return(m.Cost, nil)
+		mockService.EXPECT().Update(gomock.Any(), m.ID, testutil.UserID, gomock.Any(), gomock.Any()).Return(m.Cost, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -322,7 +322,7 @@ func TestUpdateCost(t *testing.T) {
 		mockService := mocks.NewMockCostService(ctrl)
 		cc := controller.NewCostController(mockService)
 
-		mockService.EXPECT().Update(testutil.CostID, testutil.UserID, gomock.Any(), gomock.Any()).Return(nil, domains.NewNotFoundError("cost not found"))
+		mockService.EXPECT().Update(gomock.Any(), testutil.CostID, testutil.UserID, gomock.Any(), gomock.Any()).Return(nil, domains.NewNotFoundError("cost not found"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -342,7 +342,7 @@ func TestDeleteCost(t *testing.T) {
 		mockService := mocks.NewMockCostService(ctrl)
 		cc := controller.NewCostController(mockService)
 
-		mockService.EXPECT().Delete(testutil.CostID, testutil.UserID).Return(nil)
+		mockService.EXPECT().Delete(gomock.Any(), testutil.CostID, testutil.UserID).Return(nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -358,7 +358,7 @@ func TestDeleteCost(t *testing.T) {
 		mockService := mocks.NewMockCostService(ctrl)
 		cc := controller.NewCostController(mockService)
 
-		mockService.EXPECT().Delete(testutil.CostID, testutil.UserID).Return(domains.NewNotFoundError("cost not found"))
+		mockService.EXPECT().Delete(gomock.Any(), testutil.CostID, testutil.UserID).Return(domains.NewNotFoundError("cost not found"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/configuration/logger"
@@ -9,12 +10,12 @@ import (
 )
 
 type UserService interface {
-	Create(user *domains.User) (*domains.User, error)
-	FindAll(page, limit int) ([]*domains.User, int64, error)
-	FindByID(id string) (*domains.User, error)
-	FindByEmail(email string) (*domains.User, error)
-	Update(user *domains.User) (*domains.User, error)
-	Delete(id string) error
+	Create(ctx context.Context, user *domains.User) (*domains.User, error)
+	FindAll(ctx context.Context, page, limit int) ([]*domains.User, int64, error)
+	FindByID(ctx context.Context, id string) (*domains.User, error)
+	FindByEmail(ctx context.Context, email string) (*domains.User, error)
+	Update(ctx context.Context, user *domains.User) (*domains.User, error)
+	Delete(ctx context.Context, id string) error
 }
 
 type userService struct {
@@ -25,8 +26,8 @@ func NewUserService(repo repository.UserRepository) UserService {
 	return &userService{repo: repo}
 }
 
-func (s *userService) Create(user *domains.User) (*domains.User, error) {
-	existing, err := s.repo.FindByEmail(user.Email)
+func (s *userService) Create(ctx context.Context, user *domains.User) (*domains.User, error) {
+	existing, err := s.repo.FindByEmail(ctx, user.Email)
 	if err != nil && !errors.Is(err, domains.ErrNotFound) {
 		logger.Error("error checking email uniqueness", err)
 		return nil, err
@@ -40,7 +41,7 @@ func (s *userService) Create(user *domains.User) (*domains.User, error) {
 		return nil, err
 	}
 
-	created, err := s.repo.Create(user)
+	created, err := s.repo.Create(ctx, user)
 	if err != nil {
 		logger.Error("error creating user", err)
 		return nil, err
@@ -49,10 +50,10 @@ func (s *userService) Create(user *domains.User) (*domains.User, error) {
 	return created, nil
 }
 
-func (s *userService) FindAll(page, limit int) ([]*domains.User, int64, error) {
+func (s *userService) FindAll(ctx context.Context, page, limit int) ([]*domains.User, int64, error) {
 	offset := (page - 1) * limit
 
-	users, total, err := s.repo.FindAll(limit, offset)
+	users, total, err := s.repo.FindAll(ctx, limit, offset)
 	if err != nil {
 		logger.Error("error finding all users", err)
 		return nil, 0, err
@@ -61,8 +62,8 @@ func (s *userService) FindAll(page, limit int) ([]*domains.User, int64, error) {
 	return users, total, nil
 }
 
-func (s *userService) FindByID(id string) (*domains.User, error) {
-	user, err := s.repo.FindByID(id)
+func (s *userService) FindByID(ctx context.Context, id string) (*domains.User, error) {
+	user, err := s.repo.FindByID(ctx, id)
 	if err != nil {
 		if !errors.Is(err, domains.ErrNotFound) {
 			logger.Error("error finding user by id", err)
@@ -73,8 +74,8 @@ func (s *userService) FindByID(id string) (*domains.User, error) {
 	return user, nil
 }
 
-func (s *userService) FindByEmail(email string) (*domains.User, error) {
-	user, err := s.repo.FindByEmail(email)
+func (s *userService) FindByEmail(ctx context.Context, email string) (*domains.User, error) {
+	user, err := s.repo.FindByEmail(ctx, email)
 	if err != nil {
 		if !errors.Is(err, domains.ErrNotFound) {
 			logger.Error("error finding user by email", err)
@@ -85,8 +86,8 @@ func (s *userService) FindByEmail(email string) (*domains.User, error) {
 	return user, nil
 }
 
-func (s *userService) Update(user *domains.User) (*domains.User, error) {
-	if _, err := s.repo.FindByID(user.ID); err != nil {
+func (s *userService) Update(ctx context.Context, user *domains.User) (*domains.User, error) {
+	if _, err := s.repo.FindByID(ctx, user.ID); err != nil {
 		if !errors.Is(err, domains.ErrNotFound) {
 			logger.Error("error finding user on update", err)
 		}
@@ -94,7 +95,7 @@ func (s *userService) Update(user *domains.User) (*domains.User, error) {
 	}
 
 	if user.Email != "" {
-		existing, err := s.repo.FindByEmail(user.Email)
+		existing, err := s.repo.FindByEmail(ctx, user.Email)
 		if err != nil && !errors.Is(err, domains.ErrNotFound) {
 			logger.Error("error checking email uniqueness on update", err)
 			return nil, err
@@ -111,7 +112,7 @@ func (s *userService) Update(user *domains.User) (*domains.User, error) {
 		}
 	}
 
-	updated, err := s.repo.Update(user)
+	updated, err := s.repo.Update(ctx, user)
 	if err != nil {
 		logger.Error("error updating user", err)
 		return nil, err
@@ -120,15 +121,15 @@ func (s *userService) Update(user *domains.User) (*domains.User, error) {
 	return updated, nil
 }
 
-func (s *userService) Delete(id string) error {
-	if _, err := s.repo.FindByID(id); err != nil {
+func (s *userService) Delete(ctx context.Context, id string) error {
+	if _, err := s.repo.FindByID(ctx, id); err != nil {
 		if !errors.Is(err, domains.ErrNotFound) {
 			logger.Error("error finding user on delete", err)
 		}
 		return err
 	}
 
-	if err := s.repo.Delete(id); err != nil {
+	if err := s.repo.Delete(ctx, id); err != nil {
 		logger.Error("error deleting user", err)
 		return err
 	}

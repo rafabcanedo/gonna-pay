@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -14,14 +15,14 @@ import (
 )
 
 type ContactRepository interface {
-	Create(contact *domains.Contact) (*domains.Contact, error)
-	FindAll(ownerID string, limit, offset int, filters domains.ContactFilters) ([]*domains.Contact, int64, error)
-	FindByID(id string) (*domains.Contact, error)
-	Update(contact *domains.Contact) (*domains.Contact, error)
-	Delete(id string) error
-	ExistsByEmailAndOwner(email, ownerID string) (bool, error)
-	FindContactsByFrequency(userID string, limit int) ([]domains.ContactFrequency, error)
-	FindStats(ownerID string) (*domains.ContactStats, error)
+	Create(ctx context.Context, contact *domains.Contact) (*domains.Contact, error)
+	FindAll(ctx context.Context, ownerID string, limit, offset int, filters domains.ContactFilters) ([]*domains.Contact, int64, error)
+	FindByID(ctx context.Context, id string) (*domains.Contact, error)
+	Update(ctx context.Context, contact *domains.Contact) (*domains.Contact, error)
+	Delete(ctx context.Context, id string) error
+	ExistsByEmailAndOwner(ctx context.Context, email, ownerID string) (bool, error)
+	FindContactsByFrequency(ctx context.Context, userID string, limit int) ([]domains.ContactFrequency, error)
+	FindStats(ctx context.Context, ownerID string) (*domains.ContactStats, error)
 }
 
 type contactRepository struct {
@@ -32,12 +33,12 @@ func NewContactRepository(db *sql.DB) ContactRepository {
 	return &contactRepository{db: db}
 }
 
-func (r *contactRepository) Create(contact *domains.Contact) (*domains.Contact, error) {
+func (r *contactRepository) Create(ctx context.Context, contact *domains.Contact) (*domains.Contact, error) {
 	e := converter.ConvertContactDomainToEntity(contact)
 	e.ID = uuid.New()
 	now := time.Now()
 
-	_, err := r.db.Exec(
+	_, err := r.db.ExecContext(ctx,
 		`INSERT INTO contact_entities (id, owner_id, name, email, phone, category, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
 		e.ID, e.OwnerID, e.Name, e.Email, e.Phone, e.Category, now,
 	)
@@ -49,7 +50,7 @@ func (r *contactRepository) Create(contact *domains.Contact) (*domains.Contact, 
 	return converter.ConvertContactEntityToDomain(*e), nil
 }
 
-func (r *contactRepository) FindAll(ownerID string, limit, offset int, filters domains.ContactFilters) ([]*domains.Contact, int64, error) {
+func (r *contactRepository) FindAll(ctx context.Context, ownerID string, limit, offset int, filters domains.ContactFilters) ([]*domains.Contact, int64, error) {
 	conditions := []string{"owner_id = $1", "deleted_at IS NULL"}
 	args := []any{ownerID}
 	idx := 2
@@ -68,7 +69,7 @@ func (r *contactRepository) FindAll(ownerID string, limit, offset int, filters d
 	where := strings.Join(conditions, " AND ")
 
 	var total int64
-	err := r.db.QueryRow(
+	err := r.db.QueryRowContext(ctx,
 		fmt.Sprintf(`SELECT COUNT(*) FROM contact_entities WHERE %s`, where),
 		args...,
 	).Scan(&total)
@@ -77,7 +78,7 @@ func (r *contactRepository) FindAll(ownerID string, limit, offset int, filters d
 	}
 
 	queryArgs := append(args, limit, offset)
-	rows, err := r.db.Query(
+	rows, err := r.db.QueryContext(ctx,
 		fmt.Sprintf(`
 			SELECT id, owner_id, name, email, phone, category, created_at
 			FROM contact_entities
@@ -87,7 +88,6 @@ func (r *contactRepository) FindAll(ownerID string, limit, offset int, filters d
 		`, where, idx, idx+1),
 		queryArgs...,
 	)
-
 	if err != nil {
 		return nil, 0, err
 	}
@@ -109,15 +109,13 @@ func (r *contactRepository) FindAll(ownerID string, limit, offset int, filters d
 	return contacts, total, nil
 }
 
-func (r *contactRepository) FindByID(id string) (*domains.Contact, error) {
+func (r *contactRepository) FindByID(ctx context.Context, id string) (*domains.Contact, error) {
 	var e entity.ContactEntity
 
-	row := r.db.QueryRow(
+	err := r.db.QueryRowContext(ctx,
 		`SELECT id, owner_id, name, email, phone, category, created_at FROM contact_entities WHERE id = $1 AND deleted_at IS NULL`,
 		id,
-	)
-
-	err := row.Scan(&e.ID, &e.OwnerID, &e.Name, &e.Email, &e.Phone, &e.Category, &e.CreatedAt)
+	).Scan(&e.ID, &e.OwnerID, &e.Name, &e.Email, &e.Phone, &e.Category, &e.CreatedAt)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domains.NewNotFoundError("contact not found")
@@ -128,10 +126,10 @@ func (r *contactRepository) FindByID(id string) (*domains.Contact, error) {
 	return converter.ConvertContactEntityToDomain(e), nil
 }
 
-func (r *contactRepository) Update(contact *domains.Contact) (*domains.Contact, error) {
+func (r *contactRepository) Update(ctx context.Context, contact *domains.Contact) (*domains.Contact, error) {
 	e := converter.ConvertContactDomainToEntity(contact)
 
-	_, err := r.db.Exec(
+	_, err := r.db.ExecContext(ctx,
 		`UPDATE contact_entities SET name = $1, email = $2, phone = $3, category = $4 WHERE id = $5`,
 		e.Name, e.Email, e.Phone, e.Category, e.ID,
 	)
@@ -142,17 +140,17 @@ func (r *contactRepository) Update(contact *domains.Contact) (*domains.Contact, 
 	return converter.ConvertContactEntityToDomain(*e), nil
 }
 
-func (r *contactRepository) Delete(id string) error {
-	_, err := r.db.Exec(
+func (r *contactRepository) Delete(ctx context.Context, id string) error {
+	_, err := r.db.ExecContext(ctx,
 		`UPDATE contact_entities SET deleted_at = $1 WHERE id = $2`,
 		time.Now(), id,
 	)
 	return err
 }
 
-func (r *contactRepository) ExistsByEmailAndOwner(email, ownerID string) (bool, error) {
+func (r *contactRepository) ExistsByEmailAndOwner(ctx context.Context, email, ownerID string) (bool, error) {
 	var count int
-	err := r.db.QueryRow(
+	err := r.db.QueryRowContext(ctx,
 		`SELECT COUNT(*) FROM contact_entities WHERE email = $1 AND owner_id = $2 AND deleted_at IS NULL`,
 		email, ownerID,
 	).Scan(&count)
@@ -162,8 +160,8 @@ func (r *contactRepository) ExistsByEmailAndOwner(email, ownerID string) (bool, 
 	return count > 0, nil
 }
 
-func (r *contactRepository) FindStats(ownerID string) (*domains.ContactStats, error) {
-	rows, err := r.db.Query(
+func (r *contactRepository) FindStats(ctx context.Context, ownerID string) (*domains.ContactStats, error) {
+	rows, err := r.db.QueryContext(ctx,
 		`SELECT category, COUNT(*) FROM contact_entities WHERE owner_id = $1 AND deleted_at IS NULL GROUP BY category`,
 		ownerID,
 	)
@@ -189,8 +187,8 @@ func (r *contactRepository) FindStats(ownerID string) (*domains.ContactStats, er
 	return &domains.ContactStats{ByCategory: byCategory}, nil
 }
 
-func (r *contactRepository) FindContactsByFrequency(userID string, limit int) ([]domains.ContactFrequency, error) {
-	rows, err := r.db.Query(
+func (r *contactRepository) FindContactsByFrequency(ctx context.Context, userID string, limit int) ([]domains.ContactFrequency, error) {
+	rows, err := r.db.QueryContext(ctx,
 		`SELECT elem->>'contactId', elem->>'contactName', COUNT(*)
 		FROM cost_entities c, jsonb_array_elements(c.splits) AS elem
 		WHERE c.user_id = $1

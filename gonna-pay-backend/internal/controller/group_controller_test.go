@@ -23,7 +23,7 @@ func TestCreateGroup(t *testing.T) {
 		gc := controller.NewGroupController(mockService)
 
 		m := testutil.NewGroupMock()
-		mockService.EXPECT().Create(gomock.Any(), gomock.Any()).Return(m.Group, nil)
+		mockService.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Return(m.Group, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -77,7 +77,7 @@ func TestCreateGroup(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		mockService.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil, domains.NewForbiddenError("access denied"))
+		mockService.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, domains.NewForbiddenError("access denied"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -101,7 +101,7 @@ func TestFindAllGroups(t *testing.T) {
 		m1 := testutil.NewGroupMock()
 		m2 := testutil.NewGroupMock()
 		m2.Group.ID = "group-2"
-		mockService.EXPECT().FindAll(testutil.UserID, 1, 20, domains.GroupFilters{}).Return([]*domains.Group{m1.Group, m2.Group}, int64(2), nil)
+		mockService.EXPECT().FindAll(gomock.Any(), testutil.UserID, 1, 20, domains.GroupFilters{}).Return([]*domains.Group{m1.Group, m2.Group}, int64(2), nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -122,7 +122,7 @@ func TestFindAllGroups(t *testing.T) {
 		gc := controller.NewGroupController(mockService)
 
 		m := testutil.NewGroupMock()
-		mockService.EXPECT().FindAll(testutil.UserID, 2, 10, domains.GroupFilters{}).Return([]*domains.Group{m.Group}, int64(11), nil)
+		mockService.EXPECT().FindAll(gomock.Any(), testutil.UserID, 2, 10, domains.GroupFilters{}).Return([]*domains.Group{m.Group}, int64(11), nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -144,7 +144,7 @@ func TestFindAllGroups(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		mockService.EXPECT().FindAll(testutil.UserID, 1, 20, domains.GroupFilters{}).Return(nil, int64(0), domains.NewNotFoundError("not found"))
+		mockService.EXPECT().FindAll(gomock.Any(), testutil.UserID, 1, 20, domains.GroupFilters{}).Return(nil, int64(0), domains.NewNotFoundError("not found"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -164,7 +164,7 @@ func TestFindAllGroups_Filters(t *testing.T) {
 
 		m := testutil.NewGroupMock()
 		expectedFilters := domains.GroupFilters{Search: "coffee", Category: "Others"}
-		mockService.EXPECT().FindAll(testutil.UserID, 1, 20, expectedFilters).Return([]*domains.Group{m.Group}, int64(1), nil)
+		mockService.EXPECT().FindAll(gomock.Any(), testutil.UserID, 1, 20, expectedFilters).Return([]*domains.Group{m.Group}, int64(1), nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -183,7 +183,7 @@ func TestFindGroupByID(t *testing.T) {
 		gc := controller.NewGroupController(mockService)
 
 		m := testutil.NewGroupMock()
-		mockService.EXPECT().FindByID(m.ID, testutil.UserID).Return(m.Group, nil)
+		mockService.EXPECT().FindByID(gomock.Any(), m.ID, testutil.UserID).Return(m.Group, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -202,7 +202,7 @@ func TestFindGroupByID(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		mockService.EXPECT().FindByID(testutil.GroupID, testutil.UserID).Return(nil, domains.NewNotFoundError("group not found"))
+		mockService.EXPECT().FindByID(gomock.Any(), testutil.GroupID, testutil.UserID).Return(nil, domains.NewNotFoundError("group not found"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -218,7 +218,7 @@ func TestFindGroupByID(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		mockService.EXPECT().FindByID(testutil.GroupID, testutil.UserID2).Return(nil, domains.NewForbiddenError("access denied"))
+		mockService.EXPECT().FindByID(gomock.Any(), testutil.GroupID, testutil.UserID2).Return(nil, domains.NewForbiddenError("access denied"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID2)
@@ -238,7 +238,7 @@ func TestUpdateGroup(t *testing.T) {
 
 		m := testutil.NewGroupMock()
 		m.Group.Name = testutil.GroupUpdatedName
-		mockService.EXPECT().Update(gomock.Any(), testutil.UserID).Return(m.Group, nil)
+		mockService.EXPECT().Update(gomock.Any(), gomock.Any(), testutil.UserID).Return(m.Group, nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -275,7 +275,7 @@ func TestUpdateGroup(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		mockService.EXPECT().Update(gomock.Any(), testutil.UserID).Return(nil, domains.NewNotFoundError("group not found"))
+		mockService.EXPECT().Update(gomock.Any(), gomock.Any(), testutil.UserID).Return(nil, domains.NewNotFoundError("group not found"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -293,7 +293,7 @@ func TestUpdateGroup(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		mockService.EXPECT().Update(gomock.Any(), testutil.UserID2).Return(nil, domains.NewForbiddenError("access denied"))
+		mockService.EXPECT().Update(gomock.Any(), gomock.Any(), testutil.UserID2).Return(nil, domains.NewForbiddenError("access denied"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID2)
@@ -313,7 +313,7 @@ func TestDeleteGroup(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		mockService.EXPECT().Delete(testutil.GroupID, testutil.UserID).Return(nil)
+		mockService.EXPECT().Delete(gomock.Any(), testutil.GroupID, testutil.UserID).Return(nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -329,7 +329,7 @@ func TestDeleteGroup(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		mockService.EXPECT().Delete(testutil.GroupID, testutil.UserID).Return(domains.NewNotFoundError("group not found"))
+		mockService.EXPECT().Delete(gomock.Any(), testutil.GroupID, testutil.UserID).Return(domains.NewNotFoundError("group not found"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -347,7 +347,7 @@ func TestAddMember(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		mockService.EXPECT().AddMember(testutil.GroupID, testutil.ContactID, testutil.UserID).Return(nil)
+		mockService.EXPECT().AddMember(gomock.Any(), testutil.GroupID, testutil.ContactID, testutil.UserID).Return(nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -366,7 +366,7 @@ func TestAddMember(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		mockService.EXPECT().AddMember(testutil.GroupID, testutil.ContactID, testutil.UserID).Return(domains.NewConflictError("already a member"))
+		mockService.EXPECT().AddMember(gomock.Any(), testutil.GroupID, testutil.ContactID, testutil.UserID).Return(domains.NewConflictError("already a member"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -387,7 +387,7 @@ func TestRemoveMember(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		mockService.EXPECT().RemoveMember(testutil.GroupID, testutil.ContactID, testutil.UserID).Return(nil)
+		mockService.EXPECT().RemoveMember(gomock.Any(), testutil.GroupID, testutil.ContactID, testutil.UserID).Return(nil)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)
@@ -406,7 +406,7 @@ func TestRemoveMember(t *testing.T) {
 		mockService := mocks.NewMockGroupService(ctrl)
 		gc := controller.NewGroupController(mockService)
 
-		mockService.EXPECT().RemoveMember(testutil.GroupID, testutil.ContactID, testutil.UserID).Return(domains.NewNotFoundError("member not found"))
+		mockService.EXPECT().RemoveMember(gomock.Any(), testutil.GroupID, testutil.ContactID, testutil.UserID).Return(domains.NewNotFoundError("member not found"))
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.SetAuthUser(ctx, testutil.UserID)

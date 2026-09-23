@@ -10,6 +10,7 @@
 package mocks
 
 import (
+	context "context"
 	reflect "reflect"
 
 	domains "github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/model/domains"
@@ -41,52 +42,52 @@ func (m *MockGroupRepository) EXPECT() *MockGroupRepositoryMockRecorder {
 }
 
 // AddMember mocks base method.
-func (m *MockGroupRepository) AddMember(groupID, contactID string) error {
+func (m *MockGroupRepository) AddMember(ctx context.Context, groupID, contactID string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddMember", groupID, contactID)
+	ret := m.ctrl.Call(m, "AddMember", ctx, groupID, contactID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // AddMember indicates an expected call of AddMember.
-func (mr *MockGroupRepositoryMockRecorder) AddMember(groupID, contactID any) *gomock.Call {
+func (mr *MockGroupRepositoryMockRecorder) AddMember(ctx, groupID, contactID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddMember", reflect.TypeOf((*MockGroupRepository)(nil).AddMember), groupID, contactID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddMember", reflect.TypeOf((*MockGroupRepository)(nil).AddMember), ctx, groupID, contactID)
 }
 
 // Create mocks base method.
-func (m *MockGroupRepository) Create(group *domains.Group, memberIDs []string) (*domains.Group, error) {
+func (m *MockGroupRepository) Create(ctx context.Context, group *domains.Group, memberIDs []string) (*domains.Group, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", group, memberIDs)
+	ret := m.ctrl.Call(m, "Create", ctx, group, memberIDs)
 	ret0, _ := ret[0].(*domains.Group)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockGroupRepositoryMockRecorder) Create(group, memberIDs any) *gomock.Call {
+func (mr *MockGroupRepositoryMockRecorder) Create(ctx, group, memberIDs any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockGroupRepository)(nil).Create), group, memberIDs)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockGroupRepository)(nil).Create), ctx, group, memberIDs)
 }
 
 // Delete mocks base method.
-func (m *MockGroupRepository) Delete(id string) error {
+func (m *MockGroupRepository) Delete(ctx context.Context, id string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", id)
+	ret := m.ctrl.Call(m, "Delete", ctx, id)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete.
-func (mr *MockGroupRepositoryMockRecorder) Delete(id any) *gomock.Call {
+func (mr *MockGroupRepositoryMockRecorder) Delete(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockGroupRepository)(nil).Delete), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockGroupRepository)(nil).Delete), ctx, id)
 }
 
 // FindAll mocks base method.
-func (m *MockGroupRepository) FindAll(ownerID string, limit, offset int, filters domains.GroupFilters) ([]*domains.Group, int64, error) {
+func (m *MockGroupRepository) FindAll(ctx context.Context, ownerID string, limit, offset int, filters domains.GroupFilters) ([]*domains.Group, int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindAll", ownerID, limit, offset, filters)
+	ret := m.ctrl.Call(m, "FindAll", ctx, ownerID, limit, offset, filters)
 	ret0, _ := ret[0].([]*domains.Group)
 	ret1, _ := ret[1].(int64)
 	ret2, _ := ret[2].(error)
@@ -94,81 +95,96 @@ func (m *MockGroupRepository) FindAll(ownerID string, limit, offset int, filters
 }
 
 // FindAll indicates an expected call of FindAll.
-func (mr *MockGroupRepositoryMockRecorder) FindAll(ownerID, limit, offset, filters any) *gomock.Call {
+func (mr *MockGroupRepositoryMockRecorder) FindAll(ctx, ownerID, limit, offset, filters any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockGroupRepository)(nil).FindAll), ownerID, limit, offset, filters)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockGroupRepository)(nil).FindAll), ctx, ownerID, limit, offset, filters)
 }
 
 // FindByID mocks base method.
-func (m *MockGroupRepository) FindByID(id string) (*domains.Group, error) {
+func (m *MockGroupRepository) FindByID(ctx context.Context, id string) (*domains.Group, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByID", id)
+	ret := m.ctrl.Call(m, "FindByID", ctx, id)
 	ret0, _ := ret[0].(*domains.Group)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindByID indicates an expected call of FindByID.
-func (mr *MockGroupRepositoryMockRecorder) FindByID(id any) *gomock.Call {
+func (mr *MockGroupRepositoryMockRecorder) FindByID(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockGroupRepository)(nil).FindByID), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockGroupRepository)(nil).FindByID), ctx, id)
 }
 
 // IsContactOwnedBy mocks base method.
-func (m *MockGroupRepository) IsContactOwnedBy(contactID, ownerID string) (bool, error) {
+func (m *MockGroupRepository) IsContactOwnedBy(ctx context.Context, contactID, ownerID string) (bool, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsContactOwnedBy", contactID, ownerID)
+	ret := m.ctrl.Call(m, "IsContactOwnedBy", ctx, contactID, ownerID)
 	ret0, _ := ret[0].(bool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // IsContactOwnedBy indicates an expected call of IsContactOwnedBy.
-func (mr *MockGroupRepositoryMockRecorder) IsContactOwnedBy(contactID, ownerID any) *gomock.Call {
+func (mr *MockGroupRepositoryMockRecorder) IsContactOwnedBy(ctx, contactID, ownerID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsContactOwnedBy", reflect.TypeOf((*MockGroupRepository)(nil).IsContactOwnedBy), contactID, ownerID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsContactOwnedBy", reflect.TypeOf((*MockGroupRepository)(nil).IsContactOwnedBy), ctx, contactID, ownerID)
 }
 
 // MemberExists mocks base method.
-func (m *MockGroupRepository) MemberExists(groupID, contactID string) (bool, error) {
+func (m *MockGroupRepository) MemberExists(ctx context.Context, groupID, contactID string) (bool, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "MemberExists", groupID, contactID)
+	ret := m.ctrl.Call(m, "MemberExists", ctx, groupID, contactID)
 	ret0, _ := ret[0].(bool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // MemberExists indicates an expected call of MemberExists.
-func (mr *MockGroupRepositoryMockRecorder) MemberExists(groupID, contactID any) *gomock.Call {
+func (mr *MockGroupRepositoryMockRecorder) MemberExists(ctx, groupID, contactID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MemberExists", reflect.TypeOf((*MockGroupRepository)(nil).MemberExists), groupID, contactID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MemberExists", reflect.TypeOf((*MockGroupRepository)(nil).MemberExists), ctx, groupID, contactID)
 }
 
 // RemoveMember mocks base method.
-func (m *MockGroupRepository) RemoveMember(groupID, contactID string) error {
+func (m *MockGroupRepository) RemoveMember(ctx context.Context, groupID, contactID string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RemoveMember", groupID, contactID)
+	ret := m.ctrl.Call(m, "RemoveMember", ctx, groupID, contactID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // RemoveMember indicates an expected call of RemoveMember.
-func (mr *MockGroupRepositoryMockRecorder) RemoveMember(groupID, contactID any) *gomock.Call {
+func (mr *MockGroupRepositoryMockRecorder) RemoveMember(ctx, groupID, contactID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveMember", reflect.TypeOf((*MockGroupRepository)(nil).RemoveMember), groupID, contactID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveMember", reflect.TypeOf((*MockGroupRepository)(nil).RemoveMember), ctx, groupID, contactID)
 }
 
 // Update mocks base method.
-func (m *MockGroupRepository) Update(group *domains.Group) (*domains.Group, error) {
+func (m *MockGroupRepository) Update(ctx context.Context, group *domains.Group) (*domains.Group, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", group)
+	ret := m.ctrl.Call(m, "Update", ctx, group)
 	ret0, _ := ret[0].(*domains.Group)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Update indicates an expected call of Update.
-func (mr *MockGroupRepositoryMockRecorder) Update(group any) *gomock.Call {
+func (mr *MockGroupRepositoryMockRecorder) Update(ctx, group any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockGroupRepository)(nil).Update), group)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockGroupRepository)(nil).Update), ctx, group)
+}
+
+// GetMembers mocks base method.
+func (m *MockGroupRepository) GetMembers(ctx context.Context, groupID string) ([]domains.Member, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetMembers", ctx, groupID)
+	ret0, _ := ret[0].([]domains.Member)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetMembers indicates an expected call of GetMembers.
+func (mr *MockGroupRepositoryMockRecorder) GetMembers(ctx, groupID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMembers", reflect.TypeOf((*MockGroupRepository)(nil).GetMembers), ctx, groupID)
 }

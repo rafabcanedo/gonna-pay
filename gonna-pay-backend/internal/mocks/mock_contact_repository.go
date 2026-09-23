@@ -4,6 +4,7 @@
 package mocks
 
 import (
+	context "context"
 	reflect "reflect"
 
 	domains "github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/model/domains"
@@ -29,106 +30,106 @@ func (m *MockContactRepository) EXPECT() *MockContactRepositoryMockRecorder {
 	return m.recorder
 }
 
-func (m *MockContactRepository) Create(contact *domains.Contact) (*domains.Contact, error) {
+func (m *MockContactRepository) Create(ctx context.Context, contact *domains.Contact) (*domains.Contact, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", contact)
+	ret := m.ctrl.Call(m, "Create", ctx, contact)
 	ret0, _ := ret[0].(*domains.Contact)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-func (mr *MockContactRepositoryMockRecorder) Create(contact any) *gomock.Call {
+func (mr *MockContactRepositoryMockRecorder) Create(ctx, contact any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockContactRepository)(nil).Create), contact)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockContactRepository)(nil).Create), ctx, contact)
 }
 
-func (m *MockContactRepository) FindAll(ownerID string, limit, offset int, filters domains.ContactFilters) ([]*domains.Contact, int64, error) {
+func (m *MockContactRepository) FindAll(ctx context.Context, ownerID string, limit, offset int, filters domains.ContactFilters) ([]*domains.Contact, int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindAll", ownerID, limit, offset, filters)
+	ret := m.ctrl.Call(m, "FindAll", ctx, ownerID, limit, offset, filters)
 	ret0, _ := ret[0].([]*domains.Contact)
 	ret1, _ := ret[1].(int64)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }
 
-func (mr *MockContactRepositoryMockRecorder) FindAll(ownerID, limit, offset, filters any) *gomock.Call {
+func (mr *MockContactRepositoryMockRecorder) FindAll(ctx, ownerID, limit, offset, filters any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockContactRepository)(nil).FindAll), ownerID, limit, offset, filters)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockContactRepository)(nil).FindAll), ctx, ownerID, limit, offset, filters)
 }
 
-func (m *MockContactRepository) FindByID(id string) (*domains.Contact, error) {
+func (m *MockContactRepository) FindByID(ctx context.Context, id string) (*domains.Contact, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByID", id)
+	ret := m.ctrl.Call(m, "FindByID", ctx, id)
 	ret0, _ := ret[0].(*domains.Contact)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-func (mr *MockContactRepositoryMockRecorder) FindByID(id any) *gomock.Call {
+func (mr *MockContactRepositoryMockRecorder) FindByID(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockContactRepository)(nil).FindByID), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockContactRepository)(nil).FindByID), ctx, id)
 }
 
-func (m *MockContactRepository) Update(contact *domains.Contact) (*domains.Contact, error) {
+func (m *MockContactRepository) Update(ctx context.Context, contact *domains.Contact) (*domains.Contact, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", contact)
+	ret := m.ctrl.Call(m, "Update", ctx, contact)
 	ret0, _ := ret[0].(*domains.Contact)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-func (mr *MockContactRepositoryMockRecorder) Update(contact any) *gomock.Call {
+func (mr *MockContactRepositoryMockRecorder) Update(ctx, contact any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockContactRepository)(nil).Update), contact)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockContactRepository)(nil).Update), ctx, contact)
 }
 
-func (m *MockContactRepository) Delete(id string) error {
+func (m *MockContactRepository) Delete(ctx context.Context, id string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", id)
+	ret := m.ctrl.Call(m, "Delete", ctx, id)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-func (mr *MockContactRepositoryMockRecorder) Delete(id any) *gomock.Call {
+func (mr *MockContactRepositoryMockRecorder) Delete(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockContactRepository)(nil).Delete), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockContactRepository)(nil).Delete), ctx, id)
 }
 
-func (m *MockContactRepository) ExistsByEmailAndOwner(email, ownerID string) (bool, error) {
+func (m *MockContactRepository) ExistsByEmailAndOwner(ctx context.Context, email, ownerID string) (bool, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ExistsByEmailAndOwner", email, ownerID)
+	ret := m.ctrl.Call(m, "ExistsByEmailAndOwner", ctx, email, ownerID)
 	ret0, _ := ret[0].(bool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-func (mr *MockContactRepositoryMockRecorder) ExistsByEmailAndOwner(email, ownerID any) *gomock.Call {
+func (mr *MockContactRepositoryMockRecorder) ExistsByEmailAndOwner(ctx, email, ownerID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistsByEmailAndOwner", reflect.TypeOf((*MockContactRepository)(nil).ExistsByEmailAndOwner), email, ownerID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistsByEmailAndOwner", reflect.TypeOf((*MockContactRepository)(nil).ExistsByEmailAndOwner), ctx, email, ownerID)
 }
 
-func (m *MockContactRepository) FindStats(ownerID string) (*domains.ContactStats, error) {
+func (m *MockContactRepository) FindStats(ctx context.Context, ownerID string) (*domains.ContactStats, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindStats", ownerID)
+	ret := m.ctrl.Call(m, "FindStats", ctx, ownerID)
 	ret0, _ := ret[0].(*domains.ContactStats)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-func (mr *MockContactRepositoryMockRecorder) FindStats(ownerID any) *gomock.Call {
+func (mr *MockContactRepositoryMockRecorder) FindStats(ctx, ownerID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindStats", reflect.TypeOf((*MockContactRepository)(nil).FindStats), ownerID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindStats", reflect.TypeOf((*MockContactRepository)(nil).FindStats), ctx, ownerID)
 }
 
-func (m *MockContactRepository) FindContactsByFrequency(userID string, limit int) ([]domains.ContactFrequency, error) {
+func (m *MockContactRepository) FindContactsByFrequency(ctx context.Context, userID string, limit int) ([]domains.ContactFrequency, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindContactsByFrequency", userID, limit)
+	ret := m.ctrl.Call(m, "FindContactsByFrequency", ctx, userID, limit)
 	ret0, _ := ret[0].([]domains.ContactFrequency)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-func (mr *MockContactRepositoryMockRecorder) FindContactsByFrequency(userID, limit any) *gomock.Call {
+func (mr *MockContactRepositoryMockRecorder) FindContactsByFrequency(ctx, userID, limit any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindContactsByFrequency", reflect.TypeOf((*MockContactRepository)(nil).FindContactsByFrequency), userID, limit)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindContactsByFrequency", reflect.TypeOf((*MockContactRepository)(nil).FindContactsByFrequency), ctx, userID, limit)
 }

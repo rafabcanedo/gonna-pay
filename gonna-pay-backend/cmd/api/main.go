@@ -53,7 +53,7 @@ func main() {
 	userSvc := service.NewUserService(userRepo)
 	contactSvc := service.NewContactService(contactRepo)
 	groupSvc := service.NewGroupService(groupRepo)
-	costSvc := service.NewCostService(costRepo)
+	costSvc := service.NewCostService(costRepo, groupRepo)
 
 	userCtrl := controller.NewUserController(userSvc)
 	authCtrl := controller.NewAuthController(userSvc, authRepo)

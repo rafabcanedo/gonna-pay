@@ -4,6 +4,7 @@
 package mocks
 
 import (
+	context "context"
 	reflect "reflect"
 
 	domains "github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/model/domains"
@@ -34,39 +35,39 @@ func (m *MockCostRepository) EXPECT() *MockCostRepositoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockCostRepository) Create(cost *domains.Cost) (*domains.Cost, error) {
+func (m *MockCostRepository) Create(ctx context.Context, cost *domains.Cost) (*domains.Cost, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", cost)
+	ret := m.ctrl.Call(m, "Create", ctx, cost)
 	ret0, _ := ret[0].(*domains.Cost)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockCostRepositoryMockRecorder) Create(cost any) *gomock.Call {
+func (mr *MockCostRepositoryMockRecorder) Create(ctx, cost any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockCostRepository)(nil).Create), cost)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockCostRepository)(nil).Create), ctx, cost)
 }
 
 // Update mocks base method.
-func (m *MockCostRepository) Update(id string, cost *domains.Cost) (*domains.Cost, error) {
+func (m *MockCostRepository) Update(ctx context.Context, id string, cost *domains.Cost) (*domains.Cost, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", id, cost)
+	ret := m.ctrl.Call(m, "Update", ctx, id, cost)
 	ret0, _ := ret[0].(*domains.Cost)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Update indicates an expected call of Update.
-func (mr *MockCostRepositoryMockRecorder) Update(id, cost any) *gomock.Call {
+func (mr *MockCostRepositoryMockRecorder) Update(ctx, id, cost any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockCostRepository)(nil).Update), id, cost)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockCostRepository)(nil).Update), ctx, id, cost)
 }
 
 // FindAll mocks base method.
-func (m *MockCostRepository) FindAll(userID string, limit, offset int, filters domains.CostFilters) ([]*domains.Cost, int64, error) {
+func (m *MockCostRepository) FindAll(ctx context.Context, userID string, limit, offset int, filters domains.CostFilters) ([]*domains.Cost, int64, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindAll", userID, limit, offset, filters)
+	ret := m.ctrl.Call(m, "FindAll", ctx, userID, limit, offset, filters)
 	ret0, _ := ret[0].([]*domains.Cost)
 	ret1, _ := ret[1].(int64)
 	ret2, _ := ret[2].(error)
@@ -74,79 +75,51 @@ func (m *MockCostRepository) FindAll(userID string, limit, offset int, filters d
 }
 
 // FindAll indicates an expected call of FindAll.
-func (mr *MockCostRepositoryMockRecorder) FindAll(userID, limit, offset, filters any) *gomock.Call {
+func (mr *MockCostRepositoryMockRecorder) FindAll(ctx, userID, limit, offset, filters any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockCostRepository)(nil).FindAll), userID, limit, offset, filters)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAll", reflect.TypeOf((*MockCostRepository)(nil).FindAll), ctx, userID, limit, offset, filters)
 }
 
 // FindByID mocks base method.
-func (m *MockCostRepository) FindByID(id string) (*domains.Cost, error) {
+func (m *MockCostRepository) FindByID(ctx context.Context, id string) (*domains.Cost, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByID", id)
+	ret := m.ctrl.Call(m, "FindByID", ctx, id)
 	ret0, _ := ret[0].(*domains.Cost)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindByID indicates an expected call of FindByID.
-func (mr *MockCostRepositoryMockRecorder) FindByID(id any) *gomock.Call {
+func (mr *MockCostRepositoryMockRecorder) FindByID(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockCostRepository)(nil).FindByID), id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockCostRepository)(nil).FindByID), ctx, id)
 }
 
 // Delete mocks base method.
-func (m *MockCostRepository) Delete(id string) error {
+func (m *MockCostRepository) Delete(ctx context.Context, id string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", id)
+	ret := m.ctrl.Call(m, "Delete", ctx, id)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete.
-func (mr *MockCostRepositoryMockRecorder) Delete(id any) *gomock.Call {
+func (mr *MockCostRepositoryMockRecorder) Delete(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockCostRepository)(nil).Delete), id)
-}
-
-func (m *MockCostRepository) GetGroupByID(groupID string) (*domains.Group, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetGroupByID", groupID)
-	ret0, _ := ret[0].(*domains.Group)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-func (mr *MockCostRepositoryMockRecorder) GetGroupByID(groupID any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGroupByID", reflect.TypeOf((*MockCostRepository)(nil).GetGroupByID), groupID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockCostRepository)(nil).Delete), ctx, id)
 }
 
 // FindStats mocks base method.
-func (m *MockCostRepository) FindStats(userID string, filters domains.CostFilters) (*domains.CostStats, error) {
+func (m *MockCostRepository) FindStats(ctx context.Context, userID string, filters domains.CostFilters) (*domains.CostStats, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindStats", userID, filters)
+	ret := m.ctrl.Call(m, "FindStats", ctx, userID, filters)
 	ret0, _ := ret[0].(*domains.CostStats)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindStats indicates an expected call of FindStats.
-func (mr *MockCostRepositoryMockRecorder) FindStats(userID, filters any) *gomock.Call {
+func (mr *MockCostRepositoryMockRecorder) FindStats(ctx, userID, filters any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindStats", reflect.TypeOf((*MockCostRepository)(nil).FindStats), userID, filters)
-}
-
-// GetGroupMembers mocks base method.
-func (m *MockCostRepository) GetGroupMembers(groupID string) ([]domains.Member, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetGroupMembers", groupID)
-	ret0, _ := ret[0].([]domains.Member)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetGroupMembers indicates an expected call of GetGroupMembers.
-func (mr *MockCostRepositoryMockRecorder) GetGroupMembers(groupID any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetGroupMembers", reflect.TypeOf((*MockCostRepository)(nil).GetGroupMembers), groupID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindStats", reflect.TypeOf((*MockCostRepository)(nil).FindStats), ctx, userID, filters)
 }

@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 
@@ -11,12 +12,12 @@ import (
 )
 
 type UserRepository interface {
-	Create(user *domains.User) (*domains.User, error)
-	FindAll(limit, offset int) ([]*domains.User, int64, error)
-	FindByID(id string) (*domains.User, error)
-	FindByEmail(email string) (*domains.User, error)
-	Update(user *domains.User) (*domains.User, error)
-	Delete(id string) error
+	Create(ctx context.Context, user *domains.User) (*domains.User, error)
+	FindAll(ctx context.Context, limit, offset int) ([]*domains.User, int64, error)
+	FindByID(ctx context.Context, id string) (*domains.User, error)
+	FindByEmail(ctx context.Context, email string) (*domains.User, error)
+	Update(ctx context.Context, user *domains.User) (*domains.User, error)
+	Delete(ctx context.Context, id string) error
 }
 
 type userRepository struct {
@@ -27,11 +28,11 @@ func NewUserRepository(db *sql.DB) UserRepository {
 	return &userRepository{db: db}
 }
 
-func (r *userRepository) Create(user *domains.User) (*domains.User, error) {
+func (r *userRepository) Create(ctx context.Context, user *domains.User) (*domains.User, error) {
 	e := converter.ConvertDomainToEntity(user)
 	e.ID = uuid.New()
 
-	_, err := r.db.Exec(
+	_, err := r.db.ExecContext(ctx,
 		`INSERT INTO users_entities (id, name, email, password, phone) VALUES ($1, $2, $3, $4, $5)`,
 		e.ID, e.Name, e.Email, e.Password, e.Phone,
 	)
@@ -42,15 +43,15 @@ func (r *userRepository) Create(user *domains.User) (*domains.User, error) {
 	return converter.ConvertEntityToDomain(*e), nil
 }
 
-func (r *userRepository) FindAll(limit, offset int) ([]*domains.User, int64, error) {
+func (r *userRepository) FindAll(ctx context.Context, limit, offset int) ([]*domains.User, int64, error) {
 	var total int64
 
-	err := r.db.QueryRow(`SELECT COUNT(*) FROM users_entities`).Scan(&total)
+	err := r.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM users_entities`).Scan(&total)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	rows, err := r.db.Query(`SELECT id, name, email, password, phone FROM users_entities LIMIT $1 OFFSET $2`, limit, offset)
+	rows, err := r.db.QueryContext(ctx, `SELECT id, name, email, password, phone FROM users_entities LIMIT $1 OFFSET $2`, limit, offset)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -72,15 +73,13 @@ func (r *userRepository) FindAll(limit, offset int) ([]*domains.User, int64, err
 	return users, total, nil
 }
 
-func (r *userRepository) FindByID(id string) (*domains.User, error) {
+func (r *userRepository) FindByID(ctx context.Context, id string) (*domains.User, error) {
 	var e entity.UsersEntity
 
-	row := r.db.QueryRow(
+	err := r.db.QueryRowContext(ctx,
 		`SELECT id, name, email, password, phone FROM users_entities WHERE id = $1`,
 		id,
-	)
-
-	err := row.Scan(&e.ID, &e.Name, &e.Email, &e.Password, &e.Phone)
+	).Scan(&e.ID, &e.Name, &e.Email, &e.Password, &e.Phone)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domains.NewNotFoundError("user not found")
@@ -91,15 +90,13 @@ func (r *userRepository) FindByID(id string) (*domains.User, error) {
 	return converter.ConvertEntityToDomain(e), nil
 }
 
-func (r *userRepository) FindByEmail(email string) (*domains.User, error) {
+func (r *userRepository) FindByEmail(ctx context.Context, email string) (*domains.User, error) {
 	var e entity.UsersEntity
 
-	row := r.db.QueryRow(
+	err := r.db.QueryRowContext(ctx,
 		`SELECT id, name, email, password, phone FROM users_entities WHERE email = $1`,
 		email,
-	)
-
-	err := row.Scan(&e.ID, &e.Name, &e.Email, &e.Password, &e.Phone)
+	).Scan(&e.ID, &e.Name, &e.Email, &e.Password, &e.Phone)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domains.NewNotFoundError("user not found")
@@ -110,10 +107,10 @@ func (r *userRepository) FindByEmail(email string) (*domains.User, error) {
 	return converter.ConvertEntityToDomain(e), nil
 }
 
-func (r *userRepository) Update(user *domains.User) (*domains.User, error) {
+func (r *userRepository) Update(ctx context.Context, user *domains.User) (*domains.User, error) {
 	e := converter.ConvertDomainToEntity(user)
 
-	_, err := r.db.Exec(
+	_, err := r.db.ExecContext(ctx,
 		`UPDATE users_entities SET name = $1, email = $2, password = $3, phone = $4 WHERE id = $5`,
 		e.Name, e.Email, e.Password, e.Phone, e.ID,
 	)
@@ -124,7 +121,7 @@ func (r *userRepository) Update(user *domains.User) (*domains.User, error) {
 	return converter.ConvertEntityToDomain(*e), nil
 }
 
-func (r *userRepository) Delete(id string) error {
-	_, err := r.db.Exec(`DELETE FROM users_entities WHERE id = $1`, id)
+func (r *userRepository) Delete(ctx context.Context, id string) error {
+	_, err := r.db.ExecContext(ctx, `DELETE FROM users_entities WHERE id = $1`, id)
 	return err
 }

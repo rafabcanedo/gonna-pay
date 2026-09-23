@@ -1,6 +1,7 @@
 package service_test
 
 import (
+	"context"
 	"errors"
 	"testing"
 
@@ -19,11 +20,11 @@ func TestUserService_Create(t *testing.T) {
 		svc := service.NewUserService(mockRepo)
 
 		m := testutil.NewUserMock()
-		mockRepo.EXPECT().FindByEmail(m.Email).Return(nil, domains.NewNotFoundError("not found"))
-		mockRepo.EXPECT().Create(gomock.Any()).Return(m.User, nil)
+		mockRepo.EXPECT().FindByEmail(gomock.Any(), m.Email).Return(nil, domains.NewNotFoundError("not found"))
+		mockRepo.EXPECT().Create(gomock.Any(), gomock.Any()).Return(m.User, nil)
 
 		user := domains.NewUser(m.Name, m.Email, "senha123", m.Phone)
-		result, err := svc.Create(user)
+		result, err := svc.Create(context.Background(), user)
 
 		assert.NoError(t, err)
 		assert.Equal(t, m.ID, result.ID)
@@ -35,10 +36,10 @@ func TestUserService_Create(t *testing.T) {
 		svc := service.NewUserService(mockRepo)
 
 		m := testutil.NewUserMock()
-		mockRepo.EXPECT().FindByEmail(m.Email).Return(m.User, nil)
+		mockRepo.EXPECT().FindByEmail(gomock.Any(), m.Email).Return(m.User, nil)
 
 		user := domains.NewUser(m.Name, m.Email, "senha123", m.Phone)
-		_, err := svc.Create(user)
+		_, err := svc.Create(context.Background(), user)
 
 		assert.ErrorIs(t, err, domains.ErrConflict)
 	})
@@ -49,14 +50,14 @@ func TestUserService_Create(t *testing.T) {
 		svc := service.NewUserService(mockRepo)
 
 		m := testutil.NewUserMock()
-		mockRepo.EXPECT().FindByEmail(m.Email).Return(nil, domains.NewNotFoundError("not found"))
-		mockRepo.EXPECT().Create(gomock.Any()).DoAndReturn(func(u *domains.User) (*domains.User, error) {
+		mockRepo.EXPECT().FindByEmail(gomock.Any(), m.Email).Return(nil, domains.NewNotFoundError("not found"))
+		mockRepo.EXPECT().Create(gomock.Any(), gomock.Any()).DoAndReturn(func(_ context.Context, u *domains.User) (*domains.User, error) {
 			assert.NotEqual(t, "senha123", u.Password)
 			return m.User, nil
 		})
 
 		user := domains.NewUser(m.Name, m.Email, "senha123", m.Phone)
-		_, err := svc.Create(user)
+		_, err := svc.Create(context.Background(), user)
 		assert.NoError(t, err)
 	})
 
@@ -65,10 +66,10 @@ func TestUserService_Create(t *testing.T) {
 		mockRepo := mocks.NewMockUserRepository(ctrl)
 		svc := service.NewUserService(mockRepo)
 
-		mockRepo.EXPECT().FindByEmail(testutil.UserEmail).Return(nil, errors.New("db error"))
+		mockRepo.EXPECT().FindByEmail(gomock.Any(), testutil.UserEmail).Return(nil, errors.New("db error"))
 
 		user := domains.NewUser(testutil.UserName, testutil.UserEmail, "senha123", testutil.UserPhone)
-		_, err := svc.Create(user)
+		_, err := svc.Create(context.Background(), user)
 
 		assert.Error(t, err)
 	})
@@ -83,9 +84,9 @@ func TestUserService_FindAll(t *testing.T) {
 		m1 := testutil.NewUserMock()
 		m2 := testutil.NewUserMock()
 		m2.User.ID = testutil.UserID2
-		mockRepo.EXPECT().FindAll(20, 0).Return([]*domains.User{m1.User, m2.User}, int64(2), nil)
+		mockRepo.EXPECT().FindAll(gomock.Any(), 20, 0).Return([]*domains.User{m1.User, m2.User}, int64(2), nil)
 
-		result, total, err := svc.FindAll(1, 20)
+		result, total, err := svc.FindAll(context.Background(), 1, 20)
 
 		assert.NoError(t, err)
 		assert.Len(t, result, 2)
@@ -97,9 +98,9 @@ func TestUserService_FindAll(t *testing.T) {
 		mockRepo := mocks.NewMockUserRepository(ctrl)
 		svc := service.NewUserService(mockRepo)
 
-		mockRepo.EXPECT().FindAll(20, 0).Return(nil, int64(0), errors.New("db error"))
+		mockRepo.EXPECT().FindAll(gomock.Any(), 20, 0).Return(nil, int64(0), errors.New("db error"))
 
-		_, _, err := svc.FindAll(1, 20)
+		_, _, err := svc.FindAll(context.Background(), 1, 20)
 		assert.Error(t, err)
 	})
 }
@@ -111,9 +112,9 @@ func TestUserService_FindByID(t *testing.T) {
 		svc := service.NewUserService(mockRepo)
 
 		m := testutil.NewUserMock()
-		mockRepo.EXPECT().FindByID(m.ID).Return(m.User, nil)
+		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.User, nil)
 
-		result, err := svc.FindByID(m.ID)
+		result, err := svc.FindByID(context.Background(), m.ID)
 
 		assert.NoError(t, err)
 		assert.Equal(t, m.ID, result.ID)
@@ -124,9 +125,9 @@ func TestUserService_FindByID(t *testing.T) {
 		mockRepo := mocks.NewMockUserRepository(ctrl)
 		svc := service.NewUserService(mockRepo)
 
-		mockRepo.EXPECT().FindByID(testutil.UserID).Return(nil, domains.NewNotFoundError("user not found"))
+		mockRepo.EXPECT().FindByID(gomock.Any(), testutil.UserID).Return(nil, domains.NewNotFoundError("user not found"))
 
-		_, err := svc.FindByID(testutil.UserID)
+		_, err := svc.FindByID(context.Background(), testutil.UserID)
 
 		assert.ErrorIs(t, err, domains.ErrNotFound)
 	})
@@ -139,9 +140,9 @@ func TestUserService_FindByEmail(t *testing.T) {
 		svc := service.NewUserService(mockRepo)
 
 		m := testutil.NewUserMock()
-		mockRepo.EXPECT().FindByEmail(m.Email).Return(m.User, nil)
+		mockRepo.EXPECT().FindByEmail(gomock.Any(), m.Email).Return(m.User, nil)
 
-		result, err := svc.FindByEmail(m.Email)
+		result, err := svc.FindByEmail(context.Background(), m.Email)
 
 		assert.NoError(t, err)
 		assert.Equal(t, m.Email, result.Email)
@@ -152,9 +153,9 @@ func TestUserService_FindByEmail(t *testing.T) {
 		mockRepo := mocks.NewMockUserRepository(ctrl)
 		svc := service.NewUserService(mockRepo)
 
-		mockRepo.EXPECT().FindByEmail(testutil.UserEmail).Return(nil, domains.NewNotFoundError("not found"))
+		mockRepo.EXPECT().FindByEmail(gomock.Any(), testutil.UserEmail).Return(nil, domains.NewNotFoundError("not found"))
 
-		_, err := svc.FindByEmail(testutil.UserEmail)
+		_, err := svc.FindByEmail(context.Background(), testutil.UserEmail)
 
 		assert.ErrorIs(t, err, domains.ErrNotFound)
 	})
@@ -168,11 +169,11 @@ func TestUserService_Update(t *testing.T) {
 
 		m := testutil.NewUserMock()
 		m.User.Name = testutil.UserUpdatedName
-		mockRepo.EXPECT().FindByID(m.ID).Return(m.User, nil)
-		mockRepo.EXPECT().FindByEmail(m.Email).Return(nil, domains.NewNotFoundError("not found"))
-		mockRepo.EXPECT().Update(m.User).Return(m.User, nil)
+		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.User, nil)
+		mockRepo.EXPECT().FindByEmail(gomock.Any(), m.Email).Return(nil, domains.NewNotFoundError("not found"))
+		mockRepo.EXPECT().Update(gomock.Any(), m.User).Return(m.User, nil)
 
-		result, err := svc.Update(m.User)
+		result, err := svc.Update(context.Background(), m.User)
 
 		assert.NoError(t, err)
 		assert.Equal(t, testutil.UserUpdatedName, result.Name)
@@ -186,14 +187,14 @@ func TestUserService_Update(t *testing.T) {
 		m := testutil.NewUserMock()
 		m.User.Password = "nova-senha"
 
-		mockRepo.EXPECT().FindByID(m.ID).Return(m.User, nil)
-		mockRepo.EXPECT().FindByEmail(m.Email).Return(nil, domains.NewNotFoundError("not found"))
-		mockRepo.EXPECT().Update(gomock.Any()).DoAndReturn(func(u *domains.User) (*domains.User, error) {
+		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.User, nil)
+		mockRepo.EXPECT().FindByEmail(gomock.Any(), m.Email).Return(nil, domains.NewNotFoundError("not found"))
+		mockRepo.EXPECT().Update(gomock.Any(), gomock.Any()).DoAndReturn(func(_ context.Context, u *domains.User) (*domains.User, error) {
 			assert.NotEqual(t, "nova-senha", u.Password)
 			return m.User, nil
 		})
 
-		_, err := svc.Update(m.User)
+		_, err := svc.Update(context.Background(), m.User)
 		assert.NoError(t, err)
 	})
 }
@@ -205,10 +206,10 @@ func TestUserService_Delete(t *testing.T) {
 		svc := service.NewUserService(mockRepo)
 
 		m := testutil.NewUserMock()
-		mockRepo.EXPECT().FindByID(testutil.UserID).Return(m.User, nil)
-		mockRepo.EXPECT().Delete(testutil.UserID).Return(nil)
+		mockRepo.EXPECT().FindByID(gomock.Any(), testutil.UserID).Return(m.User, nil)
+		mockRepo.EXPECT().Delete(gomock.Any(), testutil.UserID).Return(nil)
 
-		err := svc.Delete(testutil.UserID)
+		err := svc.Delete(context.Background(), testutil.UserID)
 		assert.NoError(t, err)
 	})
 
@@ -218,10 +219,10 @@ func TestUserService_Delete(t *testing.T) {
 		svc := service.NewUserService(mockRepo)
 
 		m := testutil.NewUserMock()
-		mockRepo.EXPECT().FindByID(testutil.UserID).Return(m.User, nil)
-		mockRepo.EXPECT().Delete(testutil.UserID).Return(errors.New("db error"))
+		mockRepo.EXPECT().FindByID(gomock.Any(), testutil.UserID).Return(m.User, nil)
+		mockRepo.EXPECT().Delete(gomock.Any(), testutil.UserID).Return(errors.New("db error"))
 
-		err := svc.Delete(testutil.UserID)
+		err := svc.Delete(context.Background(), testutil.UserID)
 		assert.Error(t, err)
 	})
 }
