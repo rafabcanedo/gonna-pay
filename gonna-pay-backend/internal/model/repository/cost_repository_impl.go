@@ -14,7 +14,7 @@ import (
 )
 
 type CostRepository interface {
-	Create(cost *domains.Cost, members []domains.Member) (*domains.Cost, error)
+	Create(cost *domains.Cost) (*domains.Cost, error)
 	Update(id string, cost *domains.Cost) (*domains.Cost, error)
 	FindAll(userID string, limit, offset int, filters domains.CostFilters) ([]*domains.Cost, int64, error)
 	FindByID(id string) (*domains.Cost, error)
@@ -32,7 +32,100 @@ func NewCostRepository(db *sql.DB) CostRepository {
 	return &costRepository{db: db}
 }
 
-func (r *costRepository) Create(cost *domains.Cost, members []domains.Member) (*domains.Cost, error) {
+type costRow struct {
+	id              uuid.UUID
+	userID          uuid.UUID
+	groupID         sql.NullString
+	groupName       sql.NullString
+	costName        string
+	totalValue      float64
+	ownerPercentage float64
+	category        string
+	createdAt       time.Time
+	updatedAt       time.Time
+	splitCount      int
+	splitsJSON      []byte
+}
+
+func costRowToDomain(r costRow) (*domains.Cost, error) {
+	groupID := ""
+	if r.groupID.Valid {
+		groupID = r.groupID.String
+	}
+
+	groupName := ""
+	if r.groupName.Valid {
+		groupName = r.groupName.String
+	}
+
+	var splits []domains.Split
+	if r.splitsJSON != nil {
+		if err := json.Unmarshal(r.splitsJSON, &splits); err != nil {
+			return nil, err
+		}
+	}
+
+	splitCount := r.splitCount
+	if len(splits) > 0 {
+		splitCount = len(splits)
+	}
+
+	return &domains.Cost{
+		ID:              r.id.String(),
+		UserID:          r.userID.String(),
+		GroupID:         groupID,
+		GroupName:       groupName,
+		CostName:        r.costName,
+		TotalValue:      r.totalValue,
+		OwnerPercentage: r.ownerPercentage,
+		Category:        r.category,
+		CreatedAt:       r.createdAt,
+		UpdatedAt:       r.updatedAt,
+		SplitCount:      splitCount,
+		Splits:          splits,
+	}, nil
+}
+
+func buildCostConditions(col, userID string, filters domains.CostFilters) ([]string, []any, int) {
+	conditions := []string{col + "user_id = $1"}
+	args := []any{userID}
+	idx := 2
+
+	if filters.Category != "" {
+		conditions = append(conditions, fmt.Sprintf(col+"category = $%d", idx))
+		args = append(args, filters.Category)
+		idx++
+	}
+
+	switch filters.Type {
+	case domains.CostTypeSolo:
+		conditions = append(conditions, col+"group_id IS NULL")
+	case domains.CostTypeGroup:
+		conditions = append(conditions, col+"group_id IS NOT NULL")
+	}
+
+	switch filters.Period {
+	case domains.CostPeriodMonth:
+		conditions = append(conditions, "DATE_TRUNC('month', "+col+"created_at) = DATE_TRUNC('month', NOW())")
+	case domains.CostPeriodWeek:
+		conditions = append(conditions, col+"created_at >= NOW() - INTERVAL '7 days'")
+	}
+
+	if filters.MinValue != nil {
+		conditions = append(conditions, fmt.Sprintf(col+"total_value >= $%d", idx))
+		args = append(args, *filters.MinValue)
+		idx++
+	}
+	if filters.MaxValue != nil {
+		conditions = append(conditions, fmt.Sprintf(col+"total_value <= $%d", idx))
+		args = append(args, *filters.MaxValue)
+		idx++
+	}
+
+	return conditions, args, idx
+}
+
+func (r *costRepository) Create(cost *domains.Cost) (*domains.Cost, error) {
 	costID := uuid.New()
 	now := time.Now()
 
@@ -41,26 +134,14 @@ func (r *costRepository) Create(cost *domains.Cost, members []domains.Member) (*
 		groupID = cost.GroupID
 	}
 
-	var splits []domains.Split
+	for i := range cost.Splits {
+		cost.Splits[i].ID = uuid.New().String()
+	}
+
 	var splitsJSON []byte
-
-	if len(members) > 0 {
-		memberPercentage := math.Round(((100-cost.OwnerPercentage)/float64(len(members)))*100) / 100
-		memberValue := math.Round((cost.TotalValue*memberPercentage/100)*100) / 100
-
-		splits = make([]domains.Split, len(members))
-		for i, m := range members {
-			splits[i] = domains.Split{
-				ID:          uuid.New().String(),
-				ContactID:   m.ID,
-				ContactName: m.Name,
-				Value:       memberValue,
-				Percentage:  memberPercentage,
-			}
-		}
-
+	if len(cost.Splits) > 0 {
 		var err error
-		splitsJSON, err = json.Marshal(splits)
+		splitsJSON, err = json.Marshal(cost.Splits)
 		if err != nil {
 			return nil, err
 		}
@@ -87,7 +168,7 @@ func (r *costRepository) Create(cost *domains.Cost, members []domains.Member) (*
 		cost.OwnerPercentage,
 		now,
 		now,
-		splits,
+		cost.Splits,
 	), nil
 }
 
@@ -96,14 +177,6 @@ func (r *costRepository) Update(id string, cost *domains.Cost) (*domains.Cost, e
 
 	var splitsJSON []byte
 	if len(cost.Splits) > 0 {
-		memberPercentage := math.Round(((100-cost.OwnerPercentage)/float64(len(cost.Splits)))*100) / 100
-		memberValue := math.Round((cost.TotalValue*memberPercentage/100)*100) / 100
-
-		for i := range cost.Splits {
-			cost.Splits[i].Percentage = memberPercentage
-			cost.Splits[i].Value = memberValue
-		}
-
 		var err error
 		splitsJSON, err = json.Marshal(cost.Splits)
 		if err != nil {
@@ -136,36 +209,7 @@ func (r *costRepository) Update(id string, cost *domains.Cost) (*domains.Cost, e
 }
 
 func (r *costRepository) FindAll(userID string, limit, offset int, filters domains.CostFilters) ([]*domains.Cost, int64, error) {
-	conditions := []string{"c.user_id = $1"}
-	args := []interface{}{userID}
-	idx := 2
-
-	if filters.Category != "" {
-		conditions = append(conditions, fmt.Sprintf("c.category = $%d", idx))
-		args = append(args, filters.Category)
-		idx++
-	}
-	if filters.Type == domains.CostTypeSolo {
-		conditions = append(conditions, "c.group_id IS NULL")
-	} else if filters.Type == domains.CostTypeGroup {
-		conditions = append(conditions, "c.group_id IS NOT NULL")
-	}
-	if filters.Period == domains.CostPeriodMonth {
-		conditions = append(conditions, "DATE_TRUNC('month', c.created_at) = DATE_TRUNC('month', NOW())")
-	} else if filters.Period == domains.CostPeriodWeek {
-		conditions = append(conditions, "c.created_at >= NOW() - INTERVAL '7 days'")
-	}
-	if filters.MinValue != nil {
-		conditions = append(conditions, fmt.Sprintf("c.total_value >= $%d", idx))
-		args = append(args, *filters.MinValue)
-		idx++
-	}
-	if filters.MaxValue != nil {
-		conditions = append(conditions, fmt.Sprintf("c.total_value <= $%d", idx))
-		args = append(args, *filters.MaxValue)
-		idx++
-	}
-
+	conditions, args, idx := buildCostConditions("c.", userID, filters)
 	where := strings.Join(conditions, " AND ")
 
 	var total int64
@@ -199,51 +243,20 @@ func (r *costRepository) FindAll(userID string, limit, offset int, filters domai
 
 	var costs []*domains.Cost
 	for rows.Next() {
-		var (
-			id              uuid.UUID
-			userIDField     uuid.UUID
-			groupIDRaw      sql.NullString
-			costName        string
-			totalValue      float64
-			ownerPercentage float64
-			category        string
-			createdAt       time.Time
-			updatedAt       time.Time
-			groupName       sql.NullString
-			splitCount      int
-		)
-
+		var row costRow
 		if err := rows.Scan(
-			&id, &userIDField, &groupIDRaw, &costName, &totalValue, &ownerPercentage, &category, &createdAt, &updatedAt,
-			&groupName,
-			&splitCount,
+			&row.id, &row.userID, &row.groupID, &row.costName, &row.totalValue,
+			&row.ownerPercentage, &row.category, &row.createdAt, &row.updatedAt,
+			&row.groupName, &row.splitCount,
 		); err != nil {
 			return nil, 0, err
 		}
 
-		groupID := ""
-		if groupIDRaw.Valid {
-			groupID = groupIDRaw.String
+		cost, err := costRowToDomain(row)
+		if err != nil {
+			return nil, 0, err
 		}
-
-		groupNameStr := ""
-		if groupName.Valid {
-			groupNameStr = groupName.String
-		}
-
-		costs = append(costs, &domains.Cost{
-			ID:              id.String(),
-			UserID:          userIDField.String(),
-			GroupID:         groupID,
-			GroupName:       groupNameStr,
-			CostName:        costName,
-			TotalValue:      totalValue,
-			OwnerPercentage: ownerPercentage,
-			Category:        category,
-			CreatedAt:       createdAt,
-			UpdatedAt:       updatedAt,
-			SplitCount:      splitCount,
-		})
+		costs = append(costs, cost)
 	}
 
 	if err := rows.Err(); err != nil {
@@ -254,20 +267,7 @@ func (r *costRepository) FindAll(userID string, limit, offset int, filters domai
 }
 
 func (r *costRepository) FindByID(id string) (*domains.Cost, error) {
-	var (
-		costID          uuid.UUID
-		userID          uuid.UUID
-		groupIDRaw      sql.NullString
-		costName        string
-		totalValue      float64
-		ownerPercentage float64
-		category        string
-		createdAt       time.Time
-		updatedAt       time.Time
-		groupName       sql.NullString
-		splitsJSON      []byte
-	)
-
+	var row costRow
 	err := r.db.QueryRow(`
 		SELECT
 			c.id, c.user_id, c.group_id, c.cost_name, c.total_value, c.owner_percentage, c.category, c.created_at, c.updated_at,
@@ -276,8 +276,9 @@ func (r *costRepository) FindByID(id string) (*domains.Cost, error) {
 		LEFT JOIN group_entities g ON g.id = c.group_id
 		WHERE c.id = $1
 	`, id).Scan(
-		&costID, &userID, &groupIDRaw, &costName, &totalValue, &ownerPercentage, &category, &createdAt, &updatedAt,
-		&groupName, &splitsJSON,
+		&row.id, &row.userID, &row.groupID, &row.costName, &row.totalValue,
+		&row.ownerPercentage, &row.category, &row.createdAt, &row.updatedAt,
+		&row.groupName, &row.splitsJSON,
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -286,71 +287,11 @@ func (r *costRepository) FindByID(id string) (*domains.Cost, error) {
 		return nil, err
 	}
 
-	groupID := ""
-	if groupIDRaw.Valid {
-		groupID = groupIDRaw.String
-	}
-
-	groupNameStr := ""
-	if groupName.Valid {
-		groupNameStr = groupName.String
-	}
-
-	var splits []domains.Split
-	if splitsJSON != nil {
-		if err := json.Unmarshal(splitsJSON, &splits); err != nil {
-			return nil, err
-		}
-	}
-
-	return &domains.Cost{
-		ID:              costID.String(),
-		UserID:          userID.String(),
-		GroupID:         groupID,
-		GroupName:       groupNameStr,
-		CostName:        costName,
-		TotalValue:      totalValue,
-		OwnerPercentage: ownerPercentage,
-		Category:        category,
-		CreatedAt:       createdAt,
-		UpdatedAt:       updatedAt,
-		SplitCount:      len(splits),
-		Splits:          splits,
-	}, nil
+	return costRowToDomain(row)
 }
 
 func (r *costRepository) FindStats(userID string, filters domains.CostFilters) (*domains.CostStats, error) {
-	conditions := []string{"user_id = $1"}
-	args := []interface{}{userID}
-	idx := 2
-
-	if filters.Category != "" {
-		conditions = append(conditions, fmt.Sprintf("category = $%d", idx))
-		args = append(args, filters.Category)
-		idx++
-	}
-	if filters.Type == domains.CostTypeSolo {
-		conditions = append(conditions, "group_id IS NULL")
-	} else if filters.Type == domains.CostTypeGroup {
-		conditions = append(conditions, "group_id IS NOT NULL")
-	}
-	if filters.Period == domains.CostPeriodMonth {
-		conditions = append(conditions, "DATE_TRUNC('month', created_at) = DATE_TRUNC('month', NOW())")
-	} else if filters.Period == domains.CostPeriodWeek {
-		conditions = append(conditions, "created_at >= NOW() - INTERVAL '7 days'")
-	}
-	if filters.MinValue != nil {
-		conditions = append(conditions, fmt.Sprintf("total_value >= $%d", idx))
-		args = append(args, *filters.MinValue)
-		idx++
-	}
-	if filters.MaxValue != nil {
-		conditions = append(conditions, fmt.Sprintf("total_value <= $%d", idx))
-		args = append(args, *filters.MaxValue)
-		idx++
-	}
-
-	_ = idx
+	conditions, args, _ := buildCostConditions("", userID, filters)
 	where := strings.Join(conditions, " AND ")
 
 	var thisMonth, inSplits, solo float64

@@ -34,18 +34,18 @@ func (m *MockCostRepository) EXPECT() *MockCostRepositoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockCostRepository) Create(cost *domains.Cost, members []domains.Member) (*domains.Cost, error) {
+func (m *MockCostRepository) Create(cost *domains.Cost) (*domains.Cost, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", cost, members)
+	ret := m.ctrl.Call(m, "Create", cost)
 	ret0, _ := ret[0].(*domains.Cost)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create.
-func (mr *MockCostRepositoryMockRecorder) Create(cost, members any) *gomock.Call {
+func (mr *MockCostRepositoryMockRecorder) Create(cost any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockCostRepository)(nil).Create), cost, members)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockCostRepository)(nil).Create), cost)
 }
 
 // Update mocks base method.

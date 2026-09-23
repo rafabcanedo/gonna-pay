@@ -57,11 +57,24 @@ func (s *costService) Create(cost *domains.Cost, ownerPercentage *float64) (*dom
 		} else {
 			cost.OwnerPercentage = math.Round((100.0/float64(memberCount+1))*100) / 100
 		}
+
+		memberPercentage := math.Round(((100-cost.OwnerPercentage)/float64(len(members)))*100) / 100
+		memberValue := math.Round((cost.TotalValue*memberPercentage/100)*100) / 100
+
+		cost.Splits = make([]domains.Split, len(members))
+		for i, m := range members {
+			cost.Splits[i] = domains.Split{
+				ContactID:   m.ID,
+				ContactName: m.Name,
+				Value:       memberValue,
+				Percentage:  memberPercentage,
+			}
+		}
 	} else {
 		cost.OwnerPercentage = 100
 	}
 
-	created, err := s.repo.Create(cost, members)
+	created, err := s.repo.Create(cost)
 	if err != nil {
 		logger.Error("error creating cost", err)
 		return nil, err
@@ -108,6 +121,15 @@ func (s *costService) Update(id, userID string, cost *domains.Cost, ownerPercent
 				return nil, domains.NewInvalidInputError("ownerPercentage must be between 0 and 100 (exclusive)")
 			}
 			existing.OwnerPercentage = *ownerPercentage
+		}
+
+		if len(existing.Splits) > 0 {
+			memberPercentage := math.Round(((100-existing.OwnerPercentage)/float64(len(existing.Splits)))*100) / 100
+			memberValue := math.Round((existing.TotalValue*memberPercentage/100)*100) / 100
+			for i := range existing.Splits {
+				existing.Splits[i].Percentage = memberPercentage
+				existing.Splits[i].Value = memberValue
+			}
 		}
 	} else {
 		existing.OwnerPercentage = 100
