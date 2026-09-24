@@ -46,7 +46,7 @@ type CostMock struct {
 }
 
 func NewUserMock() UserMock {
-	u := domains.NewUserWithID(UserID, UserName, UserEmail, "", UserPhone)
+	u := domains.NewUserWithID(UserID, UserName, UserEmail, "", UserPhone, false)
 	return UserMock{
 		User:  u,
 		ID:    UserID,

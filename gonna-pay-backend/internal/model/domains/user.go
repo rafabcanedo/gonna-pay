@@ -3,11 +3,12 @@ package domains
 import "golang.org/x/crypto/bcrypt"
 
 type User struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"-"`
-	Phone    string `json:"phone"`
+	ID            string `json:"id"`
+	Name          string `json:"name"`
+	Email         string `json:"email"`
+	Password      string `json:"-"`
+	Phone         string `json:"phone"`
+	EmailVerified bool   `json:"emailVerified"`
 }
 
 func NewUser(name, email, password, phone string) *User {
@@ -19,13 +20,14 @@ func NewUser(name, email, password, phone string) *User {
 	}
 }
 
-func NewUserWithID(id, name, email, password, phone string) *User {
+func NewUserWithID(id, name, email, password, phone string, emailVerified bool) *User {
 	return &User{
-		ID:       id,
-		Name:     name,
-		Email:    email,
-		Password: password,
-		Phone:    phone,
+		ID:            id,
+		Name:          name,
+		Email:         email,
+		Password:      password,
+		Phone:         phone,
+		EmailVerified: emailVerified,
 	}
 }
 

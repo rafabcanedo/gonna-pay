@@ -3,10 +3,13 @@ package service
 import (
 	"context"
 	"errors"
+	"time"
 
+	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/auth"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/configuration/logger"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/model/domains"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/model/repository"
+	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/model/repository/entity/enums"
 )
 
 type UserService interface {
@@ -20,10 +23,12 @@ type UserService interface {
 
 type userService struct {
 	repo repository.UserRepository
+	emailTokenRepo repository.EmailTokenRepository
+	emailSvc EmailService
 }
 
-func NewUserService(repo repository.UserRepository) UserService {
-	return &userService{repo: repo}
+func NewUserService(repo repository.UserRepository, emailTokenRepo repository.EmailTokenRepository, emailSvc EmailService) UserService {
+	return &userService{repo: repo, emailTokenRepo: emailTokenRepo, emailSvc: emailSvc}
 }
 
 func (s *userService) Create(ctx context.Context, user *domains.User) (*domains.User, error) {
@@ -45,6 +50,24 @@ func (s *userService) Create(ctx context.Context, user *domains.User) (*domains.
 	if err != nil {
 		logger.Error("error creating user", err)
 		return nil, err
+	}
+
+	token, err := auth.GenerateRefreshToken()
+	if err != nil {
+		logger.Error("error generating verification token", err)
+		return created, nil
+	}
+
+	tokenHash := auth.HashToken(token)
+	expiresAt := time.Now().Add(24 * time.Hour)
+
+	if err := s.emailTokenRepo.Save(ctx, created.ID, tokenHash, enums.EmailTokenTypeVerification, expiresAt); err != nil {
+		logger.Error("error saving verification token", err)
+		return created, nil
+	}
+
+	if err := s.emailSvc.SendVerificationEmail(ctx, created.Email, created.Name, token); err != nil {
+		logger.Error("error sending verification email", err)
 	}
 
 	return created, nil

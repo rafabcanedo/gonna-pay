@@ -49,14 +49,16 @@ func main() {
 	contactRepo := repository.NewContactRepository(db)
 	groupRepo := repository.NewGroupRepository(db)
 	costRepo := repository.NewCostRepository(db)
+	emailTokenRepo := repository.NewEmailTokenRepository(db)
 
-	userSvc := service.NewUserService(userRepo)
+	emailSvc := service.NewEmailService()
+	userSvc := service.NewUserService(userRepo, emailTokenRepo, emailSvc)
 	contactSvc := service.NewContactService(contactRepo)
 	groupSvc := service.NewGroupService(groupRepo)
 	costSvc := service.NewCostService(costRepo, groupRepo)
 
 	userCtrl := controller.NewUserController(userSvc)
-	authCtrl := controller.NewAuthController(userSvc, authRepo)
+	authCtrl := controller.NewAuthController(userSvc, authRepo, emailTokenRepo, emailSvc)
 	contactCtrl := controller.NewContactController(contactSvc)
 	groupCtrl := controller.NewGroupController(groupSvc)
 	costCtrl := controller.NewCostController(costSvc)

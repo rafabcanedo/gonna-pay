@@ -145,7 +145,7 @@ func (uc *UserController) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	user := domains.NewUserWithID(id, req.Name, req.Email, req.Password, req.Phone)
+	user := domains.NewUserWithID(id, req.Name, req.Email, req.Password, req.Phone, false)
 
 	updated, err := uc.service.Update(c.Request.Context(), user)
 	if err != nil {

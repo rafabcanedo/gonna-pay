@@ -33,8 +33,8 @@ func (r *userRepository) Create(ctx context.Context, user *domains.User) (*domai
 	e.ID = uuid.New()
 
 	_, err := r.db.ExecContext(ctx,
-		`INSERT INTO users_entities (id, name, email, password, phone) VALUES ($1, $2, $3, $4, $5)`,
-		e.ID, e.Name, e.Email, e.Password, e.Phone,
+		`INSERT INTO users_entities (id, name, email, password, phone, email_verified) VALUES ($1, $2, $3, $4, $5, $6)`,
+		e.ID, e.Name, e.Email, e.Password, e.Phone, e.EmailVerified,
 	)
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func (r *userRepository) FindAll(ctx context.Context, limit, offset int) ([]*dom
 		return nil, 0, err
 	}
 
-	rows, err := r.db.QueryContext(ctx, `SELECT id, name, email, password, phone FROM users_entities LIMIT $1 OFFSET $2`, limit, offset)
+	rows, err := r.db.QueryContext(ctx, `SELECT id, name, email, password, phone, email_verified FROM users_entities LIMIT $1 OFFSET $2`, limit, offset)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -60,7 +60,7 @@ func (r *userRepository) FindAll(ctx context.Context, limit, offset int) ([]*dom
 	var users []*domains.User
 	for rows.Next() {
 		var e entity.UsersEntity
-		if err := rows.Scan(&e.ID, &e.Name, &e.Email, &e.Password, &e.Phone); err != nil {
+		if err := rows.Scan(&e.ID, &e.Name, &e.Email, &e.Password, &e.Phone, &e.EmailVerified); err != nil {
 			return nil, 0, err
 		}
 		users = append(users, converter.ConvertEntityToDomain(e))
@@ -77,9 +77,9 @@ func (r *userRepository) FindByID(ctx context.Context, id string) (*domains.User
 	var e entity.UsersEntity
 
 	err := r.db.QueryRowContext(ctx,
-		`SELECT id, name, email, password, phone FROM users_entities WHERE id = $1`,
+		`SELECT id, name, email, password, phone, email_verified FROM users_entities WHERE id = $1`,
 		id,
-	).Scan(&e.ID, &e.Name, &e.Email, &e.Password, &e.Phone)
+	).Scan(&e.ID, &e.Name, &e.Email, &e.Password, &e.Phone, &e.EmailVerified)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domains.NewNotFoundError("user not found")
@@ -94,9 +94,9 @@ func (r *userRepository) FindByEmail(ctx context.Context, email string) (*domain
 	var e entity.UsersEntity
 
 	err := r.db.QueryRowContext(ctx,
-		`SELECT id, name, email, password, phone FROM users_entities WHERE email = $1`,
+		`SELECT id, name, email, password, phone, email_verified FROM users_entities WHERE email = $1`,
 		email,
-	).Scan(&e.ID, &e.Name, &e.Email, &e.Password, &e.Phone)
+	).Scan(&e.ID, &e.Name, &e.Email, &e.Password, &e.Phone, &e.EmailVerified)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, domains.NewNotFoundError("user not found")
@@ -111,8 +111,8 @@ func (r *userRepository) Update(ctx context.Context, user *domains.User) (*domai
 	e := converter.ConvertDomainToEntity(user)
 
 	_, err := r.db.ExecContext(ctx,
-		`UPDATE users_entities SET name = $1, email = $2, password = $3, phone = $4 WHERE id = $5`,
-		e.Name, e.Email, e.Password, e.Phone, e.ID,
+		`UPDATE users_entities SET name = $1, email = $2, password = $3, phone = $4, email_verified = $5 WHERE id = $6`,
+		e.Name, e.Email, e.Password, e.Phone, e.EmailVerified, e.ID,
 	)
 	if err != nil {
 		return nil, err

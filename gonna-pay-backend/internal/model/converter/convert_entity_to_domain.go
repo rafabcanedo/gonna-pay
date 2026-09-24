@@ -12,6 +12,7 @@ func ConvertEntityToDomain(e entity.UsersEntity) *domains.User {
 		e.Email,
 		e.Password,
 		e.Phone,
+		e.EmailVerified,
 	)
 }
 

@@ -15,11 +15,12 @@ func ConvertDomainToEntity(user *domains.User) *entity.UsersEntity {
 	}
 
 	return &entity.UsersEntity{
-		ID:       userID,
-		Name:     user.Name,
-		Email:    user.Email,
-		Password: user.Password,
-		Phone:    user.Phone,
+		ID:            userID,
+		Name:          user.Name,
+		Email:         user.Email,
+		Password:      user.Password,
+		Phone:         user.Phone,
+		EmailVerified: user.EmailVerified,
 	}
 }
 

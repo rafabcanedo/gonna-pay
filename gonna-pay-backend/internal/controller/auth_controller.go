@@ -11,6 +11,7 @@ import (
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/configuration/validation"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/httputil"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/model/repository"
+	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/model/repository/entity/enums"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/model/service"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/view/request"
 	"github.com/rafabcanedo/gonna-pay/gonna-pay-backend/internal/view/response"
@@ -19,10 +20,12 @@ import (
 type AuthController struct {
 	userService service.UserService
 	authRepo    repository.AuthRepository
+	emailTokenRepo repository.EmailTokenRepository
+	emailSvc service.EmailService
 }
 
-func NewAuthController(userService service.UserService, authRepo repository.AuthRepository) *AuthController {
-	return &AuthController{userService: userService, authRepo: authRepo}
+func NewAuthController(userService service.UserService, authRepo repository.AuthRepository, emailTokenRepo repository.EmailTokenRepository, emailSvc service.EmailService) *AuthController {
+    return &AuthController{userService: userService, authRepo: authRepo, emailTokenRepo: emailTokenRepo, emailSvc: emailSvc}
 }
 
 // @Summary      Login
@@ -286,4 +289,155 @@ func (ac *AuthController) DeleteProfile(c *gin.Context) {
 	c.SetCookie("refresh_token", "", -1, "/auth", "", false, true)
 
 	c.JSON(http.StatusOK, gin.H{"message": "account deleted successfully"})
+}
+
+// @Summary      Verificar e-mail
+// @Description  Valida o token de verificação de e-mail e marca o usuário como verificado
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body  body      request.VerifyEmailRequest  true  "Token de verificação"
+// @Success      200   {object}  map[string]string  "message"
+// @Failure      400   {object}  rest_errors.RestErrors
+// @Failure      404   {object}  rest_errors.RestErrors
+// @Failure      500   {object}  rest_errors.RestErrors
+// @Router       /auth/verify-email [post]
+func (ac *AuthController) VerifyEmail(c *gin.Context) {
+	var req request.VerifyEmailRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		restErr := validation.ValidateError(err)
+		c.JSON(restErr.Code, restErr)
+		return
+	}
+
+	ctx := c.Request.Context()
+	tokenHash := auth.HashToken(req.Token)
+
+	stored, err := ac.emailTokenRepo.FindByHashAndType(ctx, tokenHash, enums.EmailTokenTypeVerification)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, rest_errors.NewBadRequestError("invalid or expired token"))
+		return
+	}
+
+	if time.Now().After(stored.ExpiresAt) {
+		ac.emailTokenRepo.DeleteByHash(ctx, tokenHash)
+		c.JSON(http.StatusBadRequest, rest_errors.NewBadRequestError("token expired"))
+		return
+	}
+
+	user, err := ac.userService.FindByID(ctx, stored.UserID.String())
+	if err != nil {
+		httputil.RespondError(c, err)
+		return
+	}
+
+	user.EmailVerified = true
+	if _, err := ac.userService.Update(ctx, user); err != nil {
+		httputil.RespondError(c, err)
+		return
+	}
+
+	ac.emailTokenRepo.DeleteByHash(ctx, tokenHash)
+
+	c.JSON(http.StatusOK, gin.H{"message": "email verified successfully"})
+}
+
+// @Summary      Esqueci minha senha
+// @Description  Envia e-mail com link para redefinição de senha. Sempre retorna 200 para não revelar se o e-mail existe
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body  body      request.ForgotPasswordRequest  true  "E-mail do usuário"
+// @Success      200   {object}  map[string]string  "message"
+// @Router       /auth/forgot-password [post]
+func (ac *AuthController) ForgotPassword(c *gin.Context) {
+	var req request.ForgotPasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		restErr := validation.ValidateError(err)
+		c.JSON(restErr.Code, restErr)
+		return
+	}
+
+	ctx := c.Request.Context()
+
+	user, err := ac.userService.FindByEmail(ctx, req.Email)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"message": "if this email exists, a reset link has been sent"})
+		return
+	}
+
+	ac.emailTokenRepo.DeleteByUserIDAndType(ctx, user.ID, enums.EmailTokenTypeReset)
+
+	token, err := auth.GenerateRefreshToken()
+	if err != nil {
+		logger.Error("error generating password reset token", err)
+		c.JSON(http.StatusOK, gin.H{"message": "if this email exists, a reset link has been sent"})
+		return
+	}
+
+	tokenHash := auth.HashToken(token)
+	expiresAt := time.Now().Add(1 * time.Hour)
+
+	if err := ac.emailTokenRepo.Save(ctx, user.ID, tokenHash, enums.EmailTokenTypeReset, expiresAt); err != nil {
+		logger.Error("error saving password reset token", err)
+		c.JSON(http.StatusOK, gin.H{"message": "if this email exists, a reset link has been sent"})
+		return
+	}
+
+	if err := ac.emailSvc.SendPasswordResetEmail(ctx, user.Email, user.Name, token); err != nil {
+		logger.Error("error sending password reset email", err)
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "if this email exists, a reset link has been sent"})
+}
+
+// @Summary      Redefinir senha
+// @Description  Valida o token de reset e atualiza a senha do usuário
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        body  body      request.ResetPasswordRequest  true  "Token e nova senha"
+// @Success      200   {object}  map[string]string  "message"
+// @Failure      400   {object}  rest_errors.RestErrors
+// @Failure      404   {object}  rest_errors.RestErrors
+// @Failure      500   {object}  rest_errors.RestErrors
+// @Router       /auth/reset-password [post]
+func (ac *AuthController) ResetPassword(c *gin.Context) {
+	var req request.ResetPasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		restErr := validation.ValidateError(err)
+		c.JSON(restErr.Code, restErr)
+		return
+	}
+
+	ctx := c.Request.Context()
+	tokenHash := auth.HashToken(req.Token)
+
+	stored, err := ac.emailTokenRepo.FindByHashAndType(ctx, tokenHash, enums.EmailTokenTypeReset)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, rest_errors.NewBadRequestError("invalid or expired token"))
+		return
+	}
+
+	if time.Now().After(stored.ExpiresAt) {
+		ac.emailTokenRepo.DeleteByHash(ctx, tokenHash)
+		c.JSON(http.StatusBadRequest, rest_errors.NewBadRequestError("token expired"))
+		return
+	}
+
+	user, err := ac.userService.FindByID(ctx, stored.UserID.String())
+	if err != nil {
+		httputil.RespondError(c, err)
+		return
+	}
+
+	user.Password = req.Password
+	if _, err := ac.userService.Update(ctx, user); err != nil {
+		httputil.RespondError(c, err)
+		return
+	}
+
+	ac.emailTokenRepo.DeleteByHash(ctx, tokenHash)
+
+	c.JSON(http.StatusOK, gin.H{"message": "password reset successfully"})
 }

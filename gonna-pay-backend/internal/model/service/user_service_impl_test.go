@@ -13,15 +13,24 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
+func newUserSvc(ctrl *gomock.Controller) (service.UserService, *mocks.MockUserRepository, *mocks.MockEmailTokenRepository, *mocks.MockEmailService) {
+	mockRepo := mocks.NewMockUserRepository(ctrl)
+	mockEmailTokenRepo := mocks.NewMockEmailTokenRepository(ctrl)
+	mockEmailSvc := mocks.NewMockEmailService(ctrl)
+	svc := service.NewUserService(mockRepo, mockEmailTokenRepo, mockEmailSvc)
+	return svc, mockRepo, mockEmailTokenRepo, mockEmailSvc
+}
+
 func TestUserService_Create(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockRepo := mocks.NewMockUserRepository(ctrl)
-		svc := service.NewUserService(mockRepo)
+		svc, mockRepo, mockEmailTokenRepo, mockEmailSvc := newUserSvc(ctrl)
 
 		m := testutil.NewUserMock()
 		mockRepo.EXPECT().FindByEmail(gomock.Any(), m.Email).Return(nil, domains.NewNotFoundError("not found"))
 		mockRepo.EXPECT().Create(gomock.Any(), gomock.Any()).Return(m.User, nil)
+		mockEmailTokenRepo.EXPECT().Save(gomock.Any(), m.ID, gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+		mockEmailSvc.EXPECT().SendVerificationEmail(gomock.Any(), m.Email, m.Name, gomock.Any()).Return(nil)
 
 		user := domains.NewUser(m.Name, m.Email, "senha123", m.Phone)
 		result, err := svc.Create(context.Background(), user)
@@ -32,8 +41,7 @@ func TestUserService_Create(t *testing.T) {
 
 	t.Run("email already in use", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockRepo := mocks.NewMockUserRepository(ctrl)
-		svc := service.NewUserService(mockRepo)
+		svc, mockRepo, _, _ := newUserSvc(ctrl)
 
 		m := testutil.NewUserMock()
 		mockRepo.EXPECT().FindByEmail(gomock.Any(), m.Email).Return(m.User, nil)
@@ -46,8 +54,7 @@ func TestUserService_Create(t *testing.T) {
 
 	t.Run("password is encrypted before saving", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockRepo := mocks.NewMockUserRepository(ctrl)
-		svc := service.NewUserService(mockRepo)
+		svc, mockRepo, mockEmailTokenRepo, mockEmailSvc := newUserSvc(ctrl)
 
 		m := testutil.NewUserMock()
 		mockRepo.EXPECT().FindByEmail(gomock.Any(), m.Email).Return(nil, domains.NewNotFoundError("not found"))
@@ -55,6 +62,8 @@ func TestUserService_Create(t *testing.T) {
 			assert.NotEqual(t, "senha123", u.Password)
 			return m.User, nil
 		})
+		mockEmailTokenRepo.EXPECT().Save(gomock.Any(), m.ID, gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+		mockEmailSvc.EXPECT().SendVerificationEmail(gomock.Any(), m.Email, m.Name, gomock.Any()).Return(nil)
 
 		user := domains.NewUser(m.Name, m.Email, "senha123", m.Phone)
 		_, err := svc.Create(context.Background(), user)
@@ -63,8 +72,7 @@ func TestUserService_Create(t *testing.T) {
 
 	t.Run("repo error on FindByEmail", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockRepo := mocks.NewMockUserRepository(ctrl)
-		svc := service.NewUserService(mockRepo)
+		svc, mockRepo, _, _ := newUserSvc(ctrl)
 
 		mockRepo.EXPECT().FindByEmail(gomock.Any(), testutil.UserEmail).Return(nil, errors.New("db error"))
 
@@ -73,13 +81,45 @@ func TestUserService_Create(t *testing.T) {
 
 		assert.Error(t, err)
 	})
+
+	t.Run("email token save error does not fail create", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		svc, mockRepo, mockEmailTokenRepo, _ := newUserSvc(ctrl)
+
+		m := testutil.NewUserMock()
+		mockRepo.EXPECT().FindByEmail(gomock.Any(), m.Email).Return(nil, domains.NewNotFoundError("not found"))
+		mockRepo.EXPECT().Create(gomock.Any(), gomock.Any()).Return(m.User, nil)
+		mockEmailTokenRepo.EXPECT().Save(gomock.Any(), m.ID, gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("db error"))
+
+		user := domains.NewUser(m.Name, m.Email, "senha123", m.Phone)
+		result, err := svc.Create(context.Background(), user)
+
+		assert.NoError(t, err)
+		assert.Equal(t, m.ID, result.ID)
+	})
+
+	t.Run("email send error does not fail create", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		svc, mockRepo, mockEmailTokenRepo, mockEmailSvc := newUserSvc(ctrl)
+
+		m := testutil.NewUserMock()
+		mockRepo.EXPECT().FindByEmail(gomock.Any(), m.Email).Return(nil, domains.NewNotFoundError("not found"))
+		mockRepo.EXPECT().Create(gomock.Any(), gomock.Any()).Return(m.User, nil)
+		mockEmailTokenRepo.EXPECT().Save(gomock.Any(), m.ID, gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+		mockEmailSvc.EXPECT().SendVerificationEmail(gomock.Any(), m.Email, m.Name, gomock.Any()).Return(errors.New("resend error"))
+
+		user := domains.NewUser(m.Name, m.Email, "senha123", m.Phone)
+		result, err := svc.Create(context.Background(), user)
+
+		assert.NoError(t, err)
+		assert.Equal(t, m.ID, result.ID)
+	})
 }
 
 func TestUserService_FindAll(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockRepo := mocks.NewMockUserRepository(ctrl)
-		svc := service.NewUserService(mockRepo)
+		svc, mockRepo, _, _ := newUserSvc(ctrl)
 
 		m1 := testutil.NewUserMock()
 		m2 := testutil.NewUserMock()
@@ -95,8 +135,7 @@ func TestUserService_FindAll(t *testing.T) {
 
 	t.Run("repo error", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockRepo := mocks.NewMockUserRepository(ctrl)
-		svc := service.NewUserService(mockRepo)
+		svc, mockRepo, _, _ := newUserSvc(ctrl)
 
 		mockRepo.EXPECT().FindAll(gomock.Any(), 20, 0).Return(nil, int64(0), errors.New("db error"))
 
@@ -108,8 +147,7 @@ func TestUserService_FindAll(t *testing.T) {
 func TestUserService_FindByID(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockRepo := mocks.NewMockUserRepository(ctrl)
-		svc := service.NewUserService(mockRepo)
+		svc, mockRepo, _, _ := newUserSvc(ctrl)
 
 		m := testutil.NewUserMock()
 		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.User, nil)
@@ -122,8 +160,7 @@ func TestUserService_FindByID(t *testing.T) {
 
 	t.Run("not found", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockRepo := mocks.NewMockUserRepository(ctrl)
-		svc := service.NewUserService(mockRepo)
+		svc, mockRepo, _, _ := newUserSvc(ctrl)
 
 		mockRepo.EXPECT().FindByID(gomock.Any(), testutil.UserID).Return(nil, domains.NewNotFoundError("user not found"))
 
@@ -136,8 +173,7 @@ func TestUserService_FindByID(t *testing.T) {
 func TestUserService_FindByEmail(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockRepo := mocks.NewMockUserRepository(ctrl)
-		svc := service.NewUserService(mockRepo)
+		svc, mockRepo, _, _ := newUserSvc(ctrl)
 
 		m := testutil.NewUserMock()
 		mockRepo.EXPECT().FindByEmail(gomock.Any(), m.Email).Return(m.User, nil)
@@ -150,8 +186,7 @@ func TestUserService_FindByEmail(t *testing.T) {
 
 	t.Run("not found", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockRepo := mocks.NewMockUserRepository(ctrl)
-		svc := service.NewUserService(mockRepo)
+		svc, mockRepo, _, _ := newUserSvc(ctrl)
 
 		mockRepo.EXPECT().FindByEmail(gomock.Any(), testutil.UserEmail).Return(nil, domains.NewNotFoundError("not found"))
 
@@ -164,8 +199,7 @@ func TestUserService_FindByEmail(t *testing.T) {
 func TestUserService_Update(t *testing.T) {
 	t.Run("success without password change", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockRepo := mocks.NewMockUserRepository(ctrl)
-		svc := service.NewUserService(mockRepo)
+		svc, mockRepo, _, _ := newUserSvc(ctrl)
 
 		m := testutil.NewUserMock()
 		m.User.Name = testutil.UserUpdatedName
@@ -181,8 +215,7 @@ func TestUserService_Update(t *testing.T) {
 
 	t.Run("success encrypts new password", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockRepo := mocks.NewMockUserRepository(ctrl)
-		svc := service.NewUserService(mockRepo)
+		svc, mockRepo, _, _ := newUserSvc(ctrl)
 
 		m := testutil.NewUserMock()
 		m.User.Password = "nova-senha"
@@ -202,8 +235,7 @@ func TestUserService_Update(t *testing.T) {
 func TestUserService_Delete(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockRepo := mocks.NewMockUserRepository(ctrl)
-		svc := service.NewUserService(mockRepo)
+		svc, mockRepo, _, _ := newUserSvc(ctrl)
 
 		m := testutil.NewUserMock()
 		mockRepo.EXPECT().FindByID(gomock.Any(), testutil.UserID).Return(m.User, nil)
@@ -215,8 +247,7 @@ func TestUserService_Delete(t *testing.T) {
 
 	t.Run("repo error", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockRepo := mocks.NewMockUserRepository(ctrl)
-		svc := service.NewUserService(mockRepo)
+		svc, mockRepo, _, _ := newUserSvc(ctrl)
 
 		m := testutil.NewUserMock()
 		mockRepo.EXPECT().FindByID(gomock.Any(), testutil.UserID).Return(m.User, nil)

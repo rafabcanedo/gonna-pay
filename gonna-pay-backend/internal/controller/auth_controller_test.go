@@ -21,6 +21,15 @@ func init() {
 	os.Setenv("JWT_SECRET", "test-secret-key")
 }
 
+func newAuthCtrl(ctrl *gomock.Controller) (*controller.AuthController, *mocks.MockUserService, *mocks.MockAuthRepository, *mocks.MockEmailTokenRepository, *mocks.MockEmailService) {
+	mockUserService := mocks.NewMockUserService(ctrl)
+	mockAuthRepo := mocks.NewMockAuthRepository(ctrl)
+	mockEmailTokenRepo := mocks.NewMockEmailTokenRepository(ctrl)
+	mockEmailSvc := mocks.NewMockEmailService(ctrl)
+	ac := controller.NewAuthController(mockUserService, mockAuthRepo, mockEmailTokenRepo, mockEmailSvc)
+	return ac, mockUserService, mockAuthRepo, mockEmailTokenRepo, mockEmailSvc
+}
+
 func hashPassword(password string) (string, error) {
 	user := domains.NewUser("", "", password, "")
 	if err := user.EncryptPassword(); err != nil {
@@ -50,9 +59,7 @@ func hasCookieExpired(cookies []*http.Cookie, name string) bool {
 func TestLogin(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockUserService := mocks.NewMockUserService(ctrl)
-		mockAuthRepo := mocks.NewMockAuthRepository(ctrl)
-		ac := controller.NewAuthController(mockUserService, mockAuthRepo)
+		ac, mockUserService, mockAuthRepo, _, _ := newAuthCtrl(ctrl)
 
 		user := testutil.NewUserFixture()
 		user.Password, _ = hashPassword("senha123")
@@ -80,9 +87,7 @@ func TestLogin(t *testing.T) {
 
 	t.Run("validation error - invalid email", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockUserService := mocks.NewMockUserService(ctrl)
-		mockAuthRepo := mocks.NewMockAuthRepository(ctrl)
-		ac := controller.NewAuthController(mockUserService, mockAuthRepo)
+		ac, _, _, _, _ := newAuthCtrl(ctrl)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.MakePost(ctx, nil, map[string]any{
@@ -97,9 +102,7 @@ func TestLogin(t *testing.T) {
 
 	t.Run("user not found", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockUserService := mocks.NewMockUserService(ctrl)
-		mockAuthRepo := mocks.NewMockAuthRepository(ctrl)
-		ac := controller.NewAuthController(mockUserService, mockAuthRepo)
+		ac, mockUserService, _, _, _ := newAuthCtrl(ctrl)
 
 		mockUserService.EXPECT().FindByEmail(gomock.Any(), "rafael@email.com").Return(nil, domains.NewNotFoundError("not found"))
 
@@ -116,9 +119,7 @@ func TestLogin(t *testing.T) {
 
 	t.Run("wrong password", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockUserService := mocks.NewMockUserService(ctrl)
-		mockAuthRepo := mocks.NewMockAuthRepository(ctrl)
-		ac := controller.NewAuthController(mockUserService, mockAuthRepo)
+		ac, mockUserService, _, _, _ := newAuthCtrl(ctrl)
 
 		user := testutil.NewUserFixture()
 		user.Password, _ = hashPassword("senha-correta")
@@ -139,9 +140,7 @@ func TestLogin(t *testing.T) {
 func TestRefresh(t *testing.T) {
 	t.Run("missing cookie", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockUserService := mocks.NewMockUserService(ctrl)
-		mockAuthRepo := mocks.NewMockAuthRepository(ctrl)
-		ac := controller.NewAuthController(mockUserService, mockAuthRepo)
+		ac, _, _, _, _ := newAuthCtrl(ctrl)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.MakePost(ctx, nil, nil)
@@ -153,9 +152,7 @@ func TestRefresh(t *testing.T) {
 
 	t.Run("invalid token - not found in db", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockUserService := mocks.NewMockUserService(ctrl)
-		mockAuthRepo := mocks.NewMockAuthRepository(ctrl)
-		ac := controller.NewAuthController(mockUserService, mockAuthRepo)
+		ac, _, mockAuthRepo, _, _ := newAuthCtrl(ctrl)
 
 		mockAuthRepo.EXPECT().FindByHash(gomock.Any(), gomock.Any()).Return(nil, domains.NewNotFoundError("not found"))
 
@@ -170,9 +167,7 @@ func TestRefresh(t *testing.T) {
 
 	t.Run("expired token", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockUserService := mocks.NewMockUserService(ctrl)
-		mockAuthRepo := mocks.NewMockAuthRepository(ctrl)
-		ac := controller.NewAuthController(mockUserService, mockAuthRepo)
+		ac, _, mockAuthRepo, _, _ := newAuthCtrl(ctrl)
 
 		expiredToken := &entity.RefreshTokenEntity{
 			ID:        uuid.New(),
@@ -196,9 +191,7 @@ func TestRefresh(t *testing.T) {
 func TestLogout(t *testing.T) {
 	t.Run("success with cookie", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockUserService := mocks.NewMockUserService(ctrl)
-		mockAuthRepo := mocks.NewMockAuthRepository(ctrl)
-		ac := controller.NewAuthController(mockUserService, mockAuthRepo)
+		ac, _, mockAuthRepo, _, _ := newAuthCtrl(ctrl)
 
 		mockAuthRepo.EXPECT().DeleteByHash(gomock.Any(), gomock.Any()).Return(nil)
 
@@ -216,9 +209,7 @@ func TestLogout(t *testing.T) {
 
 	t.Run("success without cookie", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockUserService := mocks.NewMockUserService(ctrl)
-		mockAuthRepo := mocks.NewMockAuthRepository(ctrl)
-		ac := controller.NewAuthController(mockUserService, mockAuthRepo)
+		ac, _, _, _, _ := newAuthCtrl(ctrl)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.MakePost(ctx, nil, nil)
@@ -232,9 +223,7 @@ func TestLogout(t *testing.T) {
 func TestGetProfile(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockUserService := mocks.NewMockUserService(ctrl)
-		mockAuthRepo := mocks.NewMockAuthRepository(ctrl)
-		ac := controller.NewAuthController(mockUserService, mockAuthRepo)
+		ac, mockUserService, _, _, _ := newAuthCtrl(ctrl)
 
 		user := testutil.NewUserFixture()
 		mockUserService.EXPECT().FindByID(gomock.Any(), "user-1").Return(user, nil)
@@ -253,9 +242,7 @@ func TestGetProfile(t *testing.T) {
 
 	t.Run("missing userID", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockUserService := mocks.NewMockUserService(ctrl)
-		mockAuthRepo := mocks.NewMockAuthRepository(ctrl)
-		ac := controller.NewAuthController(mockUserService, mockAuthRepo)
+		ac, _, _, _, _ := newAuthCtrl(ctrl)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.MakeGet(ctx, nil, nil)
@@ -269,9 +256,7 @@ func TestGetProfile(t *testing.T) {
 func TestDeleteProfile(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockUserService := mocks.NewMockUserService(ctrl)
-		mockAuthRepo := mocks.NewMockAuthRepository(ctrl)
-		ac := controller.NewAuthController(mockUserService, mockAuthRepo)
+		ac, mockUserService, _, _, _ := newAuthCtrl(ctrl)
 
 		mockUserService.EXPECT().Delete(gomock.Any(), "user-1").Return(nil)
 
@@ -288,9 +273,7 @@ func TestDeleteProfile(t *testing.T) {
 
 	t.Run("missing userID", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
-		mockUserService := mocks.NewMockUserService(ctrl)
-		mockAuthRepo := mocks.NewMockAuthRepository(ctrl)
-		ac := controller.NewAuthController(mockUserService, mockAuthRepo)
+		ac, _, _, _, _ := newAuthCtrl(ctrl)
 
 		ctx, rec := testutil.NewTestContext()
 		testutil.MakeDelete(ctx, nil)
