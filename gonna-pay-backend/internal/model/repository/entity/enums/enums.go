@@ -32,5 +32,5 @@ type EmailTokenType string
 
 const (
 	EmailTokenTypeVerification EmailTokenType = "email_verification"
-	EmailTokenTypeReset EmailTokenType = "password_reset"
+	EmailTokenTypeReset        EmailTokenType = "password_reset"
 )

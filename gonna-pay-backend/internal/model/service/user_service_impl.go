@@ -22,9 +22,9 @@ type UserService interface {
 }
 
 type userService struct {
-	repo repository.UserRepository
+	repo           repository.UserRepository
 	emailTokenRepo repository.EmailTokenRepository
-	emailSvc EmailService
+	emailSvc       EmailService
 }
 
 func NewUserService(repo repository.UserRepository, emailTokenRepo repository.EmailTokenRepository, emailSvc EmailService) UserService {
@@ -110,12 +110,15 @@ func (s *userService) FindByEmail(ctx context.Context, email string) (*domains.U
 }
 
 func (s *userService) Update(ctx context.Context, user *domains.User) (*domains.User, error) {
-	if _, err := s.repo.FindByID(ctx, user.ID); err != nil {
+	existing, err := s.repo.FindByID(ctx, user.ID)
+	if err != nil {
 		if !errors.Is(err, domains.ErrNotFound) {
 			logger.Error("error finding user on update", err)
 		}
 		return nil, err
 	}
+
+	user.EmailVerified = existing.EmailVerified
 
 	if user.Email != "" {
 		existing, err := s.repo.FindByEmail(ctx, user.Email)

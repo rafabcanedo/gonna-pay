@@ -18,14 +18,14 @@ import (
 )
 
 type AuthController struct {
-	userService service.UserService
-	authRepo    repository.AuthRepository
+	userService    service.UserService
+	authRepo       repository.AuthRepository
 	emailTokenRepo repository.EmailTokenRepository
-	emailSvc service.EmailService
+	emailSvc       service.EmailService
 }
 
 func NewAuthController(userService service.UserService, authRepo repository.AuthRepository, emailTokenRepo repository.EmailTokenRepository, emailSvc service.EmailService) *AuthController {
-    return &AuthController{userService: userService, authRepo: authRepo, emailTokenRepo: emailTokenRepo, emailSvc: emailSvc}
+	return &AuthController{userService: userService, authRepo: authRepo, emailTokenRepo: emailTokenRepo, emailSvc: emailSvc}
 }
 
 // @Summary      Login
