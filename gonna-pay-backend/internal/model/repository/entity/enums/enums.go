@@ -27,3 +27,10 @@ const (
 	GroupCategoryTravel        GroupCategory = "Travel"
 	GroupCategoryOthers        GroupCategory = "Others"
 )
+
+type EmailTokenType string
+
+const (
+	EmailTokenTypeVerification EmailTokenType = "email_verification"
+	EmailTokenTypeReset EmailTokenType = "password_reset"
+)

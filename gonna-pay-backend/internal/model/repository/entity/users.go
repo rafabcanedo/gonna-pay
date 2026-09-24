@@ -8,6 +8,7 @@ type UsersEntity struct {
 	Email string `gorm:"type:varchar(50);unique;not null"`
 	Password string `gorm:"type:varchar(60);not null"`
 	Phone string `gorm:"type:varchar(20);not null"`
+	EmailVerified bool `gorm:"default:false;not null"`
 
 	Contacts []ContactEntity `gorm:"foreignKey:OwnerID"`
 	Costs    []CostEntity    `gorm:"foreignKey:UserID"`
