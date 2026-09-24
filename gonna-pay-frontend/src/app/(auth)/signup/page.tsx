@@ -19,6 +19,12 @@ export default function SignUpForm() {
   const methods = useForm<IRegisterAccount>({
     resolver: yupResolver(signUpSchema),
     mode: "onSubmit",
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+      phone: '',
+    }
   })
 
   const handleRegisterAccount = (data: IRegisterAccount) => {

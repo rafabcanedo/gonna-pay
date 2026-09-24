@@ -74,7 +74,7 @@ export async function apiCall<T>(
           if (data?.fields) {
             throw new ValidationError(data.fields)
           }
-          throw new ApiError(400, data?.error || 'Bad request', data)
+          throw new ApiError(400, data?.message || data?.error || 'Bad request', data)
 
         case 401:
           if (retry) {
@@ -87,7 +87,7 @@ export async function apiCall<T>(
               redirect('/api/auth/clear-session')
             }
           }
-          throw new UnauthorizedError()
+          throw new UnauthorizedError(data?.message)
 
         case 403:
           throw new ForbiddenError()
@@ -102,7 +102,7 @@ export async function apiCall<T>(
           throw new ServiceUnavailableError()
 
         default:
-          throw new ApiError(res.status, data?.error || 'Unknown error', data)
+          throw new ApiError(res.status, data?.message || data?.error || 'Unknown error', data)
       }
     }
 

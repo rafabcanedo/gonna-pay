@@ -32,3 +32,7 @@ export interface IUpdateProfileResponse {
   message: string;
   user: IUserData;
 }
+
+export interface IMessageResponse {
+  message: string;
+}

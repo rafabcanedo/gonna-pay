@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { authService, ISignInRequest, ISignUpRequest, IAuthResponse } from "@/services/auth";
+import { authService, ISignInRequest, ISignUpRequest, IAuthResponse, IMessageResponse } from "@/services/auth";
 import { IRestError } from "@/types";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -24,7 +24,7 @@ export function useAuthMutations() {
     },
   });
 
-  const registerMutation = useMutation<{ message: string }, IRestError, ISignUpRequest>({
+  const registerMutation = useMutation<IMessageResponse, IRestError, ISignUpRequest>({
     mutationFn: authService.signUp,
     onSuccess: (data) => {
       toast.success(data.message || "Account created! You can now sign in.");

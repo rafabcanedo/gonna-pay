@@ -1,21 +1,21 @@
 import { apiCall } from "@/lib/api-client";
-import type { ISignInRequest, ISignUpRequest, IAuthResponse, IUserData, IUpdateProfileRequest, IUpdateProfileResponse } from './interfaces';
+import type { ISignInRequest, ISignUpRequest, IAuthResponse, IUserData, IUpdateProfileRequest, IUpdateProfileResponse, IMessageResponse } from './interfaces';
 
-export type { ISignInRequest, ISignUpRequest, IAuthResponse, IUserData, IUpdateProfileRequest, IUpdateProfileResponse };
+export type { ISignInRequest, ISignUpRequest, IAuthResponse, IUserData, IUpdateProfileRequest, IUpdateProfileResponse, IMessageResponse };
 
 export const authService = {
   async signIn(data: ISignInRequest): Promise<IAuthResponse> {
     return apiCall<IAuthResponse>("/auth/signin", {
       method: "POST",
       body: JSON.stringify(data),
-    });
+    }, false);
   },
 
-  async signUp(data: ISignUpRequest): Promise<{ message: string }> {
-    return apiCall<{ message: string }>("/auth/signup", {
+  async signUp(data: ISignUpRequest): Promise<IMessageResponse> {
+    return apiCall<IMessageResponse>("/auth/signup", {
       method: "POST",
       body: JSON.stringify(data),
-    });
+    }, false);
   },
 
   async getProfile(): Promise<IUserData> {
@@ -31,14 +31,14 @@ export const authService = {
     });
   },
 
-  async logout(): Promise<{ message: string }> {
-    return apiCall<{ message: string }>("/auth/logout", {
+  async logout(): Promise<IMessageResponse> {
+    return apiCall<IMessageResponse>("/auth/logout", {
       method: "POST",
     });
   },
 
-  async deleteAccount(): Promise<{ message: string }> {
-    return apiCall<{ message: string }>("/auth/profile", {
+  async deleteAccount(): Promise<IMessageResponse> {
+    return apiCall<IMessageResponse>("/auth/profile", {
       method: "DELETE",
     });
   },

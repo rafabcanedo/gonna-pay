@@ -17,8 +17,8 @@ export class ValidationError extends ApiError {
 }
 
 export class UnauthorizedError extends ApiError {
-  constructor() {
-    super(401, 'Unauthorized. Please login.', null)
+  constructor(message = 'Unauthorized. Please login.') {
+    super(401, message, null)
     this.name = 'UnauthorizedError'
   }
 }
