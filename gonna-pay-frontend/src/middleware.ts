@@ -1,7 +1,7 @@
 import { MiddlewareConfig, NextRequest, NextResponse } from "next/server";
 
 // Work with public routes, definition routes which the user can access without authentication
-const publicRoutes = ["/signin", "/signup", "/forgot-your-password"] as const;
+const publicRoutes = ["/signin", "/signup", "/forgot-your-password", "/verify-email", "/verify-email-sent", "/reset-password"] as const;
 
 // Route where user is redirected when user is not authenticated
 const REDIRECT_WHEN_NOT_AUTHENTICATED_ROUTE = "/signin";

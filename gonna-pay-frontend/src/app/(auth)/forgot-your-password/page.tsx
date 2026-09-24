@@ -5,12 +5,14 @@ import { useForm, FormProvider } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 import { forgotPasswordSchema } from "@/validations/schemas";
 import { HookFormTextInput } from "@/components/hook-form-text-input";
+import { useAuthMutations } from "@/hooks/mutations/use-auth-mutations";
 import { IForgotPassword } from "./types"
 
 export default function ForgotYourPassword() {
+
+  const { forgotPasswordMutation } = useAuthMutations();
 
   const methods = useForm<IForgotPassword>({
     resolver: yupResolver(forgotPasswordSchema),
@@ -18,9 +20,8 @@ export default function ForgotYourPassword() {
     defaultValues: { email: "" },
   });
 
-  const handleSubmit = async (data: IForgotPassword) => {
-    console.log("Password reset triggered for:", data.email);
-    toast.success("Password reset link sent to your email.");
+  const handleSubmit = (data: IForgotPassword) => {
+    forgotPasswordMutation.mutate({ email: data.email });
   };
 
   const router = useRouter();
@@ -52,8 +53,8 @@ export default function ForgotYourPassword() {
             </div>
 
             <div className="mt-4">
-              <Button className="bg-primary hover:bg-hover" size="sm" type="submit">
-                Reset my passoword
+              <Button className="bg-primary hover:bg-hover" size="sm" type="submit" disabled={forgotPasswordMutation.isPending}>
+                {forgotPasswordMutation.isPending ? "Loading" : "Reset my password"}
               </Button>
             </div>
           </form>

@@ -1,7 +1,7 @@
 import { apiCall } from "@/lib/api-client";
-import type { ISignInRequest, ISignUpRequest, IAuthResponse, IUserData, IUpdateProfileRequest, IUpdateProfileResponse, IMessageResponse } from './interfaces';
+import type { ISignInRequest, ISignUpRequest, IAuthResponse, IUserData, IUpdateProfileRequest, IUpdateProfileResponse, IMessageResponse, IVerifyEmailRequest, IForgotPasswordRequest, IResetPasswordRequest } from './interfaces';
 
-export type { ISignInRequest, ISignUpRequest, IAuthResponse, IUserData, IUpdateProfileRequest, IUpdateProfileResponse, IMessageResponse };
+export type { ISignInRequest, ISignUpRequest, IAuthResponse, IUserData, IUpdateProfileRequest, IUpdateProfileResponse, IMessageResponse, IVerifyEmailRequest, IForgotPasswordRequest, IResetPasswordRequest };
 
 export const authService = {
   async signIn(data: ISignInRequest): Promise<IAuthResponse> {
@@ -42,4 +42,25 @@ export const authService = {
       method: "DELETE",
     });
   },
+
+  async verifyEmail(data: IVerifyEmailRequest): Promise<IMessageResponse> {
+  return apiCall<IMessageResponse>("/auth/verify-email", {
+    method: "POST",
+    body: JSON.stringify(data),
+  }, false);
+},
+
+async forgotPassword(data: IForgotPasswordRequest): Promise<IMessageResponse> {
+  return apiCall<IMessageResponse>("/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify(data),
+  }, false);
+},
+
+async resetPassword(data: IResetPasswordRequest): Promise<IMessageResponse> {
+  return apiCall<IMessageResponse>("/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify(data),
+  }, false);
+},
 };

@@ -86,3 +86,10 @@ export const editCostSchema = yup.object({
       return !isNaN(num) && num > 0 && num < 100;
     }),
 });
+
+export const resetPasswordSchema = yup.object({
+  password: passwordField(6),
+  confirmPassword: yup.string()
+    .oneOf([yup.ref("password")], "Passwords do not match")
+    .required("This field is required."),
+})

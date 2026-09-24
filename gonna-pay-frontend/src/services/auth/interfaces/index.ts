@@ -36,3 +36,16 @@ export interface IUpdateProfileResponse {
 export interface IMessageResponse {
   message: string;
 }
+
+export interface IVerifyEmailRequest {
+  token: string;
+}
+
+export interface IForgotPasswordRequest {
+  email: string;
+}
+
+export interface IResetPasswordRequest {
+  token: string;
+  password: string;
+}
