@@ -36,29 +36,29 @@ export function useAuthMutations() {
   });
 
   const forgotPasswordMutation = useMutation<IMessageResponse, IRestError, IForgotPasswordRequest>({
-  mutationFn: authService.forgotPassword,
-  onSuccess: (data) => {
-    toast.success(data.message || "Reset link sent to your email.");
-  },
-  onError: (error) => {
-    toast.error(error.message || "Failed to send reset link.");
-  },
-});
+    mutationFn: authService.forgotPassword,
+    onSuccess: (data) => {
+      toast.success(data.message || "Reset link sent to your email.");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to send reset link.");
+    },
+  });
 
-const resetPasswordMutation = useMutation<IMessageResponse, IRestError, IResetPasswordRequest>({
-  mutationFn: authService.resetPassword,
-  onSuccess: (data) => {
-    toast.success(data.message || "Password updated successfully!");
-    router.push("/signin");
-  },
-  onError: (error) => {
-    toast.error(error.message || "Failed to reset password.");
-  },
-});
+  const resetPasswordMutation = useMutation<IMessageResponse, IRestError, IResetPasswordRequest>({
+    mutationFn: authService.resetPassword,
+    onSuccess: (data) => {
+      toast.success(data.message || "Password updated successfully!");
+      router.push("/signin");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to reset password.");
+    },
+  });
 
-const verifyEmailMutation = useMutation<IMessageResponse, IRestError, IVerifyEmailRequest>({
-  mutationFn: authService.verifyEmail,
-});
+  const verifyEmailMutation = useMutation<IMessageResponse, IRestError, IVerifyEmailRequest>({
+    mutationFn: authService.verifyEmail,
+  });
 
   return {
     loginMutation,

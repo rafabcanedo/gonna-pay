@@ -44,23 +44,23 @@ export const authService = {
   },
 
   async verifyEmail(data: IVerifyEmailRequest): Promise<IMessageResponse> {
-  return apiCall<IMessageResponse>("/auth/verify-email", {
-    method: "POST",
-    body: JSON.stringify(data),
-  }, false);
-},
+    return apiCall<IMessageResponse>("/auth/verify-email", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }, false);
+  },
 
-async forgotPassword(data: IForgotPasswordRequest): Promise<IMessageResponse> {
-  return apiCall<IMessageResponse>("/auth/forgot-password", {
-    method: "POST",
-    body: JSON.stringify(data),
-  }, false);
-},
+  async forgotPassword(data: IForgotPasswordRequest): Promise<IMessageResponse> {
+    return apiCall<IMessageResponse>("/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }, false);
+  },
 
-async resetPassword(data: IResetPasswordRequest): Promise<IMessageResponse> {
-  return apiCall<IMessageResponse>("/auth/reset-password", {
-    method: "POST",
-    body: JSON.stringify(data),
-  }, false);
-},
+  async resetPassword(data: IResetPasswordRequest): Promise<IMessageResponse> {
+    return apiCall<IMessageResponse>("/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }, false);
+  },
 };
