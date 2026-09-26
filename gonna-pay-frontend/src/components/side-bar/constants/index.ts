@@ -16,9 +16,9 @@ export const navMain: NavGroup[] = [
   {
     title: "Getting Started",
     items: [
-      { title: "How can I start?", url: "#", icon: BookText },
-      { title: "How it works",     url: "#", icon: BookText },
-      { title: "Contact Us",       url: "#", icon: BookText },
+      { title: "How can I start?", url: "/docs/how-can-i-start", icon: BookText },
+      { title: "How it works",     url: "/docs/how-it-works",    icon: BookText },
+      { title: "Contact Us",       url: "/docs/contact-us",      icon: BookText },
     ],
   },
 ]
