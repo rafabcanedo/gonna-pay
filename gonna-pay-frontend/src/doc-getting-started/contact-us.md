@@ -14,6 +14,5 @@ contact@gonnapay.dev
 
 ---
 
-<p style={{ color: '#0c56aa', fontFamily: 'var(--font-poppins)', marginTop: '1rem' }}>
-  Development by Azzurro
-</p>
+(footer — different font, color #0c56aa)
+Development by Azzurro
