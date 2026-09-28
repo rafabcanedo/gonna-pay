@@ -1,10 +1,12 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import type { Heading } from './types'
 
 export function TableOfContents() {
   const [headings, setHeadings] = useState<Heading[]>([])
+  const pathname = usePathname()
 
   useEffect(() => {
     const elements = document.querySelectorAll('article h2, article h3')
@@ -14,7 +16,7 @@ export function TableOfContents() {
       level: Number(el.tagName[1]),
     }))
     setHeadings(list)
-  }, [])
+  }, [pathname])
 
   if (headings.length === 0) return null
 
