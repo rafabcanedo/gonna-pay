@@ -52,7 +52,7 @@ export default function SignInForm() {
             </CardFooter>
             <div className="flex flex-row justify-center text-center mt-6">
               <span className="text-sm">
-                Don't have an account?
+                Don&apos;t have an account?
                 <Link
                   href="/signup"
                   className="hover:text-secondary hover:underline focus:outline-none ml-1"
