@@ -1,4 +1,4 @@
-import { MiddlewareConfig, NextRequest, NextResponse } from "next/server";
+import { ProxyConfig, NextRequest, NextResponse } from "next/server";
 
 // Work with public routes, definition routes which the user can access without authentication
 const publicRoutes = ["/signin", "/signup", "/forgot-your-password", "/verify-email", "/verify-email-sent", "/reset-password"] as const;
@@ -10,7 +10,7 @@ const REDIRECT_WHEN_AUTHENTICATED_ROUTE = "/dashboard";
 
 // Here we search if the access_token cookie exists, but we do not validate
 // the JWT signature. The real validation happens in the Fastify backend.
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const authToken = request.cookies.get("access_token");
 
@@ -44,8 +44,8 @@ export function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Next middleware config default
-export const config: MiddlewareConfig = {
+// Next proxy config default
+export const config: ProxyConfig = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:

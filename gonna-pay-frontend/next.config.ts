@@ -1,10 +1,9 @@
 import type { NextConfig } from 'next'
 import createMDX from '@next/mdx'
-import rehypeSlug from 'rehype-slug'
 
 const withMDX = createMDX({
   options: {
-    rehypePlugins: [rehypeSlug],
+    rehypePlugins: ['rehype-slug'],
   },
 })
 

@@ -81,6 +81,7 @@ export async function apiCall<T>(
             if (typeof window !== 'undefined') {
               const refreshed = await tryRefresh()
               if (refreshed) return apiCall<T>(endpoint, options, false)
+              // eslint-disable-next-line @next/next/no-location-assign-relative-destination
               window.location.href = '/signin'
             } else {
               const { redirect } = await import('next/navigation')
