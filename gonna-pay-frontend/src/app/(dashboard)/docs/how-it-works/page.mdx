@@ -1,15 +1,40 @@
+import { Callout } from '../components/callout'
+import { CategoryBadges } from '../components/category-badges'
+
 # How it works
 
-Brief introduction about how the platform works.
+This doc explains how each section of this application works.
 
 ## Costs
 
-Generic placeholder text explaining what costs are.
+A cost is a specific payment at a specific moment. When you're travelling, going out for dinner, or doing something else, you can log a cost for it.
+
+When creating a cost, you can optionally link it to a group and set the percentage you'd like to cover.
+
+<Callout type="tip">Group and percentage are optional. If you don't add a group, it becomes a solo cost — you cover 100% of it.</Callout>
+
+Each cost has a category:
+
+<CategoryBadges items={["Dinner", "Lunch", "Entertainment", "Travel", "Others"]} />
 
 ## Cost Splits
 
-Generic placeholder text explaining what cost splits are.
+When a cost is linked to a group and you cover less than 100%, the remaining amount is automatically split among the group members. You don't create splits manually — they appear as a result of the cost.
+
+<Callout type="important">To have splits, you need a contact, a group with that contact as a member, and a cost linked to that group with a percentage below 100%.</Callout>
 
 ## Groups
 
-Generic placeholder text explaining what groups are.
+Groups are a way to keep your costs organized. You can create a group and add your contacts to it. This allows you to associate costs with a group, and if you want to use the same group for another cost, you can.
+
+Each group also has a category that represents the type of expense it covers:
+
+<CategoryBadges items={["Dinner", "Lunch", "Entertainment", "Travel", "Others"]} />
+
+## Payments
+
+Payments gives you a high-level view of your finances, containing solo costs and shared costs.
+
+## My wallet
+
+We're still developing this section. Coming soon.
