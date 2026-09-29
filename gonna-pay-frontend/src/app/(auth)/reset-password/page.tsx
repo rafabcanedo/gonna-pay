@@ -46,7 +46,7 @@ function ResetPasswordContent() {
   return (
     <div className="flex items-center justify-center min-h-screen">
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit(handleSubmit)}>
+        <form method="post" onSubmit={methods.handleSubmit(handleSubmit)}>
           <Card className="w-[400px]">
             <CardHeader className="flex items-center justify-center">
               <Logo size="md" />

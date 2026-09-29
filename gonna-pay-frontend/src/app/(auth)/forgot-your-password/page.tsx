@@ -40,6 +40,7 @@ export default function ForgotYourPassword() {
 
         <FormProvider {...methods}>
           <form
+            method="post"
             onSubmit={methods.handleSubmit(handleSubmit)}
             className="flex flex-col items-center justify-center space-y-1"
           >
