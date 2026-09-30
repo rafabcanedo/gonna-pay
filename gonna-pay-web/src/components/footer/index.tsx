@@ -50,7 +50,7 @@ export function Footer() {
 
       <div className="border-t border-zinc-700 pt-6 flex items-center gap-8">
         <p className="text-xs text-zinc-500">© 2026 Gonna Pay. All rights reserved.</p>
-        <a href="#about" className="text-xs text-zinc-500 hover:text-white transition-colors">
+        <a href="#about" className="text-xs text-zinc-500 hover:text-white transition-colors underline">
           About this project
         </a>
       </div>
