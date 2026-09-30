@@ -1,7 +1,9 @@
+import { WarningDevelopment } from "./components/warning-development"
+
 export function Blog() {
   return (
     <div>
-      <h1>Blog</h1>
+      <WarningDevelopment />
     </div>
   )
 }
