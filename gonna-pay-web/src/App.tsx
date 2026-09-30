@@ -1,29 +1,20 @@
-import { Wallet } from "lucide-react"
-import { AppCard } from "@/components/card"
-import { Title } from "@/components/title"
-import './App.css'
+import { BrowserRouter, Routes, Route } from "react-router"
+import { Layout } from "@/components/layout"
+import { Home } from "@/pages/home"
+import { Pricing } from "@/pages/pricing"
+import { Blog } from "@/pages/blog"
 
 function App() {
   return (
-    <div className="flex flex-col gap-8 p-8">
-      <Title>Our Working Process</Title>
-      <div className="flex gap-8">
-        <AppCard
-          title="Split Costs"
-          description="Divide expenses automatically among your group members."
-          icon={Wallet}
-          href="#"
-          size="default"
-        />
-        <AppCard
-          title="Split Costs"
-          description="Divide expenses automatically among your group members."
-          icon={Wallet}
-          href="#"
-          size="sm"
-        />
-      </div>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route index element={<Home />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/blog" element={<Blog />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   )
 }
 
