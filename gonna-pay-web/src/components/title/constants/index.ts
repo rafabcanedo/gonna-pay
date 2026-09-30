@@ -1,6 +1,7 @@
 import type { TitleSize, TitleVariant } from "../types"
 
 export const sizeMap: Record<TitleSize, string> = {
+  xs: "text-xs",
   sm: "text-sm",
   md: "text-base",
   lg: "text-lg",

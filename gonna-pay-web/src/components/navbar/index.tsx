@@ -9,9 +9,11 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm border-b border-border">
+    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm">
       <div className="flex items-center justify-between h-16 px-8">
-        <Logo size="sm" />
+        <Link to="/">
+          <Logo size="sm" />
+        </Link>
 
         <div className="hidden md:flex items-center gap-6">
           {navLinks.map(link =>
