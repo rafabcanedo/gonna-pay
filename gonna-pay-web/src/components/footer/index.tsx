@@ -1,19 +1,16 @@
-import { useState } from "react"
 import { Link } from "react-router"
 import { GithubIcon } from "@/assets/github-icon"
 import { Logo } from "@/components/logo"
 import { Title } from "@/components/title"
-import { Button } from "@/components/ui/button"
 import { footerNavLinks, socialLinks } from "./constants"
+import { SubscribeForm } from "./components/subscribe-form"
 
 export function Footer() {
-  const [email, setEmail] = useState("")
-
   return (
     <footer className="bg-zinc-800 mx-8 mb-8 rounded-2xl px-12 py-10 flex flex-col gap-8">
 
       <div className="flex items-center justify-between">
-        <Logo size="xs" className="brightness-0 invert" />
+        <Logo size="xs" variant="dark" />
 
         <div className="flex items-center gap-6">
           {footerNavLinks.map(link =>
@@ -48,16 +45,7 @@ export function Footer() {
           </p>
         </div>
 
-        <div className="flex items-start gap-2 ml-auto">
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            className="h-10 rounded-lg border border-zinc-600 bg-zinc-700 px-3 text-sm text-white placeholder:text-zinc-400 outline-none focus-visible:border-zinc-400 transition-all"
-          />
-          <Button variant="default" size="default" className="h-10">Subscribe to news</Button>
-        </div>
+        <SubscribeForm />
       </div>
 
       <div className="border-t border-zinc-700 pt-6 flex items-center gap-8">
