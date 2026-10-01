@@ -1,8 +1,9 @@
-import type { LucideIcon } from "lucide-react"
+export type ServiceVariant = "default" | "primary" | "dark"
+export type ServiceArtKey = "tracking" | "group" | "math" | "contacts"
 
 export interface ServiceItem {
-  icon: LucideIcon
+  artKey: ServiceArtKey
   title: string
   description: string
-  variant: "default" | "primary" | "dark"
+  variant: ServiceVariant
 }

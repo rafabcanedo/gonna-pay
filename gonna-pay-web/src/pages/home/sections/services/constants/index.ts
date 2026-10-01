@@ -1,30 +1,28 @@
-import { UserPlus, Users, Receipt, LayoutList } from "lucide-react"
-
 import type { ServiceItem } from "../types"
 
 export const SERVICES: ServiceItem[] = [
   {
-    icon: UserPlus,
-    title: "Add contacts",
-    description: "Register the people you share expenses with — friends, family or coworkers.",
+    artKey: "tracking",
+    title: "Expense tracking",
+    description: "Track personal or shared costs, organized by category and period.",
     variant: "default",
   },
   {
-    icon: Users,
-    title: "Create a group",
-    description: "Organize contacts by context: a trip, a dinner, a shared apartment.",
+    artKey: "group",
+    title: "Group splitting",
+    description: "Create groups for any context: a trip, a dinner, a shared apartment. Split costs among all members.",
     variant: "primary",
   },
   {
-    icon: Receipt,
-    title: "Log a cost",
-    description: "Register an expense solo or linked to a group. Set how much you cover.",
+    artKey: "math",
+    title: "Automatic math",
+    description: "Set your share. Gonna Pay divides the rest equally among everyone in the group.",
     variant: "dark",
   },
   {
-    icon: LayoutList,
-    title: "See splits instantly",
-    description: "Gonna Pay calculates and assigns each person's share automatically.",
+    artKey: "contacts",
+    title: "Contact management",
+    description: "Keep your people organized by family, friends, and coworkers. See who you split with most.",
     variant: "default",
   },
 ]
