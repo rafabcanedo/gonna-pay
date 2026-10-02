@@ -6,12 +6,12 @@ import { StepItem } from "./components/step-item"
 
 export function UseCases() {
   return (
-    <section id="use-cases" className="px-8 py-24">
+    <section id="how-it-works" className="px-8 py-24">
       <div className="flex flex-row gap-16 items-center">
         <TripMockCard />
 
         <div className="flex flex-col">
-          <Title size="lg" variant="default">How it works</Title>
+          <Title size="lg" variant="default">How It Works</Title>
           <p className="text-zinc-400 text-base mt-3">
             From a shared hotel to a dinner bill — log it once, split it instantly.
           </p>
