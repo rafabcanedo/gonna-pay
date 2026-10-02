@@ -24,8 +24,8 @@ export function ServiceCard({ artKey, title, description, variant }: ServiceItem
     <div className={cn(
       "rounded-2xl p-8 flex flex-row h-52",
       isPrimary && "bg-primary",
-      isDark && "bg-zinc-900",
-      !isPrimary && !isDark && "border border-border"
+      isDark && "bg-zinc-800",
+      !isPrimary && !isDark && "border border-zinc-700"
     )}>
       <div className="flex flex-col gap-3 flex-1 min-w-0">
         <span className={cn(
@@ -37,7 +37,7 @@ export function ServiceCard({ artKey, title, description, variant }: ServiceItem
 
         <p className={cn(
           "text-sm leading-relaxed max-w-[180px]",
-          isPrimary ? "text-primary-foreground/80" : isDark ? "text-zinc-400" : "text-muted-foreground"
+          isPrimary ? "text-primary-foreground/80" : "text-zinc-400"
         )}>
           {description}
         </p>
