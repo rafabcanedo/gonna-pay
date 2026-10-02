@@ -1,4 +1,4 @@
-import type { FeedbackData } from "../types"
+import type { FeedbackData } from "./types"
 
 export const FEEDBACKS: FeedbackData[] = [
   {
