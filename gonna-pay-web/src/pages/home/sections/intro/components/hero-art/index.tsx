@@ -1,5 +1,11 @@
+import { motion } from "framer-motion"
+
 export function HeroArt() {
   return (
+    <motion.div
+      animate={{ y: [-6, 6, -6] }}
+      transition={{ duration: 3, ease: "easeInOut", repeat: Infinity }}
+    >
     <svg
       viewBox="0 0 500 560"
       width="100%"
@@ -94,5 +100,6 @@ export function HeroArt() {
       <circle cx="420" cy="480" r="2.5" fill="#d4d4d8" />
       <circle cx="70" cy="440" r="2" fill="#d4d4d8" />
     </svg>
+    </motion.div>
   )
 }

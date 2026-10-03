@@ -1,4 +1,26 @@
+import type { Variants } from "framer-motion"
+
 import type { Step } from "../types"
+
+export const slideFromLeft: Variants = {
+  hidden: { opacity: 0, x: -40 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: "easeOut" } }
+}
+
+export const slideFromRight: Variants = {
+  hidden: { opacity: 0, x: 40 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: "easeOut" } }
+}
+
+export const stepsContainer: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.15, delayChildren: 0.3 } }
+}
+
+export const stepItem: Variants = {
+  hidden: { opacity: 0, x: 20 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.5, ease: "easeOut" } }
+}
 
 export const STEPS: Step[] = [
   {

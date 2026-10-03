@@ -1,4 +1,16 @@
+import type { Variants } from "framer-motion"
+
 import type { ServiceItem } from "../types"
+
+export const cardContainer: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.18 } }
+}
+
+export const cardItem: Variants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.65, ease: "easeOut" } }
+}
 
 export const SERVICES: ServiceItem[] = [
   {
