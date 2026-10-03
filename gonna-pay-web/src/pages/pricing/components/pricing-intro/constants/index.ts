@@ -1,4 +1,16 @@
+import type { Variants } from "framer-motion"
+
 import type { MockCardData } from "../types"
+
+export const CARDS_CONTAINER: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.15 } },
+}
+
+export const CARD_ITEM: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: "easeOut" } },
+}
 
 export const MOCK_CARDS: MockCardData[] = [
   {

@@ -1,6 +1,10 @@
+import { motion } from "framer-motion"
 import { Check, Clock } from "lucide-react"
+
+import { fadeUpContainer, fadeUpItem } from "@/lib/animations"
 import { cn } from "@/lib/utils"
-import { MOCK_CARDS } from "./constants"
+
+import { MOCK_CARDS, CARDS_CONTAINER, CARD_ITEM } from "./constants"
 import type { MockCardData } from "./types"
 
 function MockCard({ card }: { card: MockCardData }) {
@@ -43,35 +47,55 @@ function MockCard({ card }: { card: MockCardData }) {
 export function PricingIntro() {
   return (
     <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16 w-full">
-      <div className="flex flex-col gap-5 flex-1">
-        <span className="text-sm font-medium text-primary">Why Gonna Pay?</span>
+      <motion.div
+        className="flex flex-col gap-5 flex-1"
+        variants={fadeUpContainer}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.span className="text-sm font-medium text-primary" variants={fadeUpItem}>
+          Why Gonna Pay?
+        </motion.span>
 
-        <div className="flex flex-col gap-1">
+        <motion.div className="flex flex-col gap-1" variants={fadeUpItem}>
           <h2 className="text-2xl md:text-4xl font-bold text-foreground leading-tight">
             A smarter way to manage your shared costs
           </h2>
           <span className="text-4xl font-bold text-primary">day by day.</span>
-        </div>
+        </motion.div>
 
-        <p className="text-muted-foreground text-base max-w-sm">
+        <motion.p className="text-muted-foreground text-base max-w-sm" variants={fadeUpItem}>
           Split expenses, track who owes what, and keep things fair — automatically.
-        </p>
-      </div>
+        </motion.p>
+      </motion.div>
 
       <div className="flex-1 flex justify-center">
-        <div className="flex items-end">
-          <div className="relative -rotate-6 translate-y-4 -mr-5 hidden md:block" style={{ zIndex: 1 }}>
+        <motion.div
+          className="flex items-end"
+          variants={CARDS_CONTAINER}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.div
+            className="relative -rotate-6 translate-y-4 -mr-5 hidden md:block"
+            variants={CARD_ITEM}
+            style={{ zIndex: 1 }}
+          >
             <MockCard card={MOCK_CARDS[0]} />
-          </div>
+          </motion.div>
 
-          <div className="relative" style={{ zIndex: 3 }}>
+          <motion.div className="relative" variants={CARD_ITEM} style={{ zIndex: 3 }}>
             <MockCard card={MOCK_CARDS[1]} />
-          </div>
+          </motion.div>
 
-          <div className="relative rotate-6 translate-y-4 -ml-5 hidden md:block" style={{ zIndex: 2 }}>
+          <motion.div
+            className="relative rotate-6 translate-y-4 -ml-5 hidden md:block"
+            variants={CARD_ITEM}
+            style={{ zIndex: 2 }}
+          >
             <MockCard card={MOCK_CARDS[2]} />
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
     </div>
   )
