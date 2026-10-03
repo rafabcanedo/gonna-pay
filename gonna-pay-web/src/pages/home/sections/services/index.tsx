@@ -9,7 +9,7 @@ export function Services() {
       <Title size="lg" variant="default">Features</Title>
       <p className="text-zinc-400 text-base mt-3">Everything you need to split costs the right way.</p>
 
-      <div className="grid grid-cols-2 gap-6 mt-12 max-w-4xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12 max-w-4xl mx-auto">
         {SERVICES.map((service) => (
           <ServiceCard key={service.artKey} {...service} />
         ))}

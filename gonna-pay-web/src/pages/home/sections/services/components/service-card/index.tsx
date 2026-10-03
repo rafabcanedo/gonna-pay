@@ -22,7 +22,7 @@ export function ServiceCard({ artKey, title, description, variant }: ServiceItem
 
   return (
     <div className={cn(
-      "rounded-2xl p-8 flex flex-row h-52",
+      "rounded-2xl p-5 md:p-8 flex flex-col md:flex-row h-auto md:h-52",
       isPrimary && "bg-primary",
       isDark && "bg-zinc-800",
       !isPrimary && !isDark && "border border-zinc-700"
@@ -36,14 +36,14 @@ export function ServiceCard({ artKey, title, description, variant }: ServiceItem
         </span>
 
         <p className={cn(
-          "text-sm leading-relaxed max-w-[180px]",
+          "text-sm leading-relaxed md:max-w-[180px]",
           isPrimary ? "text-primary-foreground/80" : "text-zinc-400"
         )}>
           {description}
         </p>
       </div>
 
-      <div className="flex items-center justify-end shrink-0">
+      <div className="flex items-center justify-center md:justify-end shrink-0">
         <Art />
       </div>
     </div>

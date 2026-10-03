@@ -1,5 +1,5 @@
-import { useState } from "react"
-import { Link } from "react-router"
+import { useState, useEffect } from "react"
+import { Link, useLocation } from "react-router"
 import { TextAlignStart, X } from "lucide-react"
 import { Logo } from "@/components/logo"
 import { Button } from "@/components/ui/button"
@@ -7,6 +7,11 @@ import { navLinks } from "./constants"
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
+  const location = useLocation()
+
+  useEffect(() => {
+    setIsOpen(false)
+  }, [location.pathname])
 
   return (
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-sm">

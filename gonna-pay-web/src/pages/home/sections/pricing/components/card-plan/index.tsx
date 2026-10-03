@@ -13,7 +13,7 @@ interface Props {
 
 export function CardPlan({ planName, description, highlighted = false, className }: Props) {
   return (
-    <Card className={cn("flex flex-col w-80", highlighted && "ring-2 ring-primary", className)}>
+    <Card className={cn("flex flex-col w-full md:w-80", highlighted && "ring-2 ring-primary", className)}>
       <CardContent className="flex flex-col gap-6 p-6 h-full">
         <div className="flex flex-col gap-3">
           <span className="text-2xl font-semibold text-foreground">{planName}</span>

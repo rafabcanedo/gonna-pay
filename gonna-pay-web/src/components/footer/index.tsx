@@ -9,10 +9,10 @@ export function Footer() {
   return (
     <footer className="bg-zinc-800 mx-8 mb-8 rounded-2xl px-12 py-10 flex flex-col gap-8">
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <Logo size="xs" variant="dark" />
 
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4 flex-wrap">
           {footerNavLinks.map(link =>
             link.href.startsWith('/') && !link.href.startsWith('/#')
               ? <Link key={link.label} to={link.href} className="text-sm text-zinc-400 hover:text-white transition-colors underline">{link.label}</Link>

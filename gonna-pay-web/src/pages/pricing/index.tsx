@@ -13,7 +13,7 @@ export function Pricing() {
         <Title size="lg" variant="default">Our Pricing</Title>
       </div>
 
-      <div className="flex flex-row gap-8">
+      <div className="flex flex-col md:flex-row gap-8">
         <CardPricing
           planName="Free"
           price="$0"

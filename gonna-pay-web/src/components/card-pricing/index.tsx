@@ -16,7 +16,7 @@ export function CardPricing({
   className,
 }: CardPricingProps) {
   return (
-    <Card className={cn("flex flex-col w-72", highlighted && "ring-2 ring-primary", className)}>
+    <Card className={cn("flex flex-col w-full md:w-72", highlighted && "ring-2 ring-primary", className)}>
       <CardContent className="flex flex-col gap-6 p-6 h-full">
         <div className="flex flex-col gap-1">
           <span className="text-sm text-muted-foreground">{planName}</span>

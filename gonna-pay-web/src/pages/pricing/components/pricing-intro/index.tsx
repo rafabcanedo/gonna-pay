@@ -42,13 +42,13 @@ function MockCard({ card }: { card: MockCardData }) {
 
 export function PricingIntro() {
   return (
-    <div className="flex flex-row items-center gap-16 w-full">
+    <div className="flex flex-col md:flex-row items-center gap-8 md:gap-16 w-full">
       <div className="flex flex-col gap-5 flex-1">
         <span className="text-sm font-medium text-primary">Why Gonna Pay?</span>
 
         <div className="flex flex-col gap-1">
-          <h2 className="text-4xl font-bold text-foreground leading-tight">
-            A smarter way to manage<br />your shared costs
+          <h2 className="text-2xl md:text-4xl font-bold text-foreground leading-tight">
+            A smarter way to manage your shared costs
           </h2>
           <span className="text-4xl font-bold text-primary">day by day.</span>
         </div>
@@ -60,7 +60,7 @@ export function PricingIntro() {
 
       <div className="flex-1 flex justify-center">
         <div className="flex items-end">
-          <div className="relative -rotate-6 translate-y-4 -mr-5" style={{ zIndex: 1 }}>
+          <div className="relative -rotate-6 translate-y-4 -mr-5 hidden md:block" style={{ zIndex: 1 }}>
             <MockCard card={MOCK_CARDS[0]} />
           </div>
 
@@ -68,7 +68,7 @@ export function PricingIntro() {
             <MockCard card={MOCK_CARDS[1]} />
           </div>
 
-          <div className="relative rotate-6 translate-y-4 -ml-5" style={{ zIndex: 2 }}>
+          <div className="relative rotate-6 translate-y-4 -ml-5 hidden md:block" style={{ zIndex: 2 }}>
             <MockCard card={MOCK_CARDS[2]} />
           </div>
         </div>

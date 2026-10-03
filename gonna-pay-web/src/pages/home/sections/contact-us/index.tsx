@@ -12,7 +12,7 @@ export function ContactUs() {
         <span className="text-base text-zinc-700">Let's to talk about your costs</span>
       </div>
 
-      <div className="mt-12 flex flex-row gap-12 rounded-2xl bg-card p-10 shadow-xl ring-1 ring-foreground/5 max-w-4xl mx-auto">
+      <div className="mt-12 flex flex-col md:flex-row gap-12 rounded-2xl bg-card p-6 md:p-10 shadow-xl ring-1 ring-foreground/5 max-w-4xl mx-auto">
         <ContactForm />
         <ContactArt />
       </div>

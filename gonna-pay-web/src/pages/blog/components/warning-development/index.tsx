@@ -8,7 +8,7 @@ export function WarningDevelopment() {
   return (
     <div className="flex flex-col items-center justify-center gap-8 py-12">
       <div>
-        <img src={workInProgress} alt="Work in progress" className="w-100 h-100" />
+        <img src={workInProgress} alt="Work in progress" className="w-64 h-64 md:w-100 md:h-100" />
       </div>
 
       <div className="flex flex-row items-center justify-center gap-4">

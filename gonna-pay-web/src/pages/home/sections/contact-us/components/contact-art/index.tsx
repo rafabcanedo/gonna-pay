@@ -1,7 +1,7 @@
 export function ContactArt() {
   return (
-    <div className="flex flex-1 items-center justify-center">
-      <svg viewBox="0 0 360 320" width="360" height="320" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <div className="flex items-center justify-center w-full md:flex-1">
+      <svg viewBox="0 0 360 320" width="100%" height="auto" fill="none" xmlns="http://www.w3.org/2000/svg">
 
         <line x1="180" y1="160" x2="235" y2="65" stroke="#d4d4d8" strokeWidth="1" opacity="0.6" />
         <line x1="180" y1="160" x2="199" y2="268" stroke="#d4d4d8" strokeWidth="1" opacity="0.6" />

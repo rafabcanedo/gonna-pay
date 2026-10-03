@@ -7,7 +7,7 @@ import { StepItem } from "./components/step-item"
 export function UseCases() {
   return (
     <section id="how-it-works" className="px-8 py-24">
-      <div className="flex flex-row gap-16 items-center">
+      <div className="flex flex-col md:flex-row gap-8 md:gap-16 items-center">
         <TripMockCard />
 
         <div className="flex flex-col">
