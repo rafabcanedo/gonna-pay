@@ -27,7 +27,7 @@ export default function SignInForm() {
   return (
     <div className="flex items-center justify-center min-h-screen">
       <FormProvider {...methods}>
-        <form method="post" onSubmit={methods.handleSubmit(handleOnSubmit)}>
+        <form onSubmit={methods.handleSubmit(handleOnSubmit)}>
           <Card className="w-[350px]">
             <CardHeader className="flex items-center justify-center">
               <Logo size="md" />
