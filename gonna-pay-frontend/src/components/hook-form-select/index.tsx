@@ -42,7 +42,10 @@ export function HookFormSelect({
                                     <SelectLabel>{groupLabel}</SelectLabel>
                                     {options.map((opt) => (
                                         <SelectItem key={opt.value} value={opt.value}>
-                                            {opt.label}
+                                            <span className="flex items-center gap-2">
+                                                {opt.icon && <opt.icon className="w-4 h-4" />}
+                                                {opt.label}
+                                            </span>
                                         </SelectItem>
                                     ))}
                                 </SelectGroup>
@@ -50,7 +53,10 @@ export function HookFormSelect({
                             {!groupLabel &&
                                 options.map((opt) => (
                                     <SelectItem key={opt.value} value={opt.value}>
-                                        {opt.label}
+                                        <span className="flex items-center gap-2">
+                                            {opt.icon && <opt.icon className="w-4 h-4" />}
+                                            {opt.label}
+                                        </span>
                                     </SelectItem>
                                 ))
                             }

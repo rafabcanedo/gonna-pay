@@ -1,4 +1,5 @@
 import { ContactCategory, TransactionCategory } from "@/types";
+import { getCategoryIcon } from "@/utils/category-icons";
 
 interface ITypeBadge {
   type: ContactCategory | TransactionCategory
@@ -18,11 +19,13 @@ const categoryStyles: Record<string, string> = {
 
 export function BadgeType({ type }: ITypeBadge) {
   const style = categoryStyles[type] ?? "bg-blue-100 text-blue-800";
+  const Icon = getCategoryIcon(type);
 
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${style}`}
+      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${style}`}
     >
+      {Icon && <Icon className="w-3 h-3" />}
       {type}
     </span>
   );
