@@ -1,16 +1,20 @@
-FROM golang:1.25-alpine
+FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
 
-# Copy the files that list your libs
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy all code for inside the container
 COPY . .
 
-# Container use this port:3333
+RUN go build -o server cmd/api/main.go
+
+FROM alpine:latest
+
+WORKDIR /app
+
+COPY --from=builder /app/server .
+
 EXPOSE 3333
 
-# Comand for ru the server
-CMD ["go", "run", "cmd/api/main.go"]
+CMD ["./server"]

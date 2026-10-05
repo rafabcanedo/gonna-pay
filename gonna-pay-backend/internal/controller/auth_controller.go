@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -84,8 +85,9 @@ func (ac *AuthController) Login(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie("access_token", accessToken, 1800, "/", "", false, true)
-	c.SetCookie("refresh_token", refreshToken, 172800, "/auth", "", false, true)
+	secure := os.Getenv("GO_ENV") == "production"
+	c.SetCookie("access_token", accessToken, 1800, "/", "", secure, true)
+	c.SetCookie("refresh_token", refreshToken, 172800, "/auth", "", secure, true)
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
@@ -154,8 +156,9 @@ func (ac *AuthController) Refresh(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie("access_token", newAccessToken, 1800, "/", "", false, true)
-	c.SetCookie("refresh_token", newRefreshToken, 172800, "/auth", "", false, true)
+	secure := os.Getenv("GO_ENV") == "production"
+	c.SetCookie("access_token", newAccessToken, 1800, "/", "", secure, true)
+	c.SetCookie("refresh_token", newRefreshToken, 172800, "/auth", "", secure, true)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Token refreshed"})
 }
@@ -173,8 +176,9 @@ func (ac *AuthController) Logout(c *gin.Context) {
 		ac.authRepo.DeleteByHash(c.Request.Context(), tokenHash)
 	}
 
-	c.SetCookie("access_token", "", -1, "/", "", false, true)
-	c.SetCookie("refresh_token", "", -1, "/auth", "", false, true)
+	secure := os.Getenv("GO_ENV") == "production"
+	c.SetCookie("access_token", "", -1, "/", "", secure, true)
+	c.SetCookie("refresh_token", "", -1, "/auth", "", secure, true)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Logged out successfully"})
 }
@@ -285,8 +289,9 @@ func (ac *AuthController) DeleteProfile(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie("access_token", "", -1, "/", "", false, true)
-	c.SetCookie("refresh_token", "", -1, "/auth", "", false, true)
+	secure := os.Getenv("GO_ENV") == "production"
+	c.SetCookie("access_token", "", -1, "/", "", secure, true)
+	c.SetCookie("refresh_token", "", -1, "/auth", "", secure, true)
 
 	c.JSON(http.StatusOK, gin.H{"message": "account deleted successfully"})
 }
