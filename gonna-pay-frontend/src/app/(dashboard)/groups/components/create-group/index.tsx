@@ -26,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { GROUP_CATEGORY_FORM_OPTIONS } from "@/app/(dashboard)/groups/constants";
 
 export const CreateGroup = () => {
   const [openModal, setOpenModal] = useState(false);
@@ -94,9 +95,12 @@ export const CreateGroup = () => {
                 <SelectContent>
                   <SelectGroup>
                     <SelectLabel>Category</SelectLabel>
-                    {Object.values(TransactionCategory).map((cat) => (
-                      <SelectItem key={cat} value={cat}>
-                        {cat}
+                    {GROUP_CATEGORY_FORM_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        <span className="flex items-center gap-2">
+                          {opt.icon && <opt.icon className="w-4 h-4" />}
+                          {opt.label}
+                        </span>
                       </SelectItem>
                     ))}
                   </SelectGroup>
