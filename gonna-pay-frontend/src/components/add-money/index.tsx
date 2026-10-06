@@ -97,7 +97,10 @@ export const AddMoney = () => {
           <>
             <DialogHeader>
               <DialogTitle>Add Money</DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="text-red-600">
+                This feature isn&apos;t ready yet
+              </DialogDescription>
+              <DialogDescription className="line-through">
                 How much would you like to add to your wallet?
               </DialogDescription>
             </DialogHeader>

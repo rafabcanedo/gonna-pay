@@ -9,11 +9,10 @@ import {
 import Link from "next/link"
 import { BadgeType } from "@/utils/badge-types"
 import { CostsTableProps } from '../interfaces'
-
-const LIMIT = 6
+import { RECENT_COSTS_LIMIT } from './constants'
 
 export const RecentCosts = ({ costs }: CostsTableProps) => {
-  const limitedCosts = costs.slice(0, LIMIT)
+  const limitedCosts = costs.slice(0, RECENT_COSTS_LIMIT)
 
   return (
     <div className="mt-6 mb-6">
