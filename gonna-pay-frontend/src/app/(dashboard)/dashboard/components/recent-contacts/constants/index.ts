@@ -1,0 +1,1 @@
+export const RECENT_CONTACTS_LIMIT = 6

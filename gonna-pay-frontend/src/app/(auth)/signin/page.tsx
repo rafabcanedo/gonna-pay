@@ -10,10 +10,15 @@ import Link from "next/link"
 import { signInSchema } from "@/validations/schemas"
 import { useAuthMutations } from "@/hooks/mutations/use-auth-mutations"
 import { IForm } from "./interfaces"
+import { useEffect, useState } from "react"
 
 export default function SignInForm() {
 
+  const [ready, setReady] = useState(false)
+
   const { loginMutation } = useAuthMutations()
+
+  useEffect(() => setReady(true), [])
 
   const methods = useForm<IForm>({
     resolver: yupResolver(signInSchema),
@@ -27,7 +32,7 @@ export default function SignInForm() {
   return (
     <div className="flex items-center justify-center min-h-screen">
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit(handleOnSubmit)}>
+        <form method="post" onSubmit={methods.handleSubmit(handleOnSubmit)}>
           <Card className="w-[350px]">
             <CardHeader className="flex items-center justify-center">
               <Logo size="md" />
@@ -46,7 +51,7 @@ export default function SignInForm() {
                 </Link>
               </div>
 
-              <Button className="w-full bg-primary hover:bg-hover" type="submit" disabled={loginMutation.isPending}>
+              <Button className="w-full bg-primary hover:bg-hover" type="submit" disabled={!ready || loginMutation.isPending}>
                 {loginMutation.isPending ? "Loading" : "Login"}
               </Button>
             </CardFooter>

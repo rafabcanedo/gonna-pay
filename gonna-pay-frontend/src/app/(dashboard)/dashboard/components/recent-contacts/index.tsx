@@ -9,12 +9,11 @@ import {
 import { BadgeType } from "@/utils/badge-types"
 import Link from "next/link"
 import { RecentContactsProps } from '../interfaces'
-
-const LIMIT = 6
+import { RECENT_CONTACTS_LIMIT } from './constants'
 
 export const RecentContacts = ({ contacts }: RecentContactsProps) => {
 
-    const limitedContacts = contacts.slice(0, LIMIT)
+    const limitedContacts = contacts.slice(0, RECENT_CONTACTS_LIMIT)
 
     return (
         <div className="mt-6 mb-6">

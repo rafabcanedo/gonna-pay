@@ -1,12 +1,8 @@
 import Image from 'next/image'
 import gonnaLogo from '@/assets/gonna-logo.svg'
 import gLogo from '@/assets/g-logo.svg'
-import type { LogoProps, LogoSize } from './types'
-
-const widthMap: Record<LogoSize, number> = {
-  sm: 140,
-  md: 220,
-}
+import type { LogoProps } from './types'
+import { WIDTH_MAP } from './constants'
 
 export const Logo = ({ size = 'md', variant = 'default' }: LogoProps) => {
   if (variant === 'icon') {
@@ -20,7 +16,7 @@ export const Logo = ({ size = 'md', variant = 'default' }: LogoProps) => {
     )
   }
 
-  const width = widthMap[size]
+  const width = WIDTH_MAP[size]
   return (
     <Image
       src={gonnaLogo}
