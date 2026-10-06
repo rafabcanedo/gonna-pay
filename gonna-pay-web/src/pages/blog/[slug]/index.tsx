@@ -49,7 +49,7 @@ export function BlogPost() {
         ))}
       </div>
 
-      <div className="mt-10">
+      <div className="prose mt-10">
         <Suspense fallback={<div className="text-muted-foreground text-sm">Loading...</div>}>
           <Content />
         </Suspense>
