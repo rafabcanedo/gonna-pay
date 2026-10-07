@@ -19,7 +19,7 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: "feature-coming-soon",
     title: "What's Coming to Gonna Pay",
-    description: "A look at the features we're building next — from a smarter wallet to advanced reports and real-time notifications.",
+    description: "A look at the features we're building next. From a smarter wallet to advanced reports and real-time notifications.",
     date: "2026-10-06",
     author: "Gonna Pay",
     tags: ["Updates", "Product"],
