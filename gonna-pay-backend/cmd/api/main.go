@@ -1,9 +1,7 @@
 // @title           Gonna Pay API
 // @version         1.0
 // @description     API de gestão financeira e divisão de custos
-// @host            localhost:3333
 // @BasePath        /
-// @schemes         http
 
 // @securityDefinitions.apikey  CookieAuth
 // @in                          cookie
@@ -64,6 +62,10 @@ func main() {
 	groupCtrl := controller.NewGroupController(groupSvc)
 	costCtrl := controller.NewCostController(costSvc)
 
+	if os.Getenv("GO_ENV") == "production" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	router := gin.Default()
 
 	frontendURL := os.Getenv("APP_URL")
@@ -94,10 +96,14 @@ func main() {
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	port := ":3333"
-	log.Printf("Server running on %s", port)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3333"
+	}
 
-	if err := router.Run(port); err != nil {
+	log.Printf("Server running on :%s", port)
+
+	if err := router.Run(":" + port); err != nil {
 		log.Fatalf("failed to start server: %v", err)
 	}
 }
