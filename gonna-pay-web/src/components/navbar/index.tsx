@@ -23,8 +23,8 @@ export function Navbar() {
           )}
         </div>
 
-        <Button variant="default" size="default" className="hidden md:flex w-40 h-12 border-2 border-primary bg-transparent hover:bg-primary hover:border-slate-400">
-          Get Started
+        <Button asChild variant="default" size="default" className="hidden md:flex w-40 h-12 border-2 border-primary bg-transparent hover:bg-primary hover:border-slate-400">
+          <a href={`${import.meta.env.VITE_APP_URL}/signin`}>Get Started</a>
         </Button>
 
         <button className="md:hidden" onClick={() => setIsOpen(!isOpen)}>
@@ -39,8 +39,8 @@ export function Navbar() {
               ? <Link key={link.label} to={link.href} onClick={() => setIsOpen(false)} className="text-sm text-muted-foreground hover:text-foreground transition-colors py-2">{link.label}</Link>
               : <a key={link.label} href={link.href} onClick={() => setIsOpen(false)} className="text-sm text-muted-foreground hover:text-foreground transition-colors py-2">{link.label}</a>
           )}
-          <Button variant="default" size="default" className="h-10" onClick={() => setIsOpen(false)}>
-            Get Started
+          <Button asChild variant="default" size="default" className="h-10" onClick={() => setIsOpen(false)}>
+            <a href={`${import.meta.env.VITE_APP_URL}/signin`}>Get Started</a>
           </Button>
         </div>
       )}

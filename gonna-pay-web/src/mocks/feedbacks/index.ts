@@ -4,7 +4,7 @@ export const FEEDBACKS: FeedbackData[] = [
   {
     name: "Ana Lima",
     role: "Designer Freelancer",
-    text: "I split software tools and subscriptions with a colleague every month. Gonna Pay handles it automatically — I log the cost and we're done.",
+    text: "I split software tools and subscriptions with a colleague every month. Gonna Pay handles it automatically. I log the cost and we're done.",
   },
   {
     name: "Marcos Souza",
@@ -19,6 +19,6 @@ export const FEEDBACKS: FeedbackData[] = [
   {
     name: "Rafael Torres",
     role: "Software Engineer",
-    text: "Road trip with two couples. Hotels, gas, food — tracked everything and split it fairly at the end. Zero stress.",
+    text: "Road trip with two couples. Hotels, gas, food, tracked everything and split it fairly at the end. Zero stress.",
   },
 ]
