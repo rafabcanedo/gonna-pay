@@ -25,8 +25,8 @@ export function Intro() {
         </motion.p>
 
         <motion.div variants={fadeUpItem}>
-          <Button variant="default" size="default" className="md:flex w-40 h-12 border-2 border-primary bg-primary hover:border-lime-500 mt-8">
-            Get Started
+          <Button asChild variant="default" size="default" className="md:flex w-40 h-12 border-2 border-primary bg-primary hover:border-lime-500 mt-8">
+            <a href={`${import.meta.env.VITE_APP_URL}/signin`}>Get Started</a>
           </Button>
         </motion.div>
 
