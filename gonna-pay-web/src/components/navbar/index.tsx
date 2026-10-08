@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Link } from "react-router"
 import { TextAlignStart, X } from "lucide-react"
 import { Logo } from "@/components/logo"
-import { Button } from "@/components/ui/button"
+import { LinkButton } from "@/components/link-button"
 import { navLinks } from "./constants"
 
 export function Navbar() {
@@ -23,9 +23,14 @@ export function Navbar() {
           )}
         </div>
 
-        <Button asChild variant="default" size="default" className="hidden md:flex w-40 h-12 border-2 border-primary bg-transparent hover:bg-primary hover:border-slate-400">
-          <a href={`${import.meta.env.VITE_APP_URL}/signin`}>Get Started</a>
-        </Button>
+        <LinkButton
+          href={`${import.meta.env.VITE_APP_URL}/signin`}
+          variant="default"
+          size="default"
+          className="hidden md:flex w-40 h-12 border-2 border-primary bg-transparent hover:bg-primary hover:border-slate-400"
+        >
+          Get Started
+        </LinkButton>
 
         <button className="md:hidden" onClick={() => setIsOpen(!isOpen)}>
           {isOpen ? <X size={20} /> : <TextAlignStart size={20} />}
@@ -39,9 +44,15 @@ export function Navbar() {
               ? <Link key={link.label} to={link.href} onClick={() => setIsOpen(false)} className="text-sm text-muted-foreground hover:text-foreground transition-colors py-2">{link.label}</Link>
               : <a key={link.label} href={link.href} onClick={() => setIsOpen(false)} className="text-sm text-muted-foreground hover:text-foreground transition-colors py-2">{link.label}</a>
           )}
-          <Button asChild variant="default" size="default" className="h-10" onClick={() => setIsOpen(false)}>
-            <a href={`${import.meta.env.VITE_APP_URL}/signin`}>Get Started</a>
-          </Button>
+          <LinkButton
+            href={`${import.meta.env.VITE_APP_URL}/signin`}
+            variant="default"
+            size="default"
+            className="h-10"
+            onClick={() => setIsOpen(false)}
+          >
+            Get Started
+          </LinkButton>
         </div>
       )}
     </nav>
