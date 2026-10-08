@@ -16,8 +16,6 @@ export function useAuthMutations() {
       queryClient.setQueryData(["user"], data.user ?? null)
       
       router.push("/dashboard");
-      
-      router.refresh();
     },
     onError: (error) => {
       toast.error(error.message || "Invalid credentials or server error");
