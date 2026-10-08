@@ -1,6 +1,6 @@
 import { AddMoney } from "@/components/add-money";
 import { InitialHelper } from "@/components/initial-helper"
-import { User, WalletMinimal, ScanBarcode } from 'lucide-react';
+import { User, Coins, ScanBarcode } from 'lucide-react';
 import { DashboardCards } from "./components/dashboard-cards";
 import { RecentContacts } from "./components/recent-contacts";
 import { RecentCosts } from "./components/recent-costs";
@@ -27,7 +27,7 @@ export default async function Dashboard() {
       </div>
 
       <div className="flex flex-row items-center justify-between gap-16 h-14">
-        <InitialHelper name="My wallet" icon={WalletMinimal} link="/my-wallet" />
+        <InitialHelper name="My Costs" icon={Coins} link="/costs" />
         <AddMoney />
         <InitialHelper name="Payments" icon={ScanBarcode} link="/payments" />
         <InitialHelper name="My contacts" icon={User} link="/my-contacts" />
