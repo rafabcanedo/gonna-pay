@@ -1,11 +1,32 @@
+# Ler tudo ou pular? 🤣🤣
+Calma, calma, calma. Sei o texto é grande, mas se não quiser ler toda a história, pode ir direto para essa sessão [ancora sessao de como funciona o Gonna Pay], que
+lá explicarei como funciona o fluxo do Gonna Pay.
+
 # Intro
-Text
+Bunas equipo, esse doc é especialmente para vocês, que me acompanharam nesses ultimos dois anos. O projeto, que logo explicarei o que é e como foi desenvolvido, foi
+feito todo em inglês, mas esse documento em específico vou escrever em potuguês, pois assim consigo me abrir mais e colocar mais sentimento na explicação de todo
+o documento. Após alguns dias esse documento será excluído.
+
+A ideia aqui é mais explicar qual é o objetivo desse projeto, como foi desenvolvido (desde a ideia, rascunhos, desenvolvimento e deploy). Alguns de vocês já tiveram
+algum tipo de contato com esse projeto e hoje tenho ele completo (quase completo rs), com uma versão de testes deployada e corrigindo bugs.
+Então gostaria de mostrar para vocês algum preview e compartilhar o que ando estudando, praticando e criando bugs todos os dias (eu a o claude já estamos maluco).
+Estou adorando desenvolver esse projeto, e acredito que por mais simples que seja, é um grande projeto no meu portfolio.
 
 # Por que desenvolvi esse projeto
-Text
+Bom, antes de sair de férias senti que precisava me aventurar em algo, nao só em projeto simples. Além de fortificar a base, escolhi desenvolver um projeto do zero ao deploy
+para ter essa experiencia prática e enfrentar as dificuldades pontuas de cada fase do projeto.
+Então, durante a minha viagem não forcei nada, só deixei rolar e fiquei atento ao detalhes da minha viagem para tirar alguma ideia de projeto. Então passei por várias más
+experiencias com pagamento de contas simples do dia a dia, seja hotel, restaurante, presentes, passagens, etc, seja para registrar ou mais importante: deixar anotado de maneira
+prática divisao dessas contas quando tinha outra pessoa ou outras pessoas envovidas.
+Então foi ai que pensei em criar um projeto de Cost splits. O nome foi tirado do nada (Gonna Pay) e só mudei o nome no final do desenvolvido, pois não sou tao criativos para essas
+coisas de nomes.
 
 # Tecnologias e por que das escolhas
-Text
+Para o frontend escolhi Next e typescript, e o backend escolhi Golang. No frontend escolhi lidar com um modelo hibrido, no qual algumas informações estão vindo 
+server side e outras informações estão vindo client side. O backend escolhi Golang, pois queria estudar mais sobre e praticar algo que havia estudado em projetos de api, porém
+aqui fui um pouco mais além, trabalhando com validações, um arquitetura mais estruturada, e umas camadas de glamour de júnior (aprendi várias coisas na teoria, com a ajuda do Yuri 
+e vendo no Yutube e gostaria de testar hehehe)
+Para mais detalhes acompanhe o repositório no Github aqui[link do repositório].
 
 # Padroes de codigo
 Text
@@ -15,3 +36,24 @@ Text
 
 # Imagens do desenvolvimento
 Text
+
+# O que é o Gonna Pay?
+Gonna Pay é um projeto de Cost Split, no qual contém momentaneamente Cost, Contact e Group para criação, atualização e remoção.
+No qual o foco principal é a entidade de Cost
+
+[print-entidada-cost]
+
+Sendo que o usuário pode criar uma Cost sozinho, pagando 100% da conta (no forms os campos de group e percentage são optionals)
+
+[print-create-cost]
+
+O usuário também pode criar uma Cost vinculando a outras pessoas, mas aí o fluxo seria: O usuário cria um Contact [semibold], depois cria
+o Group [semibold], e dps acessa os detalhes desse Group [semibold] e adiciona o Contact [semibold] lá.
+
+[print-create-cost]
+
+**No futuro quero implementar duas coisas importantes: Marcação de "Pago" nas Costs ou Contact e também a possibilidade de criar Costs
+vinculando diretamente um contact e não só o group, como é hoje em dia.** 
+[aqui podemos destacar como um tip com backenground, olhar o gonna-pay-frontend para mais infos]
+
+# E para o futuro, Super Hero? 🦸🏻
