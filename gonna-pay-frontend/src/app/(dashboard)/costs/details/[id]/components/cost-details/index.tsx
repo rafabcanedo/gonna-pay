@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useQueryClient } from '@tanstack/react-query'
 import { FormProvider, useForm, type SubmitHandler } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { ArrowLeft } from 'lucide-react'
@@ -13,18 +14,29 @@ import { editCostSchema } from '@/validations/schemas'
 import { useCostQuery } from '@/hooks/queries/use-cost-query'
 import { useUpdateCost } from '@/hooks/mutations/use-cost-mutations'
 import { COST_CATEGORY_FORM_OPTIONS } from '@/app/(dashboard)/costs/constants'
-import { TransactionCategory } from '@/types'
+import { TransactionCategory, type CostDetail } from '@/types'
 import type { IPropsCostDetails } from './interfaces'
 import type { CostDetailsForm } from './types'
 
 export const CostDetails = ({ costId }: IPropsCostDetails) => {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const { data: cost } = useCostQuery(costId)
   const { mutateAsync: updateCost, isPending } = useUpdateCost()
 
+  const getDefaultValues = () => {
+    const cached = queryClient.getQueryData<CostDetail>(['costs', costId])
+    return {
+      costName: cached?.costName ?? '',
+      totalValue: cached ? String(cached.totalValue) : '',
+      category: (cached?.category ?? '') as TransactionCategory,
+      ownerPercentage: cached ? String(cached.ownerPercentage) : '',
+    }
+  }
+
   const methods = useForm<CostDetailsForm>({
     resolver: yupResolver<CostDetailsForm, object, CostDetailsForm>(editCostSchema),
-    defaultValues: { costName: '', totalValue: '', category: '' as TransactionCategory, ownerPercentage: '' },
+    defaultValues: getDefaultValues(),
     mode: 'onTouched',
   })
 
