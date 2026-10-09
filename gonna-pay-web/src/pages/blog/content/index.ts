@@ -25,4 +25,13 @@ export const BLOG_POSTS: BlogPost[] = [
     tags: ["Updates", "Product"],
     component: lazy(() => import("./feature-coming-soon.mdx")),
   },
+  {
+    slug: "for-sop-team",
+    title: "Explaining Gonna Pay",
+    description: "A look inside development by me.",
+    date: "2026-10-09",
+    author: "Gonna Pay",
+    tags: ["Development", "Product"],
+    component: lazy(() => import("./sop-team.mdx")),
+  },
 ]
