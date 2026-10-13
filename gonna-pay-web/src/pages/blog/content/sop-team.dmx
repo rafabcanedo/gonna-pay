@@ -1,5 +1,5 @@
 # Ler tudo ou pular? 🤣🤣
-Calma, calma, calma. Sei o texto é grande, mas se não quiser ler toda a história, pode ir direto para essa sessão [ancora sessao de como funciona o Gonna Pay], que
+Calma, calma, calma. Sei o texto é grande, mas se não quiser ler toda a história, pode ir direto para essa sessão [ancora sessao o que é Gonna Pay], que
 lá explicarei como funciona o fluxo do Gonna Pay.
 
 # Intro
@@ -57,3 +57,8 @@ vinculando diretamente um contact e não só o group, como é hoje em dia.**
 [aqui podemos destacar como um tip com backenground, olhar o gonna-pay-frontend para mais infos]
 
 # E para o futuro, Super Hero? 🦸🏻
+Eu fiz um post no qual citei algumas futuras features para o projeto, como adaptar Contacts para ser um usuario real, desenvolver uma feature de marcar uma 
+cost ou payment como aprovado, e melhorar alguns pontos visuais no frobtend, etc.
+Mas antes de comecar a desenvolver essas features, preciso reestrutar e fazer alguns refactors no projeto, como no backend para suportar as proximas features,
+quero tambem importar e comecar a usar o toolkit em Golang que desenvolvi. No frontend, está planejado de fazer refactors em alguns componentes, criando a possibilidade
+não só de usar o mesmo componente em vários lugares, mas também usar esse componente com diferentes tamanhos, estilos e funcoes.
