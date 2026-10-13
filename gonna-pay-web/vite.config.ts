@@ -4,10 +4,11 @@ import tailwindcss from "@tailwindcss/vite"
 import { defineConfig } from "vite"
 import mdx from "@mdx-js/rollup"
 import remarkFrontmatter from "remark-frontmatter"
+import rehypeSlug from "rehype-slug"
 
 export default defineConfig({
   plugins: [
-    { enforce: "pre", ...mdx({ remarkPlugins: [remarkFrontmatter] }) },
+    { enforce: "pre", ...mdx({ remarkPlugins: [remarkFrontmatter], rehypePlugins: [rehypeSlug] }) },
     react(),
     tailwindcss(),
   ],
