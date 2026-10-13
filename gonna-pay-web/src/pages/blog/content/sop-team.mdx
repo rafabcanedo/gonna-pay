@@ -1,7 +1,11 @@
 import { Callout } from "@/components/callout"
+import diagramaErUrl from "@/assets/diagrama-er.png"
+import costEntityUrl from "@/assets/cost-entity.png"
+import createCostSoloUrl from "@/assets/create-cost-solo.png"
+import createCostPageUrl from "@/assets/create-cost-page.png"
 
 ## Ler tudo ou pular? 🤣🤣
-Calma, calma, calma. Sei o texto é grande, mas se não quiser ler toda a história, pode ir direto para essa sessão [essa sessão](##o-que-é-o-gonna-pay), que
+Calma, calma, calma. Sei o texto é grande, mas se não quiser ler toda a história, pode ir direto para essa sessão <a href="#o-que-é-o-gonna-pay" className="underline">O que é o Gonna Pay</a>, que
 lá explicarei como funciona o fluxo do Gonna Pay.
 
 ## Intro
@@ -67,23 +71,32 @@ Durante o desenvolvimento, a A.I virou meu suporte geral, código, implementaç�
 
 O ponto que mais saiu da minha zona de conforto foi o deploy do backend. Nunca tinha mexido com isso antes além da Vercel pra frontend. Docker, configuração de ambiente, ajustes no código pra produção, tudo isso foi gerenciado pela A.I. Mas não só delegando cegamente: tirei dúvidas de cada etapa e fui entendendo o passo a passo no processo.
 
-## Imagens do desenvolvimento
-Text
+## Entidades
+
+<div className="not-prose my-6">
+  <img src={diagramaErUrl} alt="Diagrama ER — entidades do Gonna Pay" className="w-full rounded-lg border border-zinc-200" />
+</div>
 
 ## O que é o Gonna Pay?
 Gonna Pay é um projeto de Cost Split, no qual contém momentaneamente Cost, Contact e Group para criação, atualização e remoção.
 No qual o foco principal é a entidade de Cost
 
-[print-entidada-cost]
+<div className="not-prose my-6 flex justify-center">
+  <img src={costEntityUrl} alt="Entidade Cost" className="rounded-lg border border-zinc-200 max-w-sm w-full" />
+</div>
 
 Sendo que o usuário pode criar uma Cost sozinho, pagando 100% da conta (no forms os campos de group e percentage são optionals)
 
-[print-create-cost]
+<div className="not-prose my-6">
+  <img src={createCostSoloUrl} alt="Formulário de criação de Cost — solo" className="w-full rounded-lg border border-zinc-200" />
+</div>
 
 O usuário também pode criar uma Cost vinculando a outras pessoas, mas aí o fluxo seria: O usuário cria um **Contact**, depois cria
 o **Group**, e dps acessa os detalhes desse **Group** e adiciona o **Contact** lá.
 
-[print-create-cost]
+<div className="not-prose my-6">
+  <img src={createCostPageUrl} alt="Formulário de criação de Cost — com group" className="w-full rounded-lg border border-zinc-200" />
+</div>
 
 <Callout type="tip">
   No futuro quero implementar duas coisas importantes: marcação de "Pago" nas Costs e a possibilidade de criar Costs vinculando diretamente um Contact, não só o Group.
