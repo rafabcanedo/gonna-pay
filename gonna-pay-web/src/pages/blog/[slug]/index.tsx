@@ -5,10 +5,12 @@ import type { ComponentType } from "react"
 import { BLOG_POSTS } from "../content"
 import { HowItWorksArt } from "../components/how-it-works-art"
 import { FeatureComingSoonArt } from "../components/feature-coming-soon-art"
+import { SopTeamArt } from "../components/sop-team-art"
 
 const artMap: Record<string, ComponentType> = {
   "how-it-works": HowItWorksArt,
   "feature-coming-soon": FeatureComingSoonArt,
+  "for-sop-team": SopTeamArt,
 }
 
 export function BlogPost() {

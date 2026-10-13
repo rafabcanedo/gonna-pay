@@ -8,27 +8,40 @@ import { ArrowLeft } from 'lucide-react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { HookFormTextInput } from '@/components/hook-form-text-input'
-import { SelectCategory } from '@/app/(dashboard)/my-contacts/components/select-category'
+import { HookFormSelect } from '@/components/hook-form-select'
+import { CONTACT_CATEGORIES } from '@/app/(dashboard)/my-contacts/constants'
 import { editContactSchema } from '@/validations/schemas'
+import { useQueryClient } from '@tanstack/react-query'
 import { useContactQuery } from '@/hooks/queries/use-contact-query'
 import { useUpdateContact } from '@/hooks/mutations/use-contact-mutations'
 import { HookFormPhoneInput, formatPhone } from '@/components/hook-form-phone-input'
-import type { ContactCategory } from '@/types'
+import type { Contact, ContactCategory } from '@/types'
 import { IPropsContactDetails } from './interfaces'
 import type { EditContactForm } from './types'
 
 export const ContactDetails = ({ contactId }: IPropsContactDetails) => {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const { data: contact } = useContactQuery(contactId)
   const { mutateAsync: updateContact, isPending } = useUpdateContact()
 
+  const getDefaultValues = () => {
+    const cached = queryClient.getQueryData<Contact>(['contacts', contactId])
+    return {
+      name: cached?.name ?? '',
+      email: cached?.email ?? '',
+      phone: formatPhone(cached?.phone ?? ''),
+      category: (cached?.category ?? '') as ContactCategory,
+    }
+  }
+
   const methods = useForm<EditContactForm>({
     resolver: yupResolver<EditContactForm, object, EditContactForm>(editContactSchema),
-    defaultValues: { name: '', email: '', phone: '', category: undefined },
-    mode: 'onChange',
+    defaultValues: getDefaultValues(),
+    mode: 'onTouched',
   })
 
-  const { handleSubmit, formState, reset, watch, setValue } = methods
+  const { handleSubmit, formState, reset } = methods
   const { isSubmitting, isDirty } = formState
 
   useEffect(() => {
@@ -68,11 +81,12 @@ export const ContactDetails = ({ contactId }: IPropsContactDetails) => {
               <HookFormTextInput title="Name" name="name" label="John Jason" type="text" />
               <HookFormTextInput title="Email" name="email" label="john@example.com" type="email" />
               <HookFormPhoneInput title="Phone" name="phone" label="(11) 99711-7911" type="tel" />
-              <SelectCategory
-                value={watch('category')}
-                onValueChange={(value: ContactCategory) =>
-                  setValue('category', value, { shouldValidate: true, shouldDirty: true })
-                }
+              <HookFormSelect
+                name="category"
+                label="Category"
+                placeholder="Select a category"
+                options={CONTACT_CATEGORIES}
+                groupLabel="Category"
               />
             </CardContent>
             <CardFooter>
