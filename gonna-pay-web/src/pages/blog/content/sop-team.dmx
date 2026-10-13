@@ -29,10 +29,41 @@ e vendo no Yutube e gostaria de testar hehehe)
 Para mais detalhes acompanhe o repositório no Github aqui[link do repositório].
 
 # Padroes de codigo
-Text
+
+**No backend**, a estrutura segue três camadas bem definidas com Dependency Injection manual via Gin. O sistema de erros é tipado, com sentinels de domínio que mapeiam automaticamente pro código HTTP correto, mantendo os controllers limpos e o tratamento de erro consistente em todos os endpoints. Todos os endpoints têm documentação Swagger, os filtros de listagem são structs tipadas que passam pela cadeia inteira, e cada service e repository define sua própria interface, o que permite testar tudo com mocks sem precisar subir banco de dados.
+
+```
+Request HTTP
+  → Controller  (valida o request, extrai dados)
+    → Service   (lógica de negócio, regras, cálculos)
+      → Repository (queries no banco)
+
+Erro no domínio → ErrNotFound / ErrForbidden / ErrConflict
+  → httputil.RespondError → 404 / 403 / 409
+```
+
+**No frontend**, toda requisição passa por uma camada de API routes do Next.js antes de chegar no Go, o que mantém o cookie de autenticação encapsulado no servidor e faz o SSR funcionar naturalmente. O `apiCall<T>()` centraliza todo o tratamento de erro HTTP e o auto-refresh de token. Os hooks de query usam React Query com queryKey incluindo os filtros ativos, e os hooks de mutation cuidam do feedback pro usuário e da invalidação de cache. Os formulários seguem um padrão único com React Hook Form e Yup.
+
+```
+Componente
+  → Hook (React Query)
+    → Service
+      → apiCall<T>()
+        → Next.js API Route (encaminha cookie)
+          → Go Backend
+```
+
+**Conectando os dois**, as rotas do Next.js espelham os endpoints do Go, mesmos recursos e mesmos verbos HTTP. Os erros carregam significado nos dois lados e o JWT flui pelo cookie em toda a cadeia. Uma resposta tipada sai do banco no Go e chega como objeto TypeScript no componente React sem nenhuma conversão manual no meio.
 
 # Como utilizei A.I durante o desenvolvimento
-Text
+
+Desde o início, a A.I teve um papel bem central no projeto. No começo não foi sobre código, foi sobre produto mesmo. Usei para validar e lapidar as ideias que estavam soltas na minha cabeça, e o mais útil foi pedir para a A.I me fazer perguntas de regras de negócio, isso me forçou a pensar em pontos que eu deixaria passar e me ajudou a fechar o escopo antes de escrever uma linha de código.
+
+Depois de estruturar a ideia, adotei uma abordagem de SDD (Spec-Driven Development): criei uma pasta em cada projeto para registrar as specs do que seria implementado, junto com arquivos `.md` com os padrões de código dos dois projetos. Isso serviu como documentação pra mim e também para garantir que o contexto da A.I estivesse sempre atualizado e consistente desde as primeiras implementações.
+
+Durante o desenvolvimento, a A.I virou meu suporte geral, código, implementação, debug, dúvidas técnicas, explicar o porquê de alguma coisa quando eu travei. Em boa parte do projeto, especialmente nas camadas de API routes, services e conexões com o backend, eu mesmo implementava a base ou o primeiro endpoint, estabelecia o padrão, e depois pedia pra A.I seguir implementando o restante. Isso evitou trabalho repetitivo sem abrir mão do controle sobre como as coisas deveriam funcionar.
+
+O ponto que mais saiu da minha zona de conforto foi o deploy do backend. Nunca tinha mexido com isso antes além da Vercel pra frontend. Docker, configuração de ambiente, ajustes no código pra produção, tudo isso foi gerenciado pela A.I. Mas não só delegando cegamente: tirei dúvidas de cada etapa e fui entendendo o passo a passo no processo.
 
 # Imagens do desenvolvimento
 Text
