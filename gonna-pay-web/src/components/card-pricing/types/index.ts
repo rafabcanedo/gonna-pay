@@ -11,6 +11,7 @@ export interface CardPricingProps {
   features: PricingFeature[]
   buttonLabel: string
   highlighted?: boolean
+  strikethrough?: boolean
   onButtonClick?: () => void
   className?: string
 }
