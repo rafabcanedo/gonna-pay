@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { GroupService } from '@/services/group.service'
 import { toast } from 'sonner'
-import type { CreateGroupInput, AddMemberInput } from '@/types'
+import type { CreateGroupInput, AddMemberInput, UpdateGroupInput, Group } from '@/types'
 import { ApiError } from '@/lib/errors/api.error'
 
 export function useCreateGroup() {
@@ -14,6 +14,21 @@ export function useCreateGroup() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['groups'] })
       toast.success('Group created successfully!')
+    },
+    onError: (error: ApiError) => {
+      toast.error(error.message)
+    },
+  })
+}
+
+export function useUpdateGroup() {
+  const queryClient = useQueryClient()
+
+  return useMutation<Group, ApiError, { id: string; data: UpdateGroupInput}>({
+    mutationFn: ({ id, data }) => GroupService.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['groups']})
+      toast.success('Group updated successfully!')
     },
     onError: (error: ApiError) => {
       toast.error(error.message)

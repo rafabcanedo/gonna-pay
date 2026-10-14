@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation'
 import { useGroupQuery } from '@/hooks/queries/use-group-query'
 import { useDeleteGroup, useRemoveMember } from '@/hooks/mutations/use-group-mutations'
 import { BadgeType } from '@/utils/badge-types'
+import { getInitials } from '@/utils/get-initials'
 import { AddMember } from '../add-member'
+import { EditGroup } from '../edit-group'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, Loader2, X } from 'lucide-react';
+import { ChevronLeft, Loader2, Pencil, X } from 'lucide-react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,13 +21,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { IGroupDetailProps } from './interfaces'
-
-const getInitials = (name: string) => {
-  const parts = name.trim().split(' ')
-  if (parts.length === 1) return parts[0][0].toUpperCase()
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-}
+import type { IGroupDetailProps } from './types'
 
 export const GroupDetails = ({ groupId }: IGroupDetailProps) => {
   const router = useRouter()
@@ -34,6 +30,7 @@ export const GroupDetails = ({ groupId }: IGroupDetailProps) => {
   const { mutateAsync: removeMember } = useRemoveMember()
   const [hoveredMemberId, setHoveredMemberId] = useState<string | null>(null)
   const [removingMemberId, setRemovingMemberId] = useState<string | null>(null)
+  const [open, setOpen] = useState(false)
 
   if (!group) return null
 
@@ -58,6 +55,13 @@ export const GroupDetails = ({ groupId }: IGroupDetailProps) => {
       <header className="flex flex-row items-center gap-3 h-12 mt-4">
         <h1 className="font-montserrat text-xl text-zinc-700 font-semibold">{group.name}</h1>
         <BadgeType type={group.category} />
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="p-1 rounded-sm hover:bg-zinc-100 text-zinc-400 hover:text-zinc-600 transition-colors"
+        >
+          <Pencil className="w-4 h-4" />
+        </button>
       </header>
 
       <div className="flex flex-row items-center gap-4">
@@ -122,6 +126,8 @@ export const GroupDetails = ({ groupId }: IGroupDetailProps) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <EditGroup group={group} open={open} onOpenChange={setOpen} />
     </div>
   )
 }

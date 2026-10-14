@@ -12,6 +12,7 @@ export function CardPricing({
   features,
   buttonLabel,
   highlighted = false,
+  strikethrough = false,
   onButtonClick,
   className,
 }: CardPricingProps) {
@@ -22,7 +23,7 @@ export function CardPricing({
           <span className="text-sm text-muted-foreground">{planName}</span>
 
           <div className="flex items-baseline gap-1">
-            <span className="text-4xl font-bold text-foreground">{price}</span>
+            <span className={cn("text-4xl font-bold text-foreground", strikethrough && "line-through text-muted-foreground")}>{price}</span>
             {priceNote && (
               <span className="text-sm text-muted-foreground">{priceNote}</span>
             )}

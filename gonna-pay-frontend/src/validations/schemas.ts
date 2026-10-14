@@ -52,6 +52,14 @@ export const createGroupSchema = yup.object({
     .required("Category is required"),
 });
 
+export const editGroupSchema = yup.object({
+  name: trimmed(nameField(2)).optional(),
+  category: yup
+    .mixed<TransactionCategory>()
+    .oneOf(Object.values(TransactionCategory), "Invalid category")
+    .optional(),
+})
+
 export const addCostSchema = yup.object({
   costName: trimmed(nameField(2)),
   totalValue: trimmed(valueField()),

@@ -2,15 +2,9 @@
 
 import { FC } from "react";
 import Link from "next/link";
-import { Pencil } from "lucide-react";
 import { BadgeType } from "@/utils/badge-types";
+import { getInitials } from '@/utils/get-initials'
 import { IPropsGroupCards } from './interfaces'
-
-const getInitials = (name: string) => {
-  const parts = name.trim().split(" ");
-  if (parts.length === 1) return parts[0][0].toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-};
 
 export const GroupCards: FC<IPropsGroupCards> = ({ group }) => {
   return (
@@ -20,19 +14,7 @@ export const GroupCards: FC<IPropsGroupCards> = ({ group }) => {
           <span className="font-poppins font-semibold text-lg text-zinc-700">
             {group.name}
           </span>
-          <div className="flex items-center gap-4">
-            <BadgeType type={group.category} />
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-              }}
-              className="p-1 rounded-sm hover:bg-zinc-100 text-zinc-400 hover:text-zinc-600 transition-colors"
-            >
-              <Pencil className="w-4 h-4" />
-            </button>
-          </div>
+          <BadgeType type={group.category} />
         </div>
         <div className="flex flex-row flex-wrap items-center gap-2">
           {(group.members ?? []).map((member) => (

@@ -47,6 +47,7 @@ export function Pricing() {
             features={PRO_FEATURES}
             buttonLabel="Get Pro"
             highlighted
+            strikethrough
           />
         </motion.div>
       </motion.div>
