@@ -213,22 +213,44 @@ func TestUserService_Update(t *testing.T) {
 		assert.Equal(t, testutil.UserUpdatedName, result.Name)
 	})
 
-	t.Run("success encrypts new password", func(t *testing.T) {
+}
+
+func TestUserService_UpdatePassword(t *testing.T) {
+	t.Run("success encrypts password before saving", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		svc, mockRepo, _, _ := newUserSvc(ctrl)
 
 		m := testutil.NewUserMock()
-		m.User.Password = "nova-senha"
-
 		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.User, nil)
-		mockRepo.EXPECT().FindByEmail(gomock.Any(), m.Email).Return(nil, domains.NewNotFoundError("not found"))
-		mockRepo.EXPECT().Update(gomock.Any(), gomock.Any()).DoAndReturn(func(_ context.Context, u *domains.User) (*domains.User, error) {
-			assert.NotEqual(t, "nova-senha", u.Password)
-			return m.User, nil
+		mockRepo.EXPECT().UpdatePassword(gomock.Any(), m.ID, gomock.Any()).DoAndReturn(func(_ context.Context, id string, hashedPassword string) error {
+			assert.NotEqual(t, "nova-senha", hashedPassword)
+			return nil
 		})
 
-		_, err := svc.Update(context.Background(), m.User)
+		err := svc.UpdatePassword(context.Background(), m.ID, "nova-senha")
 		assert.NoError(t, err)
+	})
+
+	t.Run("user not found", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		svc, mockRepo, _, _ := newUserSvc(ctrl)
+
+		mockRepo.EXPECT().FindByID(gomock.Any(), testutil.UserID).Return(nil, domains.NewNotFoundError("user not found"))
+
+		err := svc.UpdatePassword(context.Background(), testutil.UserID, "nova-senha")
+		assert.ErrorIs(t, err, domains.ErrNotFound)
+	})
+
+	t.Run("repo error", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		svc, mockRepo, _, _ := newUserSvc(ctrl)
+
+		m := testutil.NewUserMock()
+		mockRepo.EXPECT().FindByID(gomock.Any(), m.ID).Return(m.User, nil)
+		mockRepo.EXPECT().UpdatePassword(gomock.Any(), m.ID, gomock.Any()).Return(errors.New("db error"))
+
+		err := svc.UpdatePassword(context.Background(), m.ID, "nova-senha")
+		assert.Error(t, err)
 	})
 }
 

@@ -18,6 +18,7 @@ type UserService interface {
 	FindByID(ctx context.Context, id string) (*domains.User, error)
 	FindByEmail(ctx context.Context, email string) (*domains.User, error)
 	Update(ctx context.Context, user *domains.User) (*domains.User, error)
+	UpdatePassword(ctx context.Context, userID string, newPassword string) error
 	Delete(ctx context.Context, id string) error
 }
 
@@ -131,13 +132,6 @@ func (s *userService) Update(ctx context.Context, user *domains.User) (*domains.
 		}
 	}
 
-	if user.Password != "" {
-		if err := user.EncryptPassword(); err != nil {
-			logger.Error("error encrypting password on update", err)
-			return nil, err
-		}
-	}
-
 	updated, err := s.repo.Update(ctx, user)
 	if err != nil {
 		logger.Error("error updating user", err)
@@ -145,6 +139,28 @@ func (s *userService) Update(ctx context.Context, user *domains.User) (*domains.
 	}
 
 	return updated, nil
+}
+
+func (s *userService) UpdatePassword(ctx context.Context, userID string, newPassword string) error {
+	if _, err := s.repo.FindByID(ctx, userID); err != nil {
+		if !errors.Is(err, domains.ErrNotFound) {
+			logger.Error("error finding user on update password", err)
+		}
+		return err
+	}
+
+	user := &domains.User{Password: newPassword}
+	if err := user.EncryptPassword(); err != nil {
+		logger.Error("error encrypting password", err)
+		return err
+	}
+
+	if err := s.repo.UpdatePassword(ctx, userID, user.Password); err != nil {
+		logger.Error("error updating password", err)
+		return err
+	}
+
+	return nil
 }
 
 func (s *userService) Delete(ctx context.Context, id string) error {

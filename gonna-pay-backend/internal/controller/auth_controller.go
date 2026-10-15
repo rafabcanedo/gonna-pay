@@ -430,14 +430,7 @@ func (ac *AuthController) ResetPassword(c *gin.Context) {
 		return
 	}
 
-	user, err := ac.userService.FindByID(ctx, stored.UserID.String())
-	if err != nil {
-		httputil.RespondError(c, err)
-		return
-	}
-
-	user.Password = req.Password
-	if _, err := ac.userService.Update(ctx, user); err != nil {
+	if err := ac.userService.UpdatePassword(ctx, stored.UserID.String(), req.Password); err != nil {
 		httputil.RespondError(c, err)
 		return
 	}
