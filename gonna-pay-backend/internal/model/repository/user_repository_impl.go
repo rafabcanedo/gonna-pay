@@ -17,6 +17,7 @@ type UserRepository interface {
 	FindByID(ctx context.Context, id string) (*domains.User, error)
 	FindByEmail(ctx context.Context, email string) (*domains.User, error)
 	Update(ctx context.Context, user *domains.User) (*domains.User, error)
+	UpdatePassword(ctx context.Context, id string, hashedPassword string) error
 	Delete(ctx context.Context, id string) error
 }
 
@@ -111,14 +112,22 @@ func (r *userRepository) Update(ctx context.Context, user *domains.User) (*domai
 	e := converter.ConvertDomainToEntity(user)
 
 	_, err := r.db.ExecContext(ctx,
-		`UPDATE users_entities SET name = $1, email = $2, password = $3, phone = $4, email_verified = $5 WHERE id = $6`,
-		e.Name, e.Email, e.Password, e.Phone, e.EmailVerified, e.ID,
+		`UPDATE users_entities SET name = $1, email = $2, phone = $3, email_verified = $4 WHERE id = $5`,
+		e.Name, e.Email, e.Phone, e.EmailVerified, e.ID,
 	)
 	if err != nil {
 		return nil, err
 	}
 
 	return converter.ConvertEntityToDomain(*e), nil
+}
+
+func (r *userRepository) UpdatePassword(ctx context.Context, id string, hashedPassword string) error {
+	_, err := r.db.ExecContext(ctx,
+		`UPDATE users_entities SET password = $1 WHERE id = $2`,
+		hashedPassword, id,
+	)
+	return err
 }
 
 func (r *userRepository) Delete(ctx context.Context, id string) error {
